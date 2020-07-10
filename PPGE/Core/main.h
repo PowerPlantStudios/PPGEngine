@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef _PPGE_PLATFORM_WIN
+#if _PPGE_PLATFORM_WIN || _PPGE_PLATFORM_MAC
 
 
 extern PPGE::Application* PPGE::CreateApplication();

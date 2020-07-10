@@ -37,3 +37,12 @@
 *.filters
 *.user
 .vs
+
+# MAC related ignores
+.idea/
+Makefile
+.DS_Store
+*.xcodeproj
+*.xcworkspace
+!bin
+bin/*

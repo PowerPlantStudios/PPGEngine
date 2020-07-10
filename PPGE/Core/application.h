@@ -4,7 +4,7 @@
 
 namespace PPGE
 {
-	class _PPGE_API Application
+    class _PPGE_API Application
 	{
 	public:
 		Application();

@@ -1,11 +1,13 @@
 workspace "PowerPlantGameEngine"
-	architecture "x64"
+	architecture "x86_64"
 	configurations
 	{
 		"Debug",
 		"Release",
 		"Dist"
 	}
+	-- https://github.com/premake/premake-core/wiki/Configurations-and-Platforms --
+	-- platforms {"Windows", "Mac"} --
 
 outdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
@@ -50,6 +52,12 @@ project "PPGE"
 	}
 
 	filter "system:windows"
+		includedirs
+		{
+			"Thirdparty/spdlog/include"
+		}
+
+		staticruntime "On"
 		systemversion "latest"
 
 		defines
@@ -57,7 +65,34 @@ project "PPGE"
 			"PPGE_PLATFORM_WIN",
 			"PPGE_DLL_EXPORT"		
 		}
-		
+	
+	filter {"system:windows", "configurations.Debug"}
+		buildoptions  "/MDd"
+
+	filter {"system:windows", "configurations.Release"}
+		buildoptions "/MD"
+
+	-- MARK: macosx --
+	filter "system:macosx"
+		staticruntime "On"
+		systemversion "latest"
+
+		defines
+		{
+			"_PPGE_PLATFORM_MAC",
+			"_PPGE_DLL_BUILD"
+		}
+		--buildoptions {"-IThirdparty/spdlog/include"}
+		sysincludedirs { "Thirdparty/spdlog/include/" }
+		xcodebuildsettings = { ["ALWAYS_SEARCH_USER_PATHS"] = "YES" }
+		-- - TODO: not sure about this. need to be checked
+		links { "Cocoa.framework" }
+
+	-- - building make files on mac specifically
+	filter { "system:macosx", "action:gmake"}
+		toolset "clang"
+	-- macosx ends --
+
 	filter "configurations:Debug"
 		defines "PPGE_DEBUG"
 		symbols "On"
@@ -69,13 +104,6 @@ project "PPGE"
 	filter "configurations:Dist"
 		defines "PPGE_DEBUG"
 		optimize "On"
-
-	filter {"system:windows", "configurations.Debug"}
-		buildoptions  "/MDd"
-
-	filter {"system:windows", "configurations.Release"}
-		buildoptions "/MD"
-
 
 project "Sandbox"
 	location "Sandbox"
@@ -117,6 +145,43 @@ project "Sandbox"
 			("{COPY} %{wks.location}build/bin/" .. outdir .. "/PPGE/PPGE.dll %{cfg.buildtarget.directory}")
 		}
 
+		includedirs
+		{
+			"Thirdparty/spdlog/include",
+			"PPGE"
+		}
+
+	filter {"system:windows", "configurations.Debug"}
+		buildoptions "/MDd"
+
+	filter {"system:windows", "configurations.Release"}
+		buildoptions "/MD"
+
+	-- MARK: macosx
+	filter "system:macosx"
+
+		staticruntime "On"
+		systemversion "latest"
+
+		defines
+		{
+			"_PPGE_PLATFORM_MAC",
+		}
+		-- only includedirs is not working
+		sysincludedirs { "Thirdparty/spdlog/include/", "PPGE/"}
+
+		--buildoptions {"-IThirdparty/spdlog/include", "-IPPGE"}
+		-- TODO: not sure about this. need to be checked
+		links { "Cocoa.framework"}
+		postbuildcommands
+		{
+			("{COPY} %{wks.location}/bin/" .. outdir .. "/PPGE/libPPGE.dylib %{cfg.buildtarget.directory}")
+		}
+
+	-- building make files on mac specifically
+	filter { "system:macosx", "action:gmake"}
+		toolset "clang"
+
 	filter "configurations:Debug"
 		defines "PPGE_DEBUG"
 		symbols "On"
@@ -128,9 +193,3 @@ project "Sandbox"
 	filter "configurations:Dist"
 		defines "PPGE_DEBUG"
 		optimize "On"
-
-	filter {"system:windows", "configurations.Debug"}
-		buildoptions "/MDd"
-
-	filter {"system:windows", "configurations.Release"}
-		buildoptions "/MD"

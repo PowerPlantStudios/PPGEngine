@@ -43,3 +43,10 @@ build
 
 # Log dumps
 *.log
+
+# MAC related ignores
+Makefile
+.idea
+.DS_Store
+*.xcodeproj
+*.xcworkspace

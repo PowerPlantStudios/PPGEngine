@@ -1,23 +1,34 @@
+#include "PPGEpch.h"
+
 #include "logger.h"
 
 namespace PPGE
 {
 
-	Shared<spdlog::logger> Logger::m_PPGELogger;
-	Shared<spdlog::logger> Logger::m_ClientLogger;
+	Shared<spdlog::logger> Logger::s_PPGELogger;
+	Shared<spdlog::logger> Logger::s_ClientLogger;
 
 	void Logger::Initialize()
 	{
+		std::vector<spdlog::sink_ptr> sinks;
+		sinks.emplace_back(CreateShared<spdlog::sinks::stdout_color_sink_mt>());
+		sinks.emplace_back(CreateShared<spdlog::sinks::basic_file_sink_mt>("PPGE.log", true));
+		
 		// Default pattern for all logger instances
-		spdlog::set_pattern("%^[%T] %n: %v%$");
+		sinks[0]->set_pattern("%^[%T] %n: %v%$");
+		sinks[1]->set_pattern("[%T] [%l] %n: %v");
 		
 		// Create engine logger and set default logging level
-		m_PPGELogger = spdlog::stderr_color_mt("PPGE");
-		m_PPGELogger->set_level(spdlog::level::trace);
+		s_PPGELogger = CreateShared<spdlog::logger>("PPGE", sinks.begin(), sinks.end());
+		spdlog::register_logger(s_PPGELogger);
+		s_PPGELogger->set_level(spdlog::level::trace);
+		s_PPGELogger->flush_on(spdlog::level::trace);
 
 		// Create client logger and set default logging level
-		m_ClientLogger = spdlog::stderr_color_mt("APPLICATION");
-		m_ClientLogger->set_level(spdlog::level::trace);
+		s_ClientLogger = CreateShared<spdlog::logger>("APPLICATION", sinks.begin(), sinks.end());
+		spdlog::register_logger(s_ClientLogger);
+		s_ClientLogger->set_level(spdlog::level::trace);
+		s_ClientLogger->flush_on(spdlog::level::trace);
 	}
 
 }

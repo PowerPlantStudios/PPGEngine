@@ -6,10 +6,15 @@
 
 
 // PPGE includes
-#include "Core/defines.h"
-#include "Core/smart_ptr.h"
-#include "Core/application.h"
-#include "Core/logger.h"
+#include "core/defines.h"
+#include "core/smart_ptr.h"
+#include "core/application.h"
+#include "core/logger.h"
+
+#include "core/input/input_event.h"
+#include "core/input/application_event.h"
+#include "core/input/input.h"
+
 
 // Entry point for client side application
-#include "Core/main.h"
+#include "core/main.h"

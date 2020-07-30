@@ -37,3 +37,9 @@
 *.filters
 *.user
 .vs
+
+# Build directory
+build
+
+# Log dumps
+*.log

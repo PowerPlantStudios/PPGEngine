@@ -1,3 +1,5 @@
+#include "PPGEpch.h"
+
 #include "application.h"
 
 namespace PPGE

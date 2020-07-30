@@ -1,10 +1,12 @@
 #pragma once
 
-#ifdef _PPGE_PLATFORM_WIN
-	#ifdef _PPGE_DLL_BUILD
-		#define _PPGE_API __declspec(dllexport)
+#ifdef PPGE_PLATFORM_WIN
+	#ifdef PPGE_DLL_EXPORT
+		#define PPGE_API __declspec(dllexport)
+	#elif PPGE_DLL_IMPORT
+		#define PPGE_API __declspec(dllimport)
 	#else
-		#define _PPGE_API __declspec(dllimport)
+		#define PPGE_API
 	#endif
 
 #else

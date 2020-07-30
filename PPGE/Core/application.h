@@ -1,10 +1,11 @@
 #pragma once
+#include "PPGEpch.h"
 
-#include "defines.h"
+#include "core/defines.h"
 
 namespace PPGE
 {
-	class _PPGE_API Application
+	class PPGE_API Application
 	{
 	public:
 		Application();

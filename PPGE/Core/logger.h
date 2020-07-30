@@ -1,24 +1,23 @@
 #pragma once
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
+#include "PPGEpch.h"
 
-#include "defines.h"
-#include "smart_ptr.h"
+#include "core/defines.h"
+#include "core/smart_ptr.h"
 
 namespace PPGE
 {
 
-	class _PPGE_API Logger
+	class PPGE_API Logger
 	{
 	public:
 		static void Initialize();
 
-		inline static Shared<spdlog::logger>& GetPPGELogger() { return m_PPGELogger; }
-		inline static Shared<spdlog::logger>& GetClientLogger() { return m_ClientLogger; }
+		inline static Shared<spdlog::logger>& GetPPGELogger() { return s_PPGELogger; }
+		inline static Shared<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
 
 	private:
-		static Shared<spdlog::logger> m_PPGELogger;
-		static Shared<spdlog::logger> m_ClientLogger;
+		static Shared<spdlog::logger> s_PPGELogger;
+		static Shared<spdlog::logger> s_ClientLogger;
 	};
 
 }

@@ -26,6 +26,8 @@ namespace PPGE
 
 		virtual bool IsVsyncEnabled() const override;
 		virtual void SetVsync(bool b_value) override;
+		virtual bool IsMaximized() const override;
+		virtual bool IsMinimized() const override;
 
 		virtual InputEventCallback InputEventCallbackFunctionPtr() const override;
 		virtual void SetInputEventCallbackFunctionPtr(InputEventCallback callback) override;
@@ -51,7 +53,7 @@ namespace PPGE
 			std::string title;
 			uint32_t height, width;
 			uint32_t posX, posY;
-			bool vSync, fullscreen;
+			bool vSync, fullscreen, minimized, maximized;
 
 			InputEventCallback InputEventCallback;
 			ApplicationEventCallback ApplicationEventCallback;

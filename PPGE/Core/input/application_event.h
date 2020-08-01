@@ -37,11 +37,13 @@ namespace PPGE
 	class PPGE_API ApplicationEvent;
 
 	template<typename T, typename F>
-	bool DispatchInputEvent(const ApplicationEvent& e, const F& func)
+	bool DispatchApplicationEvent(const ApplicationEvent& e, const F& func)
 	{
-		if (e.GetInputEventType() == T::RetreiveInputEventTypeEnum())
+		if (e.GetApplicationEventType() == T::RetreiveApplicationEventTypeEnum())
 		{
-			e.SetHandled(func(static_cast<T&>(e)));
+			T _e = *(T*)(&e);
+			bool b_handled = func(_e);
+			_e.SetHandled(b_handled);
 			return true;
 		}
 		return false;
@@ -130,6 +132,7 @@ namespace PPGE
 
 	inline std::ostream& operator<<(std::ostream& os, const ApplicationEvent& e)
 	{
-		return os << e.ToString();
+		os << e.ToString();
+		return os;
 	}
 }

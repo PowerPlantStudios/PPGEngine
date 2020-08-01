@@ -226,6 +226,7 @@ namespace PPGE
 
 	inline std::ostream& operator<<(std::ostream& os, const InputEvent& e)
 	{
-		return os << e.ToString();
+		os << e.ToString();
+		return os;
 	}
 }

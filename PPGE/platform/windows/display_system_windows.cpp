@@ -25,6 +25,7 @@ namespace PPGE
 	void DisplaySystemWindows::OnUpdate()
 	{
 		glfwPollEvents();
+		glfwSwapBuffers(m_window);
 	}
 
 	void* DisplaySystemWindows::GetNativeDisplayPtr() const
@@ -41,19 +42,23 @@ namespace PPGE
 			case WindowFlags::ALWAYS_ON_TOP :
 			{
 				b_value = glfwGetWindowAttrib(m_window, GLFW_FLOATING);
-			} break;
+				break;
+			}
 			case WindowFlags::DECORATED :
 			{
 				b_value = glfwGetWindowAttrib(m_window, GLFW_DECORATED);
-			} break;
+				break;
+			}
 			case WindowFlags::RESIZABLE :
 			{
 				b_value = glfwGetWindowAttrib(m_window, GLFW_RESIZABLE);
-			} break;
+				break;
+			}
 			case WindowFlags::FOCUSED :
 			{
 				b_value = glfwGetWindowAttrib(m_window, GLFW_FOCUSED);
-			} break;
+				break;
+			}
 		}
 
 		return b_value;
@@ -66,20 +71,24 @@ namespace PPGE
 			case WindowFlags::ALWAYS_ON_TOP:
 			{
 				glfwSetWindowAttrib(m_window, GLFW_FLOATING, b_value);
-			} break;
+				break;
+			}
 			case WindowFlags::DECORATED:
 			{
 				glfwSetWindowAttrib(m_window, GLFW_DECORATED, b_value);
-			} break;
+				break;
+			}
 			case WindowFlags::RESIZABLE:
 			{
 				glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, b_value);
-			} break;
+				break;
+			}
 			case WindowFlags::FOCUSED:
 			{
 				if (b_value)
 					glfwFocusWindow(m_window);
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -89,32 +98,44 @@ namespace PPGE
 		{
 			case WindowModes::MAXIMIZED :
 			{
+				m_props.maximized = true;
+				m_props.minimized = false;
+				m_props.fullscreen = false;
 				glfwMaximizeWindow(m_window);
-			} break;
+				break;
+			}
 			case WindowModes::FULLSCREEN :
 			{
 				if (!m_props.fullscreen)
 				{
 					m_props.fullscreen = true;
+					m_props.minimized = false;
+					m_props.maximized = false;
 					GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
 					glfwSetWindowMonitor(m_window, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE);
 				}
-			} break;
+				break;
+			}
 			case WindowModes::WINDOWED :
 			{
 				if (m_props.fullscreen)
 				{
 					m_props.fullscreen = false;
-
+					m_props.maximized = false;
+					m_props.maximized = false;
 					glfwSetWindowMonitor(m_window, nullptr, m_props.posX, m_props.posY, m_props.width, m_props.height, GLFW_DONT_CARE);
 				}
-			} break;
+				break;
+			}
 			case WindowModes::MINIMIZED :
 			{
+				m_props.minimized = true;
+				m_props.maximized = false;
+				m_props.fullscreen = false;
 				glfwIconifyWindow(m_window);
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -130,6 +151,16 @@ namespace PPGE
 			m_props.vSync = b_value;
 			glfwSwapInterval((int)m_props.vSync);
 		}
+	}
+
+	bool DisplaySystemWindows::IsMinimized() const
+	{
+		return m_props.minimized;
+	}
+
+	bool DisplaySystemWindows::IsMaximized() const
+	{
+		return m_props.minimized;
 	}
 
 	DisplaySystemWindows::InputEventCallback DisplaySystemWindows::InputEventCallbackFunctionPtr() const
@@ -198,7 +229,9 @@ namespace PPGE
 		m_props.width  = props.width;
 		m_props.posX  = 0;
 		m_props.posY  = 0;
-		m_props.vSync = false;
+		m_props.vSync = true;
+		m_props.minimized = false;
+		m_props.maximized = false;
 		m_props.fullscreen = false;
 		m_props.InputEventCallback = nullptr;
 		m_props.ApplicationEventCallback = nullptr;
@@ -226,9 +259,9 @@ namespace PPGE
 		{
 			glfwGetWindowPos(m_window, (int*)&m_props.posX, (int*)&m_props.posY);
 		}
-
+		glfwMakeContextCurrent(m_window);
 		glfwSetWindowUserPointer(m_window, &m_props);
-		SetVsync(true);
+		SetVsync(m_props.vSync);
 
 		glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
 		{
@@ -253,8 +286,59 @@ namespace PPGE
 		glfwSetWindowCloseCallback(m_window, [](GLFWwindow* window)
 		{
 			DisplaySystemWindowsProps& win_props = *(DisplaySystemWindowsProps*)glfwGetWindowUserPointer(window);
+			
 			WindowCloseEvent event;
 			win_props.ApplicationEventCallback(event);
+		});
+
+		glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* window, int iconified)
+		{
+			DisplaySystemWindowsProps& win_props = *(DisplaySystemWindowsProps*)glfwGetWindowUserPointer(window);
+			
+			switch (iconified)
+			{
+				case GLFW_TRUE:
+				{
+					win_props.minimized = true;
+
+					WindowResizeEvent event(win_props.width, win_props.height);
+					win_props.ApplicationEventCallback(event);
+					break;
+				}
+				case GLFW_FALSE:
+				{
+					win_props.minimized = false;
+
+					WindowResizeEvent event(win_props.width, win_props.height);
+					win_props.ApplicationEventCallback(event);
+					break;
+				}
+			}
+		});
+
+		glfwSetWindowMaximizeCallback(m_window, [](GLFWwindow* window, int maximized)
+		{
+			DisplaySystemWindowsProps& win_props = *(DisplaySystemWindowsProps*)glfwGetWindowUserPointer(window);
+			
+			switch (maximized)
+			{
+				case GLFW_TRUE:
+				{
+					win_props.maximized = true;
+					
+					WindowResizeEvent event(win_props.width, win_props.height);
+					win_props.ApplicationEventCallback(event);
+					break;
+				}
+				case GLFW_FALSE:
+				{
+					win_props.maximized = false;
+					
+					WindowResizeEvent event(win_props.width, win_props.height);
+					win_props.ApplicationEventCallback(event);
+					break;
+				}
+			}
 		});
 
 		glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -263,24 +347,24 @@ namespace PPGE
 
 			switch (action)
 			{
-			case GLFW_PRESS:
-			{
-				KeyPressedEvent event(static_cast<KeyCode>(key), 0);
-				win_props.InputEventCallback(event);
-				break;
-			}
-			case GLFW_RELEASE:
-			{
-				KeyReleasedEvent event(static_cast<KeyCode>(key));
-				win_props.InputEventCallback(event);
-				break;
-			}
-			case GLFW_REPEAT:
-			{
-				KeyPressedEvent event(static_cast<KeyCode>(key), 1);
-				win_props.InputEventCallback(event);
-				break;
-			}
+				case GLFW_PRESS:
+				{
+					KeyPressedEvent event(static_cast<KeyCode>(key), 0);
+					win_props.InputEventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					KeyReleasedEvent event(static_cast<KeyCode>(key));
+					win_props.InputEventCallback(event);
+					break;
+				}
+				case GLFW_REPEAT:
+				{
+					KeyPressedEvent event(static_cast<KeyCode>(key), 1);
+					win_props.InputEventCallback(event);
+					break;
+				}
 			}
 		});
 
@@ -298,18 +382,18 @@ namespace PPGE
 
 			switch (action)
 			{
-			case GLFW_PRESS:
-			{
-				MouseButtonPressedEvent event(static_cast<MouseCode>(button));
-				win_props.InputEventCallback(event);
-				break;
-			}
-			case GLFW_RELEASE:
-			{
-				MouseButtonReleasedEvent event(static_cast<MouseCode>(button));
-				win_props.InputEventCallback(event);
-				break;
-			}
+				case GLFW_PRESS:
+				{
+					MouseButtonPressedEvent event(static_cast<MouseCode>(button));
+					win_props.InputEventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					MouseButtonReleasedEvent event(static_cast<MouseCode>(button));
+					win_props.InputEventCallback(event);
+					break;
+				}
 			}
 		});
 

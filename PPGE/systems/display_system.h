@@ -13,8 +13,11 @@ namespace PPGE
 	{
 	public:
 
-		typedef void (*InputEventCallback)(const InputEvent&);
-		typedef void (*ApplicationEventCallback)(const ApplicationEvent&);
+		//typedef void (*InputEventCallback)(const InputEvent&);
+		//typedef void (*ApplicationEventCallback)(const ApplicationEvent&);
+
+		typedef std::function<void(const InputEvent&)> InputEventCallback;
+		typedef std::function<void(const ApplicationEvent&)> ApplicationEventCallback;
 		
 		enum class WindowFlags
 		{
@@ -38,7 +41,7 @@ namespace PPGE
 			uint32_t width    = 1280;
 		};
 
-		static Shared<DisplaySystem> Create(const DisplaySystemProps&);
+		static Unique<DisplaySystem> Create(const DisplaySystemProps&);
 
 	public:
 		virtual ~DisplaySystem() {}
@@ -54,6 +57,8 @@ namespace PPGE
 
 		virtual bool IsVsyncEnabled() const = 0;
 		virtual void SetVsync(bool b_value) = 0;
+		virtual bool IsMaximized() const = 0;
+		virtual bool IsMinimized() const = 0;
 
 		virtual InputEventCallback InputEventCallbackFunctionPtr() const = 0;
 		virtual void SetInputEventCallbackFunctionPtr(InputEventCallback callback) = 0;

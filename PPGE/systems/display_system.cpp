@@ -8,10 +8,10 @@
 
 namespace PPGE
 {
-	Shared<DisplaySystem> DisplaySystem::Create(const DisplaySystemProps& props)
+	Unique<DisplaySystem> DisplaySystem::Create(const DisplaySystemProps& props)
 	{	
 	#ifdef PPGE_PLATFORM_WIN
-		return CreateShared<DisplaySystemWindows>(props);
+		return CreateUnique<DisplaySystemWindows>(props);
 	#else
 		//TODO : Other platforms should be added to if else block\
 

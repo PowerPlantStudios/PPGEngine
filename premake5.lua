@@ -79,8 +79,8 @@ project "PPGE"
 
 		defines
 		{
-			"_PPGE_PLATFORM_MAC",
-			"_PPGE_DLL_BUILD"
+			"PPGE_PLATFORM_MAC",
+			"PPGE_DLL_BUILD"
 		}
 		--buildoptions {"-IThirdparty/spdlog/include"}
 		sysincludedirs { "Thirdparty/spdlog/include/" }
@@ -165,7 +165,7 @@ project "Sandbox"
 
 		defines
 		{
-			"_PPGE_PLATFORM_MAC",
+			"PPGE_PLATFORM_MAC",
 		}
 		-- only includedirs is not working
 		sysincludedirs { "Thirdparty/spdlog/include/", "PPGE/"}

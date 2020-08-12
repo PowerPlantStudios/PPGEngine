@@ -1,8 +1,8 @@
 #pragma once
 #include "PPGEpch.h"
 
-#include "core/defines.h"
-#include "core/smart_ptr.h"
+#include "Core/defines.h"
+#include "Core/smart_ptr.h"
 
 namespace PPGE
 {

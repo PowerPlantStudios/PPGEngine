@@ -1,7 +1,7 @@
 #pragma once
 #include "PPGEpch.h"
 
-#include "core/defines.h"
+#include "Core/defines.h"
 
 namespace PPGE
 {
@@ -33,21 +33,6 @@ namespace PPGE
 #define PPGE_APPLICATION_EVENT_CLASS(type)         static  ApplicationEventType RetreiveApplicationEventTypeEnum() { return ApplicationEventType::type; }                \
 								                   virtual ApplicationEventType GetApplicationEventType() const override { return RetreiveApplicationEventTypeEnum(); }  \
 								                   virtual const char* Name() const override { return #type; }                                                           \
-	
-	class PPGE_API ApplicationEvent;
-
-	template<typename T, typename F>
-	bool DispatchApplicationEvent(const ApplicationEvent& e, const F& func)
-	{
-		if (e.GetApplicationEventType() == T::RetreiveApplicationEventTypeEnum())
-		{
-			T _e = *(T*)(&e);
-			bool b_handled = func(_e);
-			_e.SetHandled(b_handled);
-			return true;
-		}
-		return false;
-	}
 
 	class PPGE_API ApplicationEvent
 	{
@@ -135,4 +120,18 @@ namespace PPGE
 		os << e.ToString();
 		return os;
 	}
+
+    template<typename T, typename F>
+    bool DispatchApplicationEvent(const ApplicationEvent& e, const F& func)
+    {
+        if (e.GetApplicationEventType() == T::RetreiveApplicationEventTypeEnum())
+        {
+            T _e = *(T*)(&e);
+            bool b_handled = func(_e);
+            _e.SetHandled(b_handled);
+            return true;
+        }
+        return false;
+    }
+
 }

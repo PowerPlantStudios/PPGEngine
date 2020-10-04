@@ -1,8 +1,8 @@
 #pragma once
 #include "PPGEpch.h"
 
-#include "core/defines.h"
-#include "core/input/input.h"
+#include "Core/defines.h"
+#include "Core/input/input.h"
 
 namespace PPGE
 {
@@ -39,19 +39,6 @@ namespace PPGE
 								             virtual InputEventType GetInputEventType() const override { return RetreiveInputEventTypeEnum(); }  \
 								             virtual const char* Name() const override { return #type; }                                         \
 	
-	class PPGE_API InputEvent;
-
-	template<typename T, typename F>
-	bool DispatchInputEvent(const InputEvent& e, const F& func)
-	{
-		if (e.GetInputEventType() == T::RetreiveInputEventTypeEnum())
-		{
-			e.SetHandled(func(static_cast<T&>(e)));
-			return true;
-		}
-		return false;
-	}
-
 	class PPGE_API InputEvent
 	{
 	public:
@@ -229,4 +216,15 @@ namespace PPGE
 		os << e.ToString();
 		return os;
 	}
+
+    template<typename T, typename F>
+    bool DispatchInputEvent(const InputEvent& e, const F& func)
+    {
+        if (e.GetInputEventType() == T::RetreiveInputEventTypeEnum())
+        {
+            e.SetHandled(func(static_cast<T&>(e)));
+            return true;
+        }
+        return false;
+    }
 }

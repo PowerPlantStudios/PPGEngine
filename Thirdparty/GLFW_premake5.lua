@@ -18,6 +18,28 @@ project "GLFW"
 		"glfw/src/vulkan.c",
 		"glfw/src/window.c"
 	}
+	filter "system:macosx"
+		pic "On"
+		systemversion "latest"
+		staticruntime "On"
+		files
+		{
+			"glfw/src/cocoa_init.m",
+			"glfw/src/cocoa_joystick.m",
+			"glfw/src/cocoa_monitor.m",
+			"glfw/src/cocoa_time.c",
+			"glfw/src/posix_thread.c",
+            "glfw/src/cocoa_platform.h",
+			"glfw/src/cocoa_window.m",
+			"glfw/src/nsgl_context.m",
+			"glfw/src/egl_context.c",
+			"glfw/src/osmesa_context.c"
+		}
+		defines
+		{
+			"_GLFW_COCOA"
+		}
+
 	filter "system:linux"
 		pic "On"
 

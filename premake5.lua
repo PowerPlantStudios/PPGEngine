@@ -45,12 +45,6 @@ project "PPGE"
 		"%{IncludeDir.GLFW}",
 	}
 
-	links 
-	{ 
-		"GLFW",
-		"opengl32.lib",
-	}
-
 	filter "system:windows"
 		includedirs
 		{
@@ -64,6 +58,19 @@ project "PPGE"
 		{
 			"PPGE_PLATFORM_WIN",
 			"PPGE_DLL_EXPORT"		
+		}
+
+		links
+		{
+			"GLFW",
+			"opengl32.lib",
+		}
+
+	filter "system:linux"
+		links
+		{
+			"GLFW",
+			"opengl32.lib",
 		}
 	
 	filter {"system:windows", "configurations.Debug"}
@@ -85,8 +92,17 @@ project "PPGE"
 		--buildoptions {"-IThirdparty/spdlog/include"}
 		sysincludedirs { "Thirdparty/spdlog/include/" }
 		xcodebuildsettings = { ["ALWAYS_SEARCH_USER_PATHS"] = "YES" }
-		-- - TODO: not sure about this. need to be checked
-		links { "Cocoa.framework" }
+		--GLFW needs to link against several OS X library. Here's the compiler invokation to compile this code sample properly.
+		-- source: https://gist.github.com/v3n/27e810ac744b076ceeb7
+		links
+		{
+			"Cocoa.framework",
+			"OpenGL.framework",
+			"CoreVideo.framework",
+			"IOKit.framework",
+			"Carbon.framework",
+			"glfw"
+		}
 
 	-- - building make files on mac specifically
 	filter { "system:macosx", "action:gmake"}

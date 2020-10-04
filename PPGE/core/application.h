@@ -1,11 +1,11 @@
 #pragma once
 #include "PPGEpch.h"
 
-#include "core/defines.h"
-#include "core/smart_ptr.h"
+#include "Core/defines.h"
+#include "Core/smart_ptr.h"
 #include "systems/display_system.h"
-#include "core/input/application_event.h"
-#include "core/input/input_event.h"
+#include "Core/input/application_event.h"
+#include "Core/input/input_event.h"
 
 namespace PPGE
 {

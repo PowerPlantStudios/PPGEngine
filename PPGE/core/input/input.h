@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core/defines.h"
-#include "core/input/key_codes.h"
-#include "core/input/mouse_codes.h"
-#include "core/input/joystick_codes.h"
-#include "core/input/gamepad_codes.h"
+#include "Core/defines.h"
+#include "Core/input/key_codes.h"
+#include "Core/input/mouse_codes.h"
+#include "Core/input/joystick_codes.h"
+#include "Core/input/gamepad_codes.h"
 
 namespace PPGE
 {

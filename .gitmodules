@@ -6,7 +6,7 @@
 	path = Thirdparty/glfw
 	url = https://github.com/glfw/glfw.git
 	branch = master
-[submodule "Thirdparty/imgui/imgui"]
-	path = Thirdparty/imgui/imgui
+[submodule "Thirdparty/imgui"]
+	path = Thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = master

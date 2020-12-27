@@ -16,8 +16,8 @@ namespace PPGE
 		//typedef void (*InputEventCallback)(const InputEvent&);
 		//typedef void (*ApplicationEventCallback)(const ApplicationEvent&);
 
-		typedef std::function<void(const InputEvent&)> InputEventCallback;
-		typedef std::function<void(const ApplicationEvent&)> ApplicationEventCallback;
+		typedef std::function<void(InputEvent&)> InputEventCallback;
+		typedef std::function<void(ApplicationEvent&)> ApplicationEventCallback;
 		
 		enum class WindowFlags
 		{

@@ -2,6 +2,8 @@
 
 #include "display_system_windows.h"
 
+#include <glad/glad.h>
+
 namespace PPGE
 {
 	static uint8_t s_SystemInstanceCount = 0;
@@ -253,13 +255,15 @@ namespace PPGE
 			#endif
 			m_window = glfwCreateWindow((int)m_props.width, (int)m_props.height, m_props.title.c_str(), nullptr, nullptr);
 			++s_SystemInstanceCount;
-			// TODO: Add assertion macro to check window is initialized sucessfully.
+			// TODO: Add assertion macro to check window is initialized successfully.
 		}
 
 		{
 			glfwGetWindowPos(m_window, (int*)&m_props.posX, (int*)&m_props.posY);
 		}
 		glfwMakeContextCurrent(m_window);
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		PPGE_ASSERT(status, "Failed to initialize GLAD!");
 		glfwSetWindowUserPointer(m_window, &m_props);
 		SetVsync(m_props.vSync);
 

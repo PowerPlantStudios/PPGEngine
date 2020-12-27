@@ -15,9 +15,13 @@ outdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- You may refer them in following projects as "%{IncludeDir.KeyValue}".
 IncludeDir = {}
 IncludeDir["GLFW"] = "Thirdparty/glfw/include"
+IncludeDir["Glad"] = "Thirdparty/glad/include"
+IncludeDir["ImGui"] = "Thirdparty/imgui"
 
 group "Dependencies" -- Virtual folder that contain 3rd party projects in workspace
-	include "Thirdparty/GLFW_premake5.lua"
+	include "Thirdparty/glfw/premake5.lua"
+	include "Thirdparty/glad/premake5.lua"
+	include "Thirdparty/imgui/premake5.lua"
 group "" -- Put the rest of the projects back to the root level of workspace
 
 project "PPGE"
@@ -43,26 +47,26 @@ project "PPGE"
 		"%{prj.name}",
 		"Thirdparty/spdlog/include",
 		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.ImGui}"
 	}
 
 	filter "system:windows"
-		includedirs
-		{
-			"Thirdparty/spdlog/include"
-		}
-
 		staticruntime "On"
 		systemversion "latest"
 
 		defines
 		{
 			"PPGE_PLATFORM_WIN",
-			"PPGE_DLL_EXPORT"		
+			"PPGE_DLL_EXPORT",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		links
 		{
 			"GLFW",
+			"Glad",
+			"ImGui",
 			"opengl32.lib",
 		}
 
@@ -70,6 +74,8 @@ project "PPGE"
 		links
 		{
 			"GLFW",
+			"Glad",
+			"ImGui",
 			"opengl32.lib",
 		}
 	

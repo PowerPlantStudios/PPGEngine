@@ -10,6 +10,3 @@
 	path = Thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = master
-[submodule "Thirdparty/gui/imgui"]
-	path = Thirdparty/gui/imgui
-	url = https://github.com/ocornut/imgui.git

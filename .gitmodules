@@ -1,12 +1,12 @@
 [submodule "Thirdparty/spdlog"]
 	path = Thirdparty/spdlog
 	url = https://github.com/gabime/spdlog.git
-	branch = v1.x
+	branch = v1.8.5
 [submodule "Thirdparty/glfw"]
 	path = Thirdparty/glfw
 	url = https://github.com/glfw/glfw.git
-	branch = master
+	branch = 3.3.4
 [submodule "Thirdparty/imgui"]
 	path = Thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
-	branch = master
+	branch = v1.83

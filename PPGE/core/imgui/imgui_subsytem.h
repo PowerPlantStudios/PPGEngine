@@ -15,10 +15,12 @@ namespace PPGE
 
 		void OnAttach() override;
 		void OnDetach() override;
-		void OnUpdate(float timestamp) override;
 		void OnInputEvent(InputEvent&) override;
+
+		void InitFrame();
+		void RenderFrame();
 	
 	private:
-
+		bool show_demo_window = true;
 	};
 }

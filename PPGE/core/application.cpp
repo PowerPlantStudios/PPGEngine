@@ -17,6 +17,9 @@ namespace PPGE
 		m_appDisplay = DisplaySystem::Create(props);
 		m_appDisplay->SetInputEventCallbackFunctionPtr(PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnInputEvent));
 		m_appDisplay->SetApplicationEventCallbackFunctionPtr(PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnApplicationEvent));
+
+		m_imGuiSubsytem = new ImGuiSubsystem();
+		RegisterSubsystemToFrontQueue(m_imGuiSubsytem);
 	}
 
 	Application::~Application()
@@ -51,12 +54,12 @@ namespace PPGE
 					subsys->OnUpdate(0.0f);
 			}
 
+			m_imGuiSubsytem->InitFrame();
 			{
 			
 			}
+			m_imGuiSubsytem->RenderFrame();
 
-			glClearColor(1, 0, 0, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
 			m_appDisplay->OnUpdate();
 		}
 	}

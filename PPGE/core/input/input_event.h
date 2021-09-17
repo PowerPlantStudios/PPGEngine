@@ -53,7 +53,7 @@ namespace PPGE
 
 		bool IsInCategory(InputEventCategoryBit category) { return GetInputEventCategory() & static_cast<int>(category); }
 		
-		void SetHandled(bool b_value) { b_handled = b_value; }
+		void SetHandled(bool b_value) { b_handled |= b_value; }
 		bool Handled() { return b_handled; }
 
 	private:

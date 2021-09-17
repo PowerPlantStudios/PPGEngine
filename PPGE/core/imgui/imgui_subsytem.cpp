@@ -2,7 +2,15 @@
 
 #include "imgui_subsytem.h"
 
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+
 #include "core/application.h"
+
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
+
 
 namespace PPGE
 {
@@ -17,17 +25,52 @@ namespace PPGE
 
 	void ImGuiSubsystem::OnAttach()
 	{
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+		ImGui::StyleColorsDark();
+
+		Application& app = Application::Get();
+		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetDisplay().GetNativeDisplayPtr());
+
+		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplOpenGL3_Init();
 	}
 
 	void ImGuiSubsystem::OnDetach()
 	{
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 	}
 	
-	void ImGuiSubsystem::OnUpdate(float timestamp)
+	void ImGuiSubsystem::OnInputEvent(InputEvent& inputEvent)
 	{
+		ImGuiIO& io = ImGui::GetIO();
+		inputEvent.SetHandled(inputEvent.IsInCategory(InputEventCategoryBit::Mouse) & io.WantCaptureMouse);
+		inputEvent.SetHandled(inputEvent.IsInCategory(InputEventCategoryBit::Keyboard) & io.WantCaptureKeyboard);
 	}
-	
-	void ImGuiSubsystem::OnInputEvent(InputEvent&)
+
+	void ImGuiSubsystem::InitFrame()
 	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+	}
+
+	void ImGuiSubsystem::RenderFrame()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		Application& app = Application::Get();
+		io.DisplaySize = ImVec2((float)app.GetDisplay().Width(), (float)app.GetDisplay().Height());
+
+		// Rendering
+		ImGui::ShowDemoWindow(&show_demo_window);
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 	}
 }

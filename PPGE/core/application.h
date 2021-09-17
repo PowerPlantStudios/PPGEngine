@@ -8,6 +8,7 @@
 #include "core/input/input_event.h"
 #include "core/subsystem_manager.h"
 #include "core/subsystem.h"
+#include "core/imgui/imgui_subsytem.h"
 
 namespace PPGE
 {
@@ -27,17 +28,17 @@ namespace PPGE
 		void RegisterSubsystemToBackQueue(Subsystem* subsystem);
 
 		static Application& Get() { return *s_instance; }
+
 	private:
 		bool OnWindowClose(WindowCloseEvent& winCloseEvent);
 		bool OnWindowResize(WindowResizeEvent& winResizeEvent);
 
-	private:
 		Unique<DisplaySystem> m_appDisplay;
+		ImGuiSubsystem* m_imGuiSubsytem;
 		SubsystemManager m_subsystemMgr;
 		bool b_isRuning;
 		bool b_isPaused;
 
-	private:
 		static Application* s_instance;
 	};
 

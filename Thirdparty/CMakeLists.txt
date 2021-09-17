@@ -15,3 +15,6 @@ if(${DISPLAY_API} STREQUAL "GLFW")
     add_subdirectory(glfw)
     set_target_properties(glfw PROPERTIES FOLDER "Dependencies")
 endif()
+
+add_subdirectory(imgui)
+set_target_properties(imgui PROPERTIES FOLDER "Dependencies")

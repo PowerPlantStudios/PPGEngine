@@ -5,7 +5,3 @@ include_directories(${DEPENDENCIES_DIR}/spdlog/include)
 
 add_executable(Game ${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp)
 target_link_libraries(Game PRIVATE Engine)
-
-if (WIN32)
-    add_compile_definitions(PPGE_PLATFORM_WIN)
-endif(WIN32)

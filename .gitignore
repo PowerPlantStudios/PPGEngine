@@ -37,6 +37,7 @@
 *.filters
 *.user
 .vs
+.vscode
 
 # Build directory
 build

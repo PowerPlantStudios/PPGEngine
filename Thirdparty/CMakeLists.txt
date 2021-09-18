@@ -1,4 +1,4 @@
-if(${GRAPHICS_API} STREQUAL "OpenGL")
+if(${RENDERING_API} STREQUAL "OpenGL")
     # GLAD dependency
     add_subdirectory(glad)
     set_target_properties(glad PROPERTIES FOLDER "Dependencies")
@@ -12,6 +12,7 @@ if(${DISPLAY_API} STREQUAL "GLFW")
     set(GLFW_BUILD_TESTS OFF)
     set(GLFW_BUILD_DOCS OFF)
     set(GLFW_INSTALL OFF)
+    set(GLFW_VULKAN_STATIC OFF)
     add_subdirectory(glfw)
     set_target_properties(glfw PROPERTIES FOLDER "Dependencies")
 endif()

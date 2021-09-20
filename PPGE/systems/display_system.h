@@ -2,76 +2,84 @@
 #include "PPGEpch.h"
 
 #include "Core/defines.h"
+#include "Core/input/application_event.h"
+#include "Core/input/input_event.h"
 #include "Core/logger.h"
 #include "Core/smart_ptr.h"
-#include "Core/input/input_event.h"
-#include "Core/input/application_event.h"
+#include "systems/isystem.h"
 
 namespace PPGE
 {
-	class PPGE_API DisplaySystem
-	{
-	public:
+namespace WindowProps
+{
+enum class WindowMode
+{
+    WINDOWED,
+    MINIMIZED,
+    MAXIMIZED,
+    FULLSCREEN
+};
+enum class AttributeTag
+{
+    ALWAYS_ON_TOP = 0,
+    DECORATED,
+    RESIZABLE,
+    FOCUSED,
+    COUNT,
+};
+using AttributeValue = uint64_t;
+using WindowAttributes = std::array<WindowProps::AttributeValue, static_cast<size_t>(WindowProps::AttributeTag::COUNT)>;
+using InputEventCallback = std::function<void(InputEvent &)>;
+using ApplicationEventCallback = std::function<void(ApplicationEvent &)>;
+}; // namespace WindowProps
 
-		//typedef void (*InputEventCallback)(const InputEvent&);
-		//typedef void (*ApplicationEventCallback)(const ApplicationEvent&);
+struct DisplaySystemProps
+{
+    std::string title = "Power Plant Game Engine";
+    uint32_t height = 720;
+    uint32_t width = 1280;
+    uint32_t posX = 120;
+    uint32_t posY = 120;
+    bool vSync = true;
+    WindowProps::WindowMode window_mode = WindowProps::WindowMode::WINDOWED;
+    WindowProps::WindowAttributes window_attributes = {1ull, 0ull, 1ull, 1ull};
+    WindowProps::InputEventCallback input_event_callback = nullptr;
+    WindowProps::ApplicationEventCallback application_event_callback = nullptr;
+};
 
-		typedef std::function<void(InputEvent&)> InputEventCallback;
-		typedef std::function<void(ApplicationEvent&)> ApplicationEventCallback;
-		
-		enum class WindowFlags
-		{
-			ALWAYS_ON_TOP,
-			DECORATED,
-			RESIZABLE,
-			FOCUSED,
-		};
+class PPGE_API DisplaySystem : public ISystem<DisplaySystemProps>
+{
+  public:
+    virtual void *GetNativeDisplayPtr() const = 0;
 
-		enum class WindowModes {
-			WINDOWED,
-			MINIMIZED,
-			MAXIMIZED,
-			FULLSCREEN
-		};
+    virtual WindowProps::AttributeValue GetWindowAttribute(WindowProps::AttributeTag attribute) const = 0;
+    virtual void SetWindowAttribute(WindowProps::AttributeTag attribute, WindowProps::AttributeValue value) = 0;
+    virtual WindowProps::WindowMode GetWindowMode() const = 0;
+    virtual void SetWindowMode(WindowProps::WindowMode mode) = 0;
 
-		struct DisplaySystemProps
-		{
-			std::string title = "Power Plant Game Engine";
-			uint32_t height   = 720;
-			uint32_t width    = 1280;
-		};
+    virtual void EnableVsync() = 0;
+    virtual void DisableVsync() = 0;
+    virtual bool IsVsyncEnabled() const = 0;
+    virtual bool IsMaximized() const = 0;
+    virtual bool IsMinimized() const = 0;
 
-		static Unique<DisplaySystem> Create(const DisplaySystemProps&);
+    virtual WindowProps::InputEventCallback GetInputEventCallback() const = 0;
+    virtual void SetInputEventCallback(WindowProps::InputEventCallback callback) = 0;
+    virtual WindowProps::ApplicationEventCallback GetApplicationEventCallback() const = 0;
+    virtual void SetApplicationEventCallback(WindowProps::ApplicationEventCallback callback) = 0;
+    virtual std::string_view GetTitle() const = 0;
+    virtual void SetTitle(const std::string &title) = 0;
+    virtual uint32_t GetHeight() const = 0;
+    virtual void SetHeight(uint32_t height) = 0;
+    virtual uint32_t GetWidth() const = 0;
+    virtual void SetWidth(uint32_t wdith) = 0;
 
-	public:
-		virtual ~DisplaySystem() {}
+    static DisplaySystem &GetDisplaySystem()
+    {
+        return *s_instance;
+    }
 
-		virtual void OnUpdate() = 0;
-
-		virtual void* GetNativeDisplayPtr() const = 0;
-
-		virtual bool GetWindowFlag(WindowFlags flag) const = 0;
-		virtual void SetWindowFlag(WindowFlags flag, bool b_value) = 0;
-
-		virtual void SetWindowMode(WindowModes mode) = 0;
-
-		virtual bool IsVsyncEnabled() const = 0;
-		virtual void SetVsync(bool b_value) = 0;
-		virtual bool IsMaximized() const = 0;
-		virtual bool IsMinimized() const = 0;
-
-		virtual InputEventCallback InputEventCallbackFunctionPtr() const = 0;
-		virtual void SetInputEventCallbackFunctionPtr(InputEventCallback callback) = 0;
-		virtual ApplicationEventCallback ApplicationEventCallbackFunctionPtr() const = 0;
-		virtual void SetApplicationEventCallbackFunctionPtr(ApplicationEventCallback callback) = 0;
-		virtual std::string Title() const = 0;
-		virtual void Title(const std::string& title) = 0;
-		virtual uint32_t Height() const = 0;
-		virtual void SetHeight(uint32_t height) = 0;
-		virtual uint32_t Width() const = 0;
-		virtual void SetWidth(uint32_t wdith) = 0;
-
-	private:
-
-	};
-}
+  protected:
+    static DisplaySystem *s_instance;
+};
+} // namespace PPGE

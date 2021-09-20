@@ -74,12 +74,12 @@ class PPGE_API DisplaySystem : public ISystem<DisplaySystemProps>
     virtual uint32_t GetWidth() const = 0;
     virtual void SetWidth(uint32_t wdith) = 0;
 
-    static DisplaySystem &GetDisplaySystem()
+    inline static DisplaySystem &GetDisplaySystem()
     {
         return *s_instance;
     }
 
-  protected:
+  private:
     static DisplaySystem *s_instance;
 };
 } // namespace PPGE

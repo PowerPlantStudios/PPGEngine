@@ -7,13 +7,13 @@
 
 namespace PPGE
 {
-class PPGE_API DisplaySystemWindows : public DisplaySystem
+class PPGE_API DisplaySystemGLFW : public DisplaySystem
 {
   public:
-    DisplaySystemWindows()
+    DisplaySystemGLFW()
     {
     }
-    ~DisplaySystemWindows()
+    ~DisplaySystemGLFW()
     {
     }
 

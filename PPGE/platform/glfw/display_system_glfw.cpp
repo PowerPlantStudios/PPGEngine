@@ -1,6 +1,6 @@
 #include "PPGEpch.h"
 
-#include "display_system_windows.h"
+#include "display_system_glfw.h"
 
 #include <glad/glad.h>
 
@@ -13,17 +13,17 @@ static void GLFWErrorCallback(int error, const char *description)
     PPGE_ERROR("GLFW Error ({0}): {1}", error, description);
 }
 
-void *DisplaySystemWindows::GetNativeDisplayPtr() const
+void *DisplaySystemGLFW::GetNativeDisplayPtr() const
 {
     return m_window_ptr;
 }
 
-WindowProps::AttributeValue DisplaySystemWindows::GetWindowAttribute(WindowProps::AttributeTag attribute) const
+WindowProps::AttributeValue DisplaySystemGLFW::GetWindowAttribute(WindowProps::AttributeTag attribute) const
 {
     return m_props.window_attributes[static_cast<size_t>(attribute)];
 }
 
-void DisplaySystemWindows::SetWindowAttribute(WindowProps::AttributeTag attribute, WindowProps::AttributeValue value)
+void DisplaySystemGLFW::SetWindowAttribute(WindowProps::AttributeTag attribute, WindowProps::AttributeValue value)
 {
     switch (attribute)
     {
@@ -52,12 +52,12 @@ void DisplaySystemWindows::SetWindowAttribute(WindowProps::AttributeTag attribut
     m_props.window_attributes[static_cast<size_t>(attribute)] = value;
 }
 
-WindowProps::WindowMode DisplaySystemWindows::GetWindowMode() const
+WindowProps::WindowMode DisplaySystemGLFW::GetWindowMode() const
 {
     return m_props.window_mode;
 }
 
-void DisplaySystemWindows::SetWindowMode(WindowProps::WindowMode mode)
+void DisplaySystemGLFW::SetWindowMode(WindowProps::WindowMode mode)
 {
     switch (mode)
     {
@@ -93,12 +93,12 @@ void DisplaySystemWindows::SetWindowMode(WindowProps::WindowMode mode)
     m_props.window_mode = mode;
 }
 
-bool DisplaySystemWindows::IsVsyncEnabled() const
+bool DisplaySystemGLFW::IsVsyncEnabled() const
 {
     return m_props.vSync;
 }
 
-void DisplaySystemWindows::EnableVsync()
+void DisplaySystemGLFW::EnableVsync()
 {
     if (!m_props.vSync)
     {
@@ -107,7 +107,7 @@ void DisplaySystemWindows::EnableVsync()
     }
 }
 
-void DisplaySystemWindows::DisableVsync()
+void DisplaySystemGLFW::DisableVsync()
 {
     if (m_props.vSync)
     {
@@ -116,53 +116,53 @@ void DisplaySystemWindows::DisableVsync()
     }
 }
 
-bool DisplaySystemWindows::IsMinimized() const
+bool DisplaySystemGLFW::IsMinimized() const
 {
     return m_props.window_mode == WindowProps::WindowMode::MINIMIZED;
 }
 
-bool DisplaySystemWindows::IsMaximized() const
+bool DisplaySystemGLFW::IsMaximized() const
 {
     return m_props.window_mode == WindowProps::WindowMode::MAXIMIZED;
 }
 
-WindowProps::InputEventCallback DisplaySystemWindows::GetInputEventCallback() const
+WindowProps::InputEventCallback DisplaySystemGLFW::GetInputEventCallback() const
 {
     return m_props.input_event_callback;
 }
 
-void DisplaySystemWindows::SetInputEventCallback(WindowProps::InputEventCallback callback)
+void DisplaySystemGLFW::SetInputEventCallback(WindowProps::InputEventCallback callback)
 {
     m_props.input_event_callback = callback;
 }
 
-WindowProps::ApplicationEventCallback DisplaySystemWindows::GetApplicationEventCallback() const
+WindowProps::ApplicationEventCallback DisplaySystemGLFW::GetApplicationEventCallback() const
 {
     return m_props.application_event_callback;
 }
 
-void DisplaySystemWindows::SetApplicationEventCallback(WindowProps::ApplicationEventCallback callback)
+void DisplaySystemGLFW::SetApplicationEventCallback(WindowProps::ApplicationEventCallback callback)
 {
     m_props.application_event_callback = callback;
 }
 
-std::string_view DisplaySystemWindows::GetTitle() const
+std::string_view DisplaySystemGLFW::GetTitle() const
 {
     return m_props.title;
 }
 
-void DisplaySystemWindows::SetTitle(const std::string &title)
+void DisplaySystemGLFW::SetTitle(const std::string &title)
 {
     m_props.title = title;
     glfwSetWindowTitle(m_window_ptr, title.c_str());
 }
 
-uint32_t DisplaySystemWindows::GetHeight() const
+uint32_t DisplaySystemGLFW::GetHeight() const
 {
     return m_props.height;
 }
 
-void DisplaySystemWindows::SetHeight(uint32_t height)
+void DisplaySystemGLFW::SetHeight(uint32_t height)
 {
     if (!glfwGetWindowAttrib(m_window_ptr, GLFW_MAXIMIZED))
     {
@@ -171,12 +171,12 @@ void DisplaySystemWindows::SetHeight(uint32_t height)
     }
 }
 
-uint32_t DisplaySystemWindows::GetWidth() const
+uint32_t DisplaySystemGLFW::GetWidth() const
 {
     return m_props.width;
 }
 
-void DisplaySystemWindows::SetWidth(uint32_t width)
+void DisplaySystemGLFW::SetWidth(uint32_t width)
 {
     if (!glfwGetWindowAttrib(m_window_ptr, GLFW_MAXIMIZED))
     {
@@ -185,11 +185,8 @@ void DisplaySystemWindows::SetWidth(uint32_t width)
     }
 }
 
-void DisplaySystemWindows::StartUp(const DisplaySystemProps &props)
+void DisplaySystemGLFW::StartUp(const DisplaySystemProps &props)
 {
-    PPGE_ASSERT(!DisplaySystem::s_instance, "Application already exists!");
-    DisplaySystem::s_instance = this;
-
     if (s_SystemInstanceCount == 0)
     {
         int success = glfwInit();
@@ -371,13 +368,13 @@ void DisplaySystemWindows::StartUp(const DisplaySystemProps &props)
     });
 }
 
-void DisplaySystemWindows::Update()
+void DisplaySystemGLFW::Update()
 {
     glfwPollEvents();
     glfwSwapBuffers(m_window_ptr);
 }
 
-void DisplaySystemWindows::ShutDown()
+void DisplaySystemGLFW::ShutDown()
 {
     glfwDestroyWindow(m_window_ptr);
     --s_SystemInstanceCount;

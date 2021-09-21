@@ -1,10 +1,10 @@
 #include <PPGE.h>
 
-class TestSubsystem : public PPGE::Subsystem
+class TestLayer : public PPGE::Layer
 {
 public:
-	TestSubsystem()
-		: Subsystem("TestSubsystem")
+    TestLayer()
+		: Layer("TestSubsystem")
 	{
 	}
 
@@ -27,7 +27,7 @@ public:
 	{
 		APP_INFO("Application is initialized.");
 		
-		RegisterSubsystemToFrontQueue(new TestSubsystem());
+		RegisterSubsystemToFrontQueue(new TestLayer());
 	}
 
 	~Game()

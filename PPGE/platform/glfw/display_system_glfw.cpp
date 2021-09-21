@@ -197,8 +197,6 @@ void DisplaySystemGLFW::StartUp(const DisplaySystemProps &props)
         // TODO: Before debug context is set, it should be check which renderer API is active.
         //       When renderer interface is implemented add condition to make sure current renderer API is OpenGL
 #endif
-        int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        PPGE_ASSERT(status, "Failed to initialize GLAD!");
     }
 
     m_props = props;
@@ -214,6 +212,11 @@ void DisplaySystemGLFW::StartUp(const DisplaySystemProps &props)
     }
 
     glfwMakeContextCurrent(m_window_ptr);
+
+    {
+        int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+        PPGE_ASSERT(success, "Failed to initialize GLAD!");
+    }
 
     glfwSetWindowUserPointer(m_window_ptr, &m_props);
 

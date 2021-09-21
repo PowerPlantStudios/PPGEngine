@@ -1,8 +1,8 @@
 #pragma once
 #include <GLFW/glfw3.h>
 
-#include "Core/defines.h"
-#include "Core/logger.h"
+#include "core/defines.h"
+#include "systems/logger_system.h"
 #include "systems/display_system.h"
 
 namespace PPGE

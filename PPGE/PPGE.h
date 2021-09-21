@@ -4,17 +4,14 @@
 
 // External includes
 
-
 // PPGE includes
-#include "Core/defines.h"
-#include "Core/smart_ptr.h"
-#include "Core/application.h"
-#include "Core/logger.h"
-
-#include "Core/input/input_event.h"
-#include "Core/input/application_event.h"
-#include "Core/input/input.h"
-
+#include "core/application.h"
+#include "core/defines.h"
+#include "core/input/application_event.h"
+#include "core/input/input.h"
+#include "core/input/input_event.h"
+#include "core/smart_ptr.h"
+#include "systems/logger_system.h"
 
 // Entry point for client side application
-#include "Core/main.h"
+#include "core/main.h"

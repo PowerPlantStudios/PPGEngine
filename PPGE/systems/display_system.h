@@ -1,12 +1,12 @@
 #pragma once
 #include "PPGEpch.h"
 
-#include "Core/defines.h"
-#include "Core/input/application_event.h"
-#include "Core/input/input_event.h"
-#include "Core/logger.h"
-#include "Core/smart_ptr.h"
+#include "core/defines.h"
+#include "core/input/application_event.h"
+#include "core/input/input_event.h"
+#include "core/smart_ptr.h"
 #include "systems/isystem.h"
+#include "systems/logger_system.h"
 
 namespace PPGE
 {
@@ -76,10 +76,10 @@ class PPGE_API DisplaySystem : public ISystem<DisplaySystemProps>
 
     inline static DisplaySystem &GetDisplaySystem()
     {
-        return *s_instance;
+        return s_instance;
     }
 
   private:
-    static DisplaySystem *s_instance;
+    static DisplaySystem &s_instance;
 };
 } // namespace PPGE

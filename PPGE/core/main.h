@@ -14,9 +14,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 int main(int argc, char** argv)
 #endif
 {
-	PPGE::Logger::Initialize();
-	PPGE_INFO("PPGE is initialized.");
-
 	PPGE::Application* application = PPGE::CreateApplication();
 	application->Run();
 	delete application;

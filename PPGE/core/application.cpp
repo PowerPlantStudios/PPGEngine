@@ -13,25 +13,34 @@ Application::Application()
     PPGE_ASSERT(!s_instance, "Application already exists!");
     s_instance = this;
 
-    DisplaySystemProps props;
-    props.input_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnInputEvent);
-    props.application_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnApplicationEvent);
-    DisplaySystem::GetDisplaySystem().StartUp(props);
+    LoggerSystemProps logger_sys_props;
+    LoggerSystem::GetLoggerSystem().StartUp(logger_sys_props);
+    PPGE_INFO("PPGE is initialized.");
 
-    m_imgui_subsystem = new ImGuiSubsystem();
+    DisplaySystemProps ds_props;
+    ds_props.input_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnInputEvent);
+    ds_props.application_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnApplicationEvent);
+    DisplaySystem::GetDisplaySystem().StartUp(ds_props);
+
+    LayerSystemProps ls_props;
+    LayerSystem::GetLayerSystem().StartUp(ls_props);
+
+    m_imgui_subsystem = new ImGuiLayer();
     RegisterSubsystemToFrontQueue(m_imgui_subsystem);
 }
 
 Application::~Application()
 {
-    DisplaySystem::GetDisplaySystem().ShutDown();
     PPGE_INFO("PPGE is destroyed.");
+    LayerSystem::GetLayerSystem().ShutDown();
+    DisplaySystem::GetDisplaySystem().ShutDown();
+    LoggerSystem::GetLoggerSystem().ShutDown();
 }
 
 void Application::OnInputEvent(InputEvent &input_event)
 {
     // PPGE_TRACE(inputEvent.ToString());
-    for (auto it = m_subsystem_manager.rbegin(); it != m_subsystem_manager.rend(); ++it)
+    for (auto it = LayerSystem::GetLayerSystem().rbegin(); it != LayerSystem::GetLayerSystem().rend(); ++it)
     {
         if (input_event.Handled())
             break;
@@ -53,7 +62,7 @@ void Application::Run()
     while (m_is_running)
     {
         {
-            for (Subsystem *subsys : m_subsystem_manager)
+            for (Layer *subsys : LayerSystem::GetLayerSystem())
                 subsys->OnUpdate(0.0f);
         }
 
@@ -66,15 +75,15 @@ void Application::Run()
     }
 }
 
-void Application::RegisterSubsystemToFrontQueue(Subsystem *subsystem)
+void Application::RegisterSubsystemToFrontQueue(Layer *subsystem)
 {
-    m_subsystem_manager.PushFrontQueue(subsystem);
+    LayerSystem::GetLayerSystem().PushFrontQueue(subsystem);
     subsystem->OnAttach();
 }
 
-void Application::RegisterSubsystemToBackQueue(Subsystem *subsystem)
+void Application::RegisterSubsystemToBackQueue(Layer *subsystem)
 {
-    m_subsystem_manager.PushBackQueue(subsystem);
+    LayerSystem::GetLayerSystem().PushBackQueue(subsystem);
     subsystem->OnAttach();
 }
 

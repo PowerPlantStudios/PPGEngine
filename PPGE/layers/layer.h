@@ -6,11 +6,11 @@
 
 namespace PPGE {
 
-	class PPGE_API Subsystem
+	class PPGE_API Layer
 	{
 	public:
-		Subsystem(const std::string& debugName = "Subsystem");
-		virtual ~Subsystem() = default;
+		Layer(const std::string& debugName = "Subsystem");
+		virtual ~Layer() = default;
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}

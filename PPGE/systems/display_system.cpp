@@ -14,6 +14,6 @@ typedef PPGE::DisplaySystemGLFW DisplaySystemImp;
 namespace PPGE
 {
 
-DisplaySystem *DisplaySystem::s_instance = new DisplaySystemImp();
+DisplaySystem &DisplaySystem::s_instance = DisplaySystemImp();
 
 } // namespace PPGE

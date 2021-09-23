@@ -22,17 +22,17 @@ Application::Application()
     ds_props.application_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnApplicationEvent);
     DisplaySystem::GetDisplaySystem().StartUp(ds_props);
 
-    LayerSystemProps ls_props;
-    LayerSystem::GetLayerSystem().StartUp(ls_props);
+    UISystemProps ls_props;
+    UISystem::GetLayerSystem().StartUp(ls_props);
 
-    m_imgui_subsystem = new ImGuiLayer();
+    m_imgui_subsystem = ImGuiLayer::CreateImGuiLayer();
     RegisterSubsystemToFrontQueue(m_imgui_subsystem);
 }
 
 Application::~Application()
 {
     PPGE_INFO("PPGE is destroyed.");
-    LayerSystem::GetLayerSystem().ShutDown();
+    UISystem::GetLayerSystem().ShutDown();
     DisplaySystem::GetDisplaySystem().ShutDown();
     LoggerSystem::GetLoggerSystem().ShutDown();
 }
@@ -40,7 +40,7 @@ Application::~Application()
 void Application::OnInputEvent(InputEvent &input_event)
 {
     // PPGE_TRACE(inputEvent.ToString());
-    for (auto it = LayerSystem::GetLayerSystem().rbegin(); it != LayerSystem::GetLayerSystem().rend(); ++it)
+    for (auto it = UISystem::GetLayerSystem().rbegin(); it != UISystem::GetLayerSystem().rend(); ++it)
     {
         if (input_event.Handled())
             break;
@@ -62,28 +62,28 @@ void Application::Run()
     while (m_is_running)
     {
         {
-            for (Layer *subsys : LayerSystem::GetLayerSystem())
+            for (UILayer *subsys : UISystem::GetLayerSystem())
                 subsys->OnUpdate(0.0f);
         }
 
-        m_imgui_subsystem->InitFrame();
+        m_imgui_subsystem->OnImGuiBegin();
         {
         }
-        m_imgui_subsystem->RenderFrame();
+        m_imgui_subsystem->OnRender();
 
         DisplaySystem::GetDisplaySystem().Update();
     }
 }
 
-void Application::RegisterSubsystemToFrontQueue(Layer *subsystem)
+void Application::RegisterSubsystemToFrontQueue(UILayer *subsystem)
 {
-    LayerSystem::GetLayerSystem().PushFrontQueue(subsystem);
+    UISystem::GetLayerSystem().PushFrontQueue(subsystem);
     subsystem->OnAttach();
 }
 
-void Application::RegisterSubsystemToBackQueue(Layer *subsystem)
+void Application::RegisterSubsystemToBackQueue(UILayer *subsystem)
 {
-    LayerSystem::GetLayerSystem().PushBackQueue(subsystem);
+    UISystem::GetLayerSystem().PushBackQueue(subsystem);
     subsystem->OnAttach();
 }
 

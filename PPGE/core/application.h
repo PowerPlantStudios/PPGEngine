@@ -2,13 +2,13 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "layers/layer.h"
-#include "layers/imgui_layer.h"
 #include "core/input/application_event.h"
 #include "core/input/input_event.h"
 #include "core/smart_ptr.h"
-#include "systems/layer_system.h"
+#include "ui/imgui_layer.h"
+#include "ui/ui_layer.h"
 #include "systems/display_system.h"
+#include "systems/ui_system.h"
 
 namespace PPGE
 {
@@ -22,8 +22,8 @@ class PPGE_API Application
     void OnApplicationEvent(ApplicationEvent &application_event);
     void Run();
 
-    void RegisterSubsystemToFrontQueue(Layer *subsystem);
-    void RegisterSubsystemToBackQueue(Layer *subsystem);
+    void RegisterSubsystemToFrontQueue(UILayer *subsystem);
+    void RegisterSubsystemToBackQueue(UILayer *subsystem);
 
     static Application &Get()
     {

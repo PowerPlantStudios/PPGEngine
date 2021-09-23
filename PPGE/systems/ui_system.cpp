@@ -1,40 +1,40 @@
 #include "PPGEpch.h"
 
-#include "layer_system.h"
+#include "ui_system.h"
 
 namespace PPGE
 {
-LayerSystem &LayerSystem::s_instance = LayerSystem();
+UISystem &UISystem::s_instance = UISystem();
 
-void LayerSystem::StartUp(const LayerSystemProps &props)
+void UISystem::StartUp(const UISystemProps &props)
 {
 }
 
-void LayerSystem::Update()
+void UISystem::Update()
 {
 }
 
-void LayerSystem::ShutDown()
+void UISystem::ShutDown()
 {
-    for (Layer *subsys : m_ManagedSubsytems)
+    for (UILayer *subsys : m_ManagedSubsytems)
     {
         subsys->OnDetach();
         delete subsys;
     }
 }
 
-void LayerSystem::PushFrontQueue(Layer *subsystem)
+void UISystem::PushFrontQueue(UILayer *subsystem)
 {
     m_ManagedSubsytems.emplace(m_ManagedSubsytems.begin() + m_InsertIndex, subsystem);
     m_InsertIndex++;
 }
 
-void LayerSystem::PushBackQueue(Layer *subsystem)
+void UISystem::PushBackQueue(UILayer *subsystem)
 {
     m_ManagedSubsytems.emplace_back(subsystem);
 }
 
-void LayerSystem::PopFrontQueue(Layer *subsystem)
+void UISystem::PopFrontQueue(UILayer *subsystem)
 {
     auto it = std::find(m_ManagedSubsytems.begin(), m_ManagedSubsytems.begin() + m_InsertIndex, subsystem);
     if (it != m_ManagedSubsytems.begin() + m_InsertIndex)
@@ -45,7 +45,7 @@ void LayerSystem::PopFrontQueue(Layer *subsystem)
     }
 }
 
-void LayerSystem::PopBackQueue(Layer *subsystem)
+void UISystem::PopBackQueue(UILayer *subsystem)
 {
     auto it = std::find(m_ManagedSubsytems.begin() + m_InsertIndex, m_ManagedSubsytems.end(), subsystem);
     if (it != m_ManagedSubsytems.end())

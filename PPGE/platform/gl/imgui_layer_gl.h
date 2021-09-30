@@ -1,3 +1,4 @@
+#pragma once
 #include "PPGEpch.h"
 
 #include "ui/imgui_layer.h"

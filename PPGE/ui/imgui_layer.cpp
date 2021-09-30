@@ -1,5 +1,3 @@
-#include "PPGEpch.h"
-
 #include "imgui_layer.h"
 
 #if RENDERING_API_OPENGL

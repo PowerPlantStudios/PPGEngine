@@ -1,9 +1,11 @@
 #pragma once
-#include <GLFW/glfw3.h>
+#include "PPGEpch.h"
 
 #include "core/defines.h"
 #include "system/display_system.h"
 #include "system/logger_system.h"
+
+class GLFWwindow;
 
 namespace PPGE
 {

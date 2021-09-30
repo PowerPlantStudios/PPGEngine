@@ -1,5 +1,3 @@
-#include "PPGEpch.h"
-
 #include "imgui_layer_gl.h"
 
 #include <backends/imgui_impl_glfw.h>

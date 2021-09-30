@@ -1,6 +1,4 @@
-#include "PPGEpch.h"
-
-#include "system/logger_system.h"
+#include "logger_system.h"
 
 namespace PPGE
 {

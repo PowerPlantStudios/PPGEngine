@@ -1,5 +1,3 @@
-#include "PPGEpch.h"
-
 #include "ui_system.h"
 
 namespace PPGE

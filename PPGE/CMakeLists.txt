@@ -6,6 +6,7 @@ include_directories(
     ${DEPENDENCIES_DIR}/glad/include
     ${DEPENDENCIES_DIR}/spdlog/include
     ${DEPENDENCIES_DIR}/imgui
+    ${DEPENDENCIES_DIR}/math/simplemath/include
     ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE PPGE_HDRS *.h)
@@ -19,7 +20,7 @@ target_compile_definitions(Engine
 target_include_directories(Engine 
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Engine 
-    PRIVATE glfw glad imgui)
+    PRIVATE glfw glad imgui simplemath)
 
 if (WIN32)
     target_compile_definitions(Engine PUBLIC PPGE_PLATFORM_WIN)

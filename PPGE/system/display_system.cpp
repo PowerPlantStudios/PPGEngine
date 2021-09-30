@@ -1,5 +1,3 @@
-#include "PPGEpch.h"
-
 #include "display_system.h"
 
 #if defined(DISPLAY_API_GLFW)

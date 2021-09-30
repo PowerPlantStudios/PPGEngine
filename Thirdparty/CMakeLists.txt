@@ -19,3 +19,6 @@ endif()
 
 add_subdirectory(imgui)
 set_target_properties(imgui PROPERTIES FOLDER "Dependencies")
+
+add_subdirectory(math)
+set_target_properties(simplemath PROPERTIES FOLDER "Dependencies")

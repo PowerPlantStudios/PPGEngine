@@ -22,11 +22,16 @@
 #endif
 
 // Commonly used (mostly unchanged) PPGE third party libraries
+
+// Logger includes
 // Do not change order of the includes
-#include "spdlog/spdlog.h"
-
-#include "spdlog/fmt/ostr.h"
-
-#include "spdlog/sinks/stdout_color_sinks.h"
-
-#include "spdlog/sinks/basic_file_sink.h"
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/basic_file_sink.h>
+// Math includes
+#include <simple_math.h>
+namespace PPGE
+{
+namespace Math = ::DirectX::SimpleMath;
+}

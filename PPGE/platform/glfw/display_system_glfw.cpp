@@ -1,7 +1,6 @@
-#include "PPGEpch.h"
-
 #include "display_system_glfw.h"
 
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
 namespace PPGE

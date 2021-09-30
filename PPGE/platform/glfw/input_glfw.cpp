@@ -1,9 +1,7 @@
-#pragma once
-#include "PPGEpch.h"
+#include "core/input.h"
 
 #include <GLFW/glfw3.h>
 
-#include "core/input.h"
 #include "system/display_system.h"
 
 namespace PPGE
@@ -13,7 +11,7 @@ std::tuple<float, float> GetMousePosition()
     auto *window_ptr = static_cast<GLFWwindow *>(DisplaySystem::Get().GetNativeDisplayPtr());
     double xpos, ypos;
     glfwGetCursorPos(window_ptr, &xpos, &ypos);
-    return {xpos, ypos};
+    return {static_cast<float>(xpos), static_cast<float>(ypos)};
 }
 
 bool Input::IsKeyPressed(const KeyCode code)

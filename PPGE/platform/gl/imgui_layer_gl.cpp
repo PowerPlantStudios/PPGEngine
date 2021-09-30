@@ -4,12 +4,11 @@
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <imgui.h>
-
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
+#include <imgui.h>
 
-#include "systems/display_system.h"
+#include "system/display_system.h"
 
 namespace PPGE
 {
@@ -31,7 +30,7 @@ void ImGuiLayerGL::OnAttach()
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
 
-    GLFWwindow *window = static_cast<GLFWwindow *>(DisplaySystem::GetDisplaySystem().GetNativeDisplayPtr());
+    GLFWwindow *window = static_cast<GLFWwindow *>(DisplaySystem::Get().GetNativeDisplayPtr());
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 410");
@@ -55,8 +54,7 @@ void PPGE::ImGuiLayerGL::OnImGuiBegin()
 void ImGuiLayerGL::OnRender()
 {
     ImGuiIO &io = ImGui::GetIO();
-    io.DisplaySize = ImVec2((float)DisplaySystem::GetDisplaySystem().GetWidth(),
-                            (float)DisplaySystem::GetDisplaySystem().GetHeight());
+    io.DisplaySize = ImVec2((float)DisplaySystem::Get().GetWidth(), (float)DisplaySystem::Get().GetHeight());
 
     // Rendering
     bool show_demo_window = true;

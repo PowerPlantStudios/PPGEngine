@@ -10,3 +10,7 @@
 	path = Thirdparty/imgui/src
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "Thirdparty/math/dxmath"]
+	path = Thirdparty/math/dxmath
+	url = https://github.com/microsoft/DirectXMath.git
+	branc = jan2021

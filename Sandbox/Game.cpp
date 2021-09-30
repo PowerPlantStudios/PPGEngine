@@ -10,6 +10,20 @@ class TestLayer : public PPGE::UILayer
     void OnUpdate(float timestamp) override
     {
         // APP_INFO("Test system updated.");
+        if (PPGE::Input::IsKeyPressed(PPGE_KEY_E))
+        {
+            APP_TRACE("Key E is pressed");
+        }
+        if (PPGE::Input::IsMouseButtonPressed(PPGE_MOUSE_BUTTON_0))
+        {
+            auto x_pose = PPGE::Input::GetMouseX();
+            APP_TRACE("Mouse x - {0} ", x_pose);
+        }
+        if (PPGE::Input::IsMouseButtonPressed(PPGE_MOUSE_BUTTON_1))
+        {
+            auto y_pose = PPGE::Input::GetMouseY();
+            APP_TRACE("Mouse y - {0} ", y_pose);
+        }
     }
 
     void OnInputEvent(PPGE::InputEvent &inputEvent) override
@@ -25,7 +39,7 @@ class Game : public PPGE::Application
     {
         APP_INFO("Application is initialized.");
 
-        RegisterSubsystemToFrontQueue(new TestLayer());
+        PushLayerBack(std::make_unique<TestLayer>());
     }
 
     ~Game()

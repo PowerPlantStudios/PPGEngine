@@ -11,8 +11,8 @@ typedef PPGE::ImGuiLayerGL ImGuiLayerImpl;
 
 namespace PPGE
 {
-ImGuiLayer *ImGuiLayer::CreateImGuiLayer()
+std::unique_ptr<ImGuiLayer> ImGuiLayer::CreateImGuiLayer()
 {
-    return new ImGuiLayerImpl();
+    return std::make_unique<ImGuiLayerImpl>();
 }
 } // namespace PPGE

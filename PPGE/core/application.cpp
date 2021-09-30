@@ -2,8 +2,6 @@
 
 #include "application.h"
 
-#include <glad/glad.h>
-
 namespace PPGE
 {
 Application *Application::s_instance = nullptr;
@@ -14,33 +12,32 @@ Application::Application()
     s_instance = this;
 
     LoggerSystemProps logger_sys_props;
-    LoggerSystem::GetLoggerSystem().StartUp(logger_sys_props);
+    LoggerSystem::Get().StartUp(logger_sys_props);
     PPGE_INFO("PPGE is initialized.");
 
     DisplaySystemProps ds_props;
     ds_props.input_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnInputEvent);
     ds_props.application_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnApplicationEvent);
-    DisplaySystem::GetDisplaySystem().StartUp(ds_props);
+    DisplaySystem::Get().StartUp(ds_props);
 
     UISystemProps ls_props;
-    UISystem::GetLayerSystem().StartUp(ls_props);
+    UISystem::Get().StartUp(ls_props);
 
-    m_imgui_subsystem = ImGuiLayer::CreateImGuiLayer();
-    RegisterSubsystemToFrontQueue(m_imgui_subsystem);
+    m_imgui_layer = UISystem::Get().PushLayerFront(ImGuiLayer::CreateImGuiLayer());
 }
 
 Application::~Application()
 {
     PPGE_INFO("PPGE is destroyed.");
-    UISystem::GetLayerSystem().ShutDown();
-    DisplaySystem::GetDisplaySystem().ShutDown();
-    LoggerSystem::GetLoggerSystem().ShutDown();
+    UISystem::Get().ShutDown();
+    DisplaySystem::Get().ShutDown();
+    LoggerSystem::Get().ShutDown();
 }
 
 void Application::OnInputEvent(InputEvent &input_event)
 {
     // PPGE_TRACE(inputEvent.ToString());
-    for (auto it = UISystem::GetLayerSystem().rbegin(); it != UISystem::GetLayerSystem().rend(); ++it)
+    for (auto it = UISystem::Get().rbegin(); it != UISystem::Get().rend(); ++it)
     {
         if (input_event.Handled())
             break;
@@ -59,44 +56,43 @@ void Application::OnApplicationEvent(ApplicationEvent &application_event)
 
 void Application::Run()
 {
-    while (m_is_running)
+    while (b_is_running)
     {
         {
-            for (UILayer *subsys : UISystem::GetLayerSystem())
+            for (auto &&subsys : UISystem::Get())
                 subsys->OnUpdate(0.0f);
         }
 
-        m_imgui_subsystem->OnImGuiBegin();
+        auto imgui_layer = m_imgui_layer.lock();
+        imgui_layer->OnImGuiBegin();
         {
         }
-        m_imgui_subsystem->OnRender();
+        imgui_layer->OnRender();
 
-        DisplaySystem::GetDisplaySystem().Update();
+        DisplaySystem::Get().Update();
     }
 }
 
-void Application::RegisterSubsystemToFrontQueue(UILayer *subsystem)
+void Application::PushLayerFront(std::unique_ptr<UILayer> layer)
 {
-    UISystem::GetLayerSystem().PushFrontQueue(subsystem);
-    subsystem->OnAttach();
+    UISystem::Get().PushLayerFront(std::move(layer));
 }
 
-void Application::RegisterSubsystemToBackQueue(UILayer *subsystem)
+void Application::PushLayerBack(std::unique_ptr<UILayer> layer)
 {
-    UISystem::GetLayerSystem().PushBackQueue(subsystem);
-    subsystem->OnAttach();
+    UISystem::Get().PushLayerBack(std::move(layer));
 }
 
 bool Application::OnWindowClose(WindowCloseEvent &)
 {
-    m_is_running = false;
+    b_is_running = false;
 
     return true;
 }
 
 bool Application::OnWindowResize(WindowResizeEvent &)
 {
-    m_is_paused = (DisplaySystem::GetDisplaySystem().IsMinimized()) ? true : false;
+    b_is_paused = (DisplaySystem::Get().IsMinimized()) ? true : false;
 
     return true;
 }

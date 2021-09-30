@@ -2,8 +2,8 @@
 #include <GLFW/glfw3.h>
 
 #include "core/defines.h"
-#include "systems/logger_system.h"
-#include "systems/display_system.h"
+#include "system/display_system.h"
+#include "system/logger_system.h"
 
 namespace PPGE
 {

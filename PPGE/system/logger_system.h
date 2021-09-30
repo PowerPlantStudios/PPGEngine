@@ -2,8 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "core/smart_ptr.h"
-#include "systems/isystem.h"
+#include "system/isystem.h"
 
 namespace PPGE
 {
@@ -25,24 +24,24 @@ class PPGE_API LoggerSystem : public ISystem<LoggerSystemProps>
     virtual void Update() override;
     virtual void ShutDown() override;
 
-    inline static Shared<spdlog::logger> &GetPPGELogger()
+    inline static std::shared_ptr<spdlog::logger> &GetPPGELogger()
     {
-        return s_PPGELogger;
+        return s_PPGE_logger;
     }
-    inline static Shared<spdlog::logger> &GetClientLogger()
+    inline static std::shared_ptr<spdlog::logger> &GetClientLogger()
     {
-        return s_ClientLogger;
+        return s_client_logger;
     }
 
-    inline static LoggerSystem &GetLoggerSystem()
+    inline static LoggerSystem &Get()
     {
-        return s_instance;
+        return *s_instance;
     }
 
   private:
-    static LoggerSystem &s_instance;
-    static Shared<spdlog::logger> s_PPGELogger;
-    static Shared<spdlog::logger> s_ClientLogger;
+    static LoggerSystem *s_instance;
+    static std::shared_ptr<spdlog::logger> s_PPGE_logger;
+    static std::shared_ptr<spdlog::logger> s_client_logger;
 };
 
 } // namespace PPGE

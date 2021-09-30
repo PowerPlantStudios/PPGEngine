@@ -1,7 +1,7 @@
 #pragma once
 #include "PPGEpch.h"
 
-#include "Core/defines.h"
+#include "core/defines.h"
 
 namespace PPGE
 {

@@ -2,13 +2,12 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "core/input/application_event.h"
-#include "core/input/input_event.h"
-#include "core/smart_ptr.h"
+#include "event/application_event.h"
+#include "event/input_event.h"
+#include "system/display_system.h"
+#include "system/ui_system.h"
 #include "ui/imgui_layer.h"
 #include "ui/ui_layer.h"
-#include "systems/display_system.h"
-#include "systems/ui_system.h"
 
 namespace PPGE
 {
@@ -22,8 +21,8 @@ class PPGE_API Application
     void OnApplicationEvent(ApplicationEvent &application_event);
     void Run();
 
-    void RegisterSubsystemToFrontQueue(UILayer *subsystem);
-    void RegisterSubsystemToBackQueue(UILayer *subsystem);
+    void PushLayerFront(std::unique_ptr<UILayer> layer);
+    void PushLayerBack(std::unique_ptr<UILayer> layer);
 
     static Application &Get()
     {
@@ -34,9 +33,9 @@ class PPGE_API Application
     bool OnWindowClose(WindowCloseEvent &win_close_event);
     bool OnWindowResize(WindowResizeEvent &win_resize_event);
 
-    ImGuiLayer *m_imgui_subsystem;
-    bool m_is_running = true;
-    bool m_is_paused = false;
+    std::weak_ptr<ImGuiLayer> m_imgui_layer;
+    bool b_is_running = true;
+    bool b_is_paused = false;
 
     static Application *s_instance;
 };

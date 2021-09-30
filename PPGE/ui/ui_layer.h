@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/defines.h"
-#include "core/input/application_event.h"
-#include "core/input/input_event.h"
+#include "event/application_event.h"
+#include "event/input_event.h"
 
 namespace PPGE
 {
@@ -10,7 +10,7 @@ namespace PPGE
 class PPGE_API UILayer
 {
   public:
-    UILayer(const std::string &debugName = "Subsystem") : m_DebugName(debugName)
+    UILayer(const std::string &debug_name = "Subsystem") : m_debug_name(debug_name)
     {
     }
     virtual ~UILayer() = default;
@@ -36,11 +36,11 @@ class PPGE_API UILayer
 
     const std::string &GetName() const
     {
-        return m_DebugName;
+        return m_debug_name;
     }
 
   protected:
-    std::string m_DebugName;
+    std::string m_debug_name;
 };
 
 } // namespace PPGE

@@ -125,19 +125,9 @@ bool DisplaySystemGLFW::IsMaximized() const
     return m_props.window_mode == WindowProps::WindowMode::MAXIMIZED;
 }
 
-WindowProps::InputEventCallback DisplaySystemGLFW::GetInputEventCallback() const
-{
-    return m_props.input_event_callback;
-}
-
 void DisplaySystemGLFW::SetInputEventCallback(WindowProps::InputEventCallback callback)
 {
     m_props.input_event_callback = callback;
-}
-
-WindowProps::ApplicationEventCallback DisplaySystemGLFW::GetApplicationEventCallback() const
-{
-    return m_props.application_event_callback;
 }
 
 void DisplaySystemGLFW::SetApplicationEventCallback(WindowProps::ApplicationEventCallback callback)
@@ -150,38 +140,14 @@ std::string_view DisplaySystemGLFW::GetTitle() const
     return m_props.title;
 }
 
-void DisplaySystemGLFW::SetTitle(const std::string &title)
-{
-    m_props.title = title;
-    glfwSetWindowTitle(m_window_ptr, title.c_str());
-}
-
 uint32_t DisplaySystemGLFW::GetHeight() const
 {
     return m_props.height;
 }
 
-void DisplaySystemGLFW::SetHeight(uint32_t height)
-{
-    if (!glfwGetWindowAttrib(m_window_ptr, GLFW_MAXIMIZED))
-    {
-        m_props.height = height;
-        glfwSetWindowSize(m_window_ptr, m_props.width, m_props.height);
-    }
-}
-
 uint32_t DisplaySystemGLFW::GetWidth() const
 {
     return m_props.width;
-}
-
-void DisplaySystemGLFW::SetWidth(uint32_t width)
-{
-    if (!glfwGetWindowAttrib(m_window_ptr, GLFW_MAXIMIZED))
-    {
-        m_props.width = width;
-        glfwSetWindowSize(m_window_ptr, m_props.width, m_props.height);
-    }
 }
 
 void DisplaySystemGLFW::StartUp(const DisplaySystemProps &props)

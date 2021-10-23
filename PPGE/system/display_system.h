@@ -59,19 +59,15 @@ class PPGE_API DisplaySystem : public ISystem<DisplaySystemProps>
     virtual void EnableVsync() = 0;
     virtual void DisableVsync() = 0;
     virtual bool IsVsyncEnabled() const = 0;
+
     virtual bool IsMaximized() const = 0;
     virtual bool IsMinimized() const = 0;
 
-    virtual WindowProps::InputEventCallback GetInputEventCallback() const = 0;
     virtual void SetInputEventCallback(WindowProps::InputEventCallback callback) = 0;
-    virtual WindowProps::ApplicationEventCallback GetApplicationEventCallback() const = 0;
     virtual void SetApplicationEventCallback(WindowProps::ApplicationEventCallback callback) = 0;
     virtual std::string_view GetTitle() const = 0;
-    virtual void SetTitle(const std::string &title) = 0;
     virtual uint32_t GetHeight() const = 0;
-    virtual void SetHeight(uint32_t height) = 0;
     virtual uint32_t GetWidth() const = 0;
-    virtual void SetWidth(uint32_t wdith) = 0;
 
     inline static DisplaySystem &Get()
     {

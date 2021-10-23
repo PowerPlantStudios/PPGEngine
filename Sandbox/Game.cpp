@@ -16,6 +16,16 @@ class TestLayer : public PPGE::UILayer
         {
             APP_TRACE("Key E is pressed. Recorded mouse positions x-{0} y-{1}", vector2.x, vector2.y);
         }
+        else if (PPGE::Input::IsKeyPressed(PPGE_KEY_C))
+        {
+            PPGE::DisplaySystem::Get().SetWindowAttribute(PPGE::WindowProps::AttributeTag::RESIZABLE,
+                                                          static_cast<PPGE::WindowProps::AttributeValue>(0));
+        }
+        else if (PPGE::Input::IsKeyPressed(PPGE_KEY_D))
+        {
+            PPGE::DisplaySystem::Get().SetWindowAttribute(PPGE::WindowProps::AttributeTag::RESIZABLE,
+                                                          static_cast<PPGE::WindowProps::AttributeValue>(1));
+        }
         if (PPGE::Input::IsMouseButtonPressed(PPGE_MOUSE_BUTTON_0))
         {
             auto x_pose = PPGE::Input::GetMouseX();

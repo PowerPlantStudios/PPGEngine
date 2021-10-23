@@ -33,20 +33,16 @@ class PPGE_API DisplaySystemGLFW : public DisplaySystem
     virtual void EnableVsync() override;
     virtual void DisableVsync() override;
     virtual bool IsVsyncEnabled() const override;
+
     virtual bool IsMaximized() const override;
     virtual bool IsMinimized() const override;
 
-    virtual WindowProps::InputEventCallback GetInputEventCallback() const override;
     virtual void SetInputEventCallback(WindowProps::InputEventCallback callback) override;
-    virtual WindowProps::ApplicationEventCallback GetApplicationEventCallback() const override;
     virtual void SetApplicationEventCallback(WindowProps::ApplicationEventCallback callback) override;
 
     virtual std::string_view GetTitle() const override;
-    virtual void SetTitle(const std::string &title) override;
     virtual uint32_t GetHeight() const override;
-    virtual void SetHeight(uint32_t height) override;
     virtual uint32_t GetWidth() const override;
-    virtual void SetWidth(uint32_t wdith) override;
 
   private:
     DisplaySystemProps m_props;

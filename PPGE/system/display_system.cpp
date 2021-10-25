@@ -4,7 +4,8 @@
 #include "platform/glfw/display_system_glfw.h"
 typedef PPGE::DisplaySystemGLFW DisplaySystemImp;
 #elif defined(DISPLAY_API_WIN32)
-// Include corresponding header file to start win32 api window
+#include "platform/win32/display_system_win32.h"
+typedef PPGE::DisplaySystemWin32 DisplaySystemImp;
 #endif
 
 namespace PPGE

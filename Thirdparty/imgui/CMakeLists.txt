@@ -28,11 +28,17 @@ set(IMGUI_HDRS
 if(${RENDERING_API} STREQUAL "OpenGL")
     set(IMGUI_SRCS ${IMGUI_SRCS}  
         ${CMAKE_CURRENT_SOURCE_DIR}/src/backends/imgui_impl_opengl3.cpp)
+elseif(${RENDERING_API} STREQUAL "DX11")
+    set(IMGUI_SRCS ${IMGUI_SRCS}  
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/backends/imgui_impl_dx11.cpp)
 endif()
 
 if(${DISPLAY_API} STREQUAL "GLFW")
     set(IMGUI_SRCS ${IMGUI_SRCS}
         ${CMAKE_CURRENT_SOURCE_DIR}/src/backends/imgui_impl_glfw.cpp)
+elseif(${DISPLAY_API} STREQUAL "Win32")
+    set(IMGUI_SRCS ${IMGUI_SRCS}  
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/backends/imgui_impl_win32.cpp)
 endif()
 
 add_library(imgui STATIC ${IMGUI_SRCS} ${IMGUI_HDRS})

@@ -119,9 +119,7 @@ target_compile_definitions(Engine PRIVATE
 target_include_directories(Engine PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(Engine PRIVATE 
-    glfw 
-    glad 
+target_link_libraries(Engine PRIVATE
     imgui 
     simplemath)
 
@@ -137,6 +135,7 @@ endif()
     
 if(${DISPLAY_API} STREQUAL "GLFW")
     target_compile_definitions(Engine PUBLIC DISPLAY_API_GLFW PRIVATE GLFW_INCLUDE_NONE)
+    target_link_libraries(Engine PRIVATE glfw)
 elseif(${DISPLAY_API} STREQUAL "Win32")
     target_compile_definitions(Engine PUBLIC DISPLAY_API_WIN32)
 else()
@@ -144,7 +143,8 @@ else()
 endif()
 
 if(${RENDERING_API} STREQUAL "OpenGL")
-    target_compile_definitions(Engine PUBLIC RENDERING_API_OPENGL) 
+    target_compile_definitions(Engine PUBLIC RENDERING_API_OPENGL)
+    target_link_libraries(Engine PRIVATE glad)
 elseif(${RENDERING_API} STREQUAL "Vulkan")
     target_compile_definitions(Engine PUBLIC RENDERING_API_VULKAN)
 elseif(${RENDERING_API} STREQUAL "DX11")

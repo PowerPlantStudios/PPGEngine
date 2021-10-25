@@ -19,6 +19,7 @@
 // Platform dependent libraries
 #ifdef PPGE_PLATFORM_WIN
 #include <Windows.h>
+#include <d3d11.h>
 #endif
 
 // Commonly used (mostly unchanged) PPGE third party libraries

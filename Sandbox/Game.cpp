@@ -11,7 +11,6 @@ class TestLayer : public PPGE::UILayer
 
     void OnUpdate(float timestamp) override
     {
-        // APP_INFO("Test system updated.");
         if (PPGE::Input::IsKeyPressed(PPGE_KEY_E))
         {
             APP_TRACE("Key E is pressed. Recorded mouse positions x-{0} y-{1}", vector2.x, vector2.y);

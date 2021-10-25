@@ -34,7 +34,7 @@ Application::~Application()
 
 void Application::OnInputEvent(InputEvent &input_event)
 {
-    // PPGE_TRACE(inputEvent.ToString());
+    // PPGE_TRACE(input_event.ToString());
     for (auto it = UISystem::Get().rbegin(); it != UISystem::Get().rend(); ++it)
     {
         if (input_event.Handled())

@@ -5,5 +5,14 @@ include_directories(
     ${DEPENDENCIES_DIR}/spdlog/include
     ${DEPENDENCIES_DIR}/math/simplemath/include)
 
-add_executable(Game ${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp)
+if(WIN32)
+    add_executable(Game WIN32 ${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp)
+else()
+    add_executable(Game ${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp)
+endif()
+
+target_compile_definitions(Game PRIVATE 
+    $<$<CONFIG:Debug>:PPGE_DEBUG> 
+    $<$<CONFIG:Release>:PPGE_RELEASE>)
+
 target_link_libraries(Game PRIVATE Engine)

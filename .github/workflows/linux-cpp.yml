@@ -14,6 +14,13 @@ jobs:
         ref: core-systems
         submodules: recursive
 
+    # install dependencies
+    - name: opengl
+      run: |
+        sudo apt-get install libglu1-mesa-dev
+        sudo apt-get install freeglut3-dev
+        sudo apt-get install mesa-common-dev
+        
     # build project
     - name: mkdir
       run: mkdir build

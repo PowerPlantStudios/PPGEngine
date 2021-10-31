@@ -2,6 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
+#include "core/input.h"
 #include "event/application_event.h"
 #include "event/input_event.h"
 #include "system/isystem.h"
@@ -9,6 +10,13 @@
 
 namespace PPGE
 {
+enum class WindowAPI
+{
+    None = 1,
+    GLFW,
+    Win32
+};
+
 namespace WindowProps
 {
 enum class WindowMode
@@ -51,6 +59,12 @@ class PPGE_API DisplaySystem : public ISystem<DisplaySystemProps>
   public:
     virtual void *GetNativeDisplayPtr() const = 0;
 
+    virtual std::tuple<float, float> GetMousePosition() = 0;
+    virtual bool IsKeyPressed(const KeyCode code) = 0;
+    virtual bool IsMouseButtonPressed(const MouseCode code) = 0;
+    virtual float GetMouseX() = 0;
+    virtual float GetMouseY() = 0;
+
     virtual WindowProps::AttributeValue GetWindowAttribute(WindowProps::AttributeTag attribute) const = 0;
     virtual void SetWindowAttribute(WindowProps::AttributeTag attribute, WindowProps::AttributeValue value) = 0;
     virtual WindowProps::WindowMode GetWindowMode() const = 0;
@@ -68,6 +82,14 @@ class PPGE_API DisplaySystem : public ISystem<DisplaySystemProps>
     virtual std::string_view GetTitle() const = 0;
     virtual uint32_t GetHeight() const = 0;
     virtual uint32_t GetWidth() const = 0;
+
+  public:
+    static void Initialize(WindowAPI api);
+
+    inline static void Destroy()
+    {
+        SAFE_DELETE(s_instance)
+    }
 
     inline static DisplaySystem &Get()
     {

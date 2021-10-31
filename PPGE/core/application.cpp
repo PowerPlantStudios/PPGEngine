@@ -9,9 +9,25 @@ Application::Application()
     PPGE_ASSERT(!s_instance, "Application already exists!");
     s_instance = this;
 
+    LoggerSystem::Initialize();
+    DisplaySystem::Initialize(WindowAPI::GLFW);
+    RendererSystem::Initialize(RendererAPI::OpenGL);
+    UISystem::Initialize();
+}
+
+Application::~Application()
+{
+    LoggerSystem::Destroy();
+    DisplaySystem::Destroy();
+    RendererSystem::Destroy();
+    UISystem::Destroy();
+}
+
+void Application::StartUp()
+{
     LoggerSystemProps logger_sys_props;
     LoggerSystem::Get().StartUp(logger_sys_props);
-    PPGE_INFO("PPGE is initialized.");
+    PPGE_INFO("PPGE is starting up.");
 
     DisplaySystemProps ds_props;
     ds_props.input_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnInputEvent);
@@ -24,12 +40,32 @@ Application::Application()
     m_imgui_layer = UISystem::Get().PushLayerFront(ImGuiLayer::CreateImGuiLayer());
 }
 
-Application::~Application()
+void Application::ShutDown()
 {
-    PPGE_INFO("PPGE is destroyed.");
+    PPGE_INFO("PPGE is shuting down.");
+
     UISystem::Get().ShutDown();
     DisplaySystem::Get().ShutDown();
     LoggerSystem::Get().ShutDown();
+}
+
+void Application::Run()
+{
+    while (b_is_running)
+    {
+        {
+            for (auto &&subsys : UISystem::Get())
+                subsys->OnUpdate(0.0f);
+        }
+
+        auto imgui_layer = m_imgui_layer.lock();
+        imgui_layer->OnImGuiBegin();
+        {
+        }
+        imgui_layer->OnRender();
+
+        DisplaySystem::Get().Update();
+    }
 }
 
 void Application::OnInputEvent(InputEvent &input_event)
@@ -50,25 +86,6 @@ void Application::OnApplicationEvent(ApplicationEvent &application_event)
                                                PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnWindowClose));
     DispatchApplicationEvent<WindowResizeEvent>(application_event,
                                                 PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnWindowResize));
-}
-
-void Application::Run()
-{
-    while (b_is_running)
-    {
-        {
-            for (auto &&subsys : UISystem::Get())
-                subsys->OnUpdate(0.0f);
-        }
-
-        auto imgui_layer = m_imgui_layer.lock();
-        imgui_layer->OnImGuiBegin();
-        {
-        }
-        imgui_layer->OnRender();
-
-        DisplaySystem::Get().Update();
-    }
 }
 
 void Application::PushLayerFront(std::unique_ptr<UILayer> layer)

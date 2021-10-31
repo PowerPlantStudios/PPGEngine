@@ -13,9 +13,10 @@ int main(int argc, char **argv)
 {
 #endif
     PPGE::Application *application = PPGE::CreateApplication();
+    application->StartUp();
     application->Run();
+    application->ShutDown();
     delete application;
-
 #if defined(PPGE_PLATFORM_WIN) && defined(PPGE_DEBUG)
     FreeConsole();
 #endif

@@ -22,6 +22,12 @@ class PPGE_API DisplaySystemWin32 : public DisplaySystem
 
     virtual void *GetNativeDisplayPtr() const override;
 
+    std::tuple<float, float> GetMousePosition() override;
+    bool IsKeyPressed(const KeyCode code) override;
+    bool IsMouseButtonPressed(const MouseCode code) override;
+    float GetMouseX() override;
+    float GetMouseY() override;
+
     virtual WindowProps::AttributeValue GetWindowAttribute(WindowProps::AttributeTag attribute) const override;
     virtual void SetWindowAttribute(WindowProps::AttributeTag attribute, WindowProps::AttributeValue value) override;
     virtual WindowProps::WindowMode GetWindowMode() const override;
@@ -44,7 +50,7 @@ class PPGE_API DisplaySystemWin32 : public DisplaySystem
   private:
     static LRESULT CALLBACK WinProc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param);
     LRESULT HandleMessage(UINT msg, WPARAM w_param, LPARAM l_param);
-    
+
     DisplaySystemProps m_props;
     HWND m_hwnd = nullptr;
     HINSTANCE m_hmodule = nullptr;

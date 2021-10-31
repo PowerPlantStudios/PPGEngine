@@ -2,9 +2,7 @@
 
 namespace PPGE
 {
-LoggerSystem *LoggerSystem::s_instance = new LoggerSystem();
-std::shared_ptr<spdlog::logger> LoggerSystem::s_PPGE_logger;
-std::shared_ptr<spdlog::logger> LoggerSystem::s_client_logger;
+LoggerSystem *LoggerSystem::s_instance = nullptr;
 
 void LoggerSystem::StartUp(const LoggerSystemProps &props)
 {
@@ -35,6 +33,13 @@ void LoggerSystem::Update()
 
 void LoggerSystem::ShutDown()
 {
+    s_PPGE_logger.reset();
+    s_client_logger.reset();
+}
+
+void LoggerSystem::Initialize()
+{
+    s_instance = new LoggerSystem();
 }
 
 } // namespace PPGE

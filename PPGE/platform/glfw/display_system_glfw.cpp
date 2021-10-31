@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
+#include "platform/glfw/input_codes_glfw.h"
+
 namespace PPGE
 {
 static uint8_t s_SystemInstanceCount = 0;
@@ -14,7 +16,38 @@ static void GLFWErrorCallback(int error, const char *description)
 
 void *DisplaySystemGLFW::GetNativeDisplayPtr() const
 {
-    return m_window_ptr;
+    return static_cast<void *>(m_window_ptr);
+}
+
+std::tuple<float, float> DisplaySystemGLFW::GetMousePosition()
+{
+    double xpos, ypos;
+    glfwGetCursorPos(m_window_ptr, &xpos, &ypos);
+    return {static_cast<float>(xpos), static_cast<float>(ypos)};
+}
+
+bool DisplaySystemGLFW::IsKeyPressed(const KeyCode code)
+{
+    auto state = glfwGetKey(m_window_ptr, static_cast<int>(GLFW_Key_Codes[static_cast<size_t>(code)]));
+    return state == GLFW_PRESS || state == GLFW_REPEAT;
+}
+
+bool DisplaySystemGLFW::IsMouseButtonPressed(const MouseCode code)
+{
+    auto state = glfwGetMouseButton(m_window_ptr, static_cast<int>(GLFW_Mouse_Codes[static_cast<size_t>(code)]));
+    return state == GLFW_PRESS;
+}
+
+float DisplaySystemGLFW::GetMouseX()
+{
+    auto [x, y] = GetMousePosition();
+    return x;
+}
+
+float DisplaySystemGLFW::GetMouseY()
+{
+    auto [x, y] = GetMousePosition();
+    return y;
 }
 
 WindowProps::AttributeValue DisplaySystemGLFW::GetWindowAttribute(WindowProps::AttributeTag attribute) const

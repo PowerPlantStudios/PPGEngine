@@ -45,6 +45,7 @@ class PPGE_API UISystem : public ISystem<UISystemProps>
         _layer->OnAttach();
         return _layer;
     }
+
     template <typename LayerType, typename = std::enable_if_t<std::is_base_of_v<UILayer, LayerType>>>
     void RemoveLayer(std::weak_ptr<LayerType> layer)
     {
@@ -90,6 +91,17 @@ class PPGE_API UISystem : public ISystem<UISystemProps>
         return m_managed_layers.rend();
     }
 
+  private:
+    layer_container m_managed_layers;
+
+  public:
+    static void Initialize();
+
+    inline static void Destroy()
+    {
+        SAFE_DELETE(s_instance)
+    }
+
     inline static UISystem &Get()
     {
         return *s_instance;
@@ -97,8 +109,5 @@ class PPGE_API UISystem : public ISystem<UISystemProps>
 
   private:
     static UISystem *s_instance;
-
-    layer_container m_managed_layers;
 };
-
 } // namespace PPGE

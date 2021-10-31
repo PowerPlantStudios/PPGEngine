@@ -26,6 +26,11 @@
 #define PPGE_BIND_CLASS_METHOD_ARG_COUNT_4(function)                                                                   \
     std::bind(&function, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,                    \
               std::placeholders::_4)
+#define SAFE_DELETE(ptr)                                                                                               \
+    {                                                                                                                  \
+        delete ptr;                                                                                                    \
+        ptr = NULL;                                                                                                    \
+    }
 
 #ifdef PPGE_DEBUG
 

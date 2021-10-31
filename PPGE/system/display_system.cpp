@@ -1,16 +1,27 @@
 #include "display_system.h"
 
-#if defined(DISPLAY_API_GLFW)
 #include "platform/glfw/display_system_glfw.h"
-typedef PPGE::DisplaySystemGLFW DisplaySystemImp;
-#elif defined(DISPLAY_API_WIN32)
 #include "platform/win32/display_system_win32.h"
-typedef PPGE::DisplaySystemWin32 DisplaySystemImp;
-#endif
 
 namespace PPGE
 {
+DisplaySystem *DisplaySystem::s_instance = nullptr;
 
-DisplaySystem *DisplaySystem::s_instance = new DisplaySystemImp();
-
+void DisplaySystem::Initialize(WindowAPI api)
+{
+    switch (api)
+    {
+    case PPGE::WindowAPI::GLFW:
+        s_instance = new DisplaySystemGLFW();
+        break;
+    case PPGE::WindowAPI::Win32:
+        s_instance = new DisplaySystemWin32();
+        break;
+    case PPGE::WindowAPI::None:
+        PPGE_ASSERT(false, "WindowAPI::None is not a valid option for DisplaySystem initialization.");
+        break;
+    default:
+        PPGE_ASSERT(false, "Given WindowAPI '{0}' is not recognized.", static_cast<int>(api));
+    }
+}
 } // namespace PPGE

@@ -8,6 +8,8 @@
 #undef IsMaximized
 #endif
 
+#include "platform/win32/input_codes_win32.h"
+
 namespace PPGE
 {
 static uint8_t s_SystemInstanceCount = 0;
@@ -16,6 +18,36 @@ static LPCTSTR s_WndClassName = "PPGEWindow";
 void *DisplaySystemWin32::GetNativeDisplayPtr() const
 {
     return static_cast<void *>(m_hwnd);
+}
+
+std::tuple<float, float> DisplaySystemWin32::GetMousePosition()
+{
+    POINT mouse_pos{0};
+    GetCursorPos(&mouse_pos);
+    ScreenToClient(static_cast<HWND>(DisplaySystem::Get().GetNativeDisplayPtr()), &mouse_pos);
+    return {static_cast<float>(mouse_pos.x), static_cast<float>(mouse_pos.y)};
+}
+
+bool DisplaySystemWin32::IsKeyPressed(const KeyCode code)
+{   
+    return GetKeyState(static_cast<int>(Win32_Key_Codes[static_cast<size_t>(code)])) & 0x8000;
+}
+
+bool DisplaySystemWin32::IsMouseButtonPressed(const MouseCode code)
+{
+    return GetKeyState(static_cast<int>(Win32_Mouse_Codes[static_cast<size_t>(code)])) & 0x8000;
+}
+
+float DisplaySystemWin32::GetMouseX()
+{
+    auto [x, y] = GetMousePosition();
+    return x;
+}
+
+float DisplaySystemWin32::GetMouseY()
+{
+    auto [x, y] = GetMousePosition();
+    return y;
 }
 
 WindowProps::AttributeValue DisplaySystemWin32::GetWindowAttribute(WindowProps::AttributeTag attribute) const

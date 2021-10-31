@@ -19,30 +19,36 @@ class PPGE_API DisplaySystemGLFW : public DisplaySystem
     {
     }
 
-    virtual void StartUp(const DisplaySystemProps &props) override;
-    virtual void Update() override;
-    virtual void ShutDown() override;
+    void StartUp(const DisplaySystemProps &props) override;
+    void Update() override;
+    void ShutDown() override;
 
-    virtual void *GetNativeDisplayPtr() const override;
+    void *GetNativeDisplayPtr() const override;
 
-    virtual WindowProps::AttributeValue GetWindowAttribute(WindowProps::AttributeTag attribute) const override;
-    virtual void SetWindowAttribute(WindowProps::AttributeTag attribute, WindowProps::AttributeValue value) override;
-    virtual WindowProps::WindowMode GetWindowMode() const override;
-    virtual void SetWindowMode(WindowProps::WindowMode mode) override;
+    std::tuple<float, float> GetMousePosition() override;
+    bool IsKeyPressed(const KeyCode code) override;
+    bool IsMouseButtonPressed(const MouseCode code) override;
+    float GetMouseX() override;
+    float GetMouseY() override;
 
-    virtual void EnableVsync() override;
-    virtual void DisableVsync() override;
-    virtual bool IsVsyncEnabled() const override;
+    WindowProps::AttributeValue GetWindowAttribute(WindowProps::AttributeTag attribute) const override;
+    void SetWindowAttribute(WindowProps::AttributeTag attribute, WindowProps::AttributeValue value) override;
+    WindowProps::WindowMode GetWindowMode() const override;
+    void SetWindowMode(WindowProps::WindowMode mode) override;
 
-    virtual bool IsMaximized() const override;
-    virtual bool IsMinimized() const override;
+    void EnableVsync() override;
+    void DisableVsync() override;
+    bool IsVsyncEnabled() const override;
 
-    virtual void SetInputEventCallback(WindowProps::InputEventCallback callback) override;
-    virtual void SetApplicationEventCallback(WindowProps::ApplicationEventCallback callback) override;
+    bool IsMaximized() const override;
+    bool IsMinimized() const override;
 
-    virtual std::string_view GetTitle() const override;
-    virtual uint32_t GetHeight() const override;
-    virtual uint32_t GetWidth() const override;
+    void SetInputEventCallback(WindowProps::InputEventCallback callback) override;
+    void SetApplicationEventCallback(WindowProps::ApplicationEventCallback callback) override;
+
+    std::string_view GetTitle() const override;
+    uint32_t GetHeight() const override;
+    uint32_t GetWidth() const override;
 
   private:
     DisplaySystemProps m_props;

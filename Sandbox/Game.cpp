@@ -50,14 +50,23 @@ class Game : public PPGE::Application
   public:
     Game()
     {
-        APP_INFO("Application is initialized.");
-
-        PushLayerBack(std::make_unique<TestLayer>());
     }
 
     ~Game()
     {
-        APP_INFO("Application is destroyed.");
+    }
+
+    void StartUp() override
+    {
+        Application::StartUp();
+        PushLayerBack(std::make_unique<TestLayer>());
+        APP_INFO("Application is started up.");
+    }
+
+    void ShutDown() override
+    {
+        APP_INFO("Application is shut down.");
+        Application::ShutDown();
     }
 };
 

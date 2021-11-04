@@ -10,8 +10,8 @@ Application::Application()
     s_instance = this;
 
     LoggerSystem::Initialize();
-    DisplaySystem::Initialize(WindowAPI::GLFW);
-    RendererSystem::Initialize(RendererAPI::OpenGL);
+    DisplaySystem::Initialize(WindowAPI::Win32);
+    RendererSystem::Initialize(RendererAPI::DX11);
     UISystem::Initialize();
 }
 
@@ -34,10 +34,13 @@ void Application::StartUp()
     ds_props.application_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnApplicationEvent);
     DisplaySystem::Get().StartUp(ds_props);
 
+    RendererSystemProps rs_props;
+    RendererSystem::Get().StartUp(rs_props);
+
     UISystemProps ls_props;
     UISystem::Get().StartUp(ls_props);
 
-    m_imgui_layer = UISystem::Get().PushLayerFront(ImGuiLayer::CreateImGuiLayer());
+    //m_imgui_layer = UISystem::Get().PushLayerFront(ImGuiLayer::CreateImGuiLayer());
 }
 
 void Application::ShutDown()
@@ -58,12 +61,13 @@ void Application::Run()
                 subsys->OnUpdate(0.0f);
         }
 
-        auto imgui_layer = m_imgui_layer.lock();
-        imgui_layer->OnImGuiBegin();
+        //auto imgui_layer = m_imgui_layer.lock();
+        //imgui_layer->OnImGuiBegin();
         {
         }
-        imgui_layer->OnRender();
+        //imgui_layer->OnRender();
 
+        RendererSystem::Get().Update();
         DisplaySystem::Get().Update();
     }
 }

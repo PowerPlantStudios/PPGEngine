@@ -1,14 +1,12 @@
 #include "display_system_glfw.h"
 
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
 
 #include "platform/glfw/input_codes_glfw.h"
+#include "system/renderer_system.h"
 
 namespace PPGE
 {
-static uint8_t s_SystemInstanceCount = 0;
-
 static void GLFWErrorCallback(int error, const char *description)
 {
     PPGE_ERROR("GLFW Error ({0}): {1}", error, description);
@@ -185,42 +183,38 @@ uint32_t DisplaySystemGLFW::GetWidth() const
 
 void DisplaySystemGLFW::StartUp(const DisplaySystemProps &props)
 {
-    if (s_SystemInstanceCount == 0)
-    {
-        int success = glfwInit();
-        PPGE_ASSERT(success, "Failed to initialize GLFW.");
-        glfwSetErrorCallback(GLFWErrorCallback);
-#if defined(PPGE_DEBUG)
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-        // TODO: Before debug context is set, it should be check which renderer API is active.
-        //       When renderer interface is implemented add condition to make sure current renderer API is OpenGL
-#endif
-    }
-
     m_props = props;
     m_window_ptr = nullptr;
 
-    PPGE_INFO("Creating Display '{0}' ({1} x {1}) | Platform : Windows", m_props.title, m_props.width, m_props.height);
+    // Initialize GLFW API //
+    PPGE_INFO("Initializing GLFW API");
+    {
+        int success = glfwInit();
+        PPGE_ASSERT(success, "Failed to initialize GLFW.");
+    }
+
+    // Set GLFW Error callback to log error messages to the PPGE logger //
+    glfwSetErrorCallback(GLFWErrorCallback);
+#if defined(PPGE_DEBUG)
+    // If rendering API is OpenGL set debug context to true //
+    if (RendererSystem::Get().GetRendererAPI() == RendererAPI::OpenGL)
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
+
+    // Start creating the window //
+    PPGE_INFO("Creating Display '{0}' ({1} x {1}) | API : GLFW", m_props.title, m_props.width, m_props.height);
     {
         m_window_ptr =
             glfwCreateWindow((int)m_props.width, (int)m_props.height, m_props.title.c_str(), nullptr, nullptr);
-        ++s_SystemInstanceCount;
         PPGE_ASSERT(m_window_ptr, "Failed to create a new GLFW window.");
-        glfwGetWindowPos(m_window_ptr, (int *)&m_props.posX, (int *)&m_props.posY);
     }
 
-    glfwMakeContextCurrent(m_window_ptr);
-
-    {
-        int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        PPGE_ASSERT(success, "Failed to initialize GLAD!");
-    }
-
+    // Set the initial position //
+    glfwGetWindowPos(m_window_ptr, (int *)&m_props.posX, (int *)&m_props.posY);
+    // Set window user pointer to access window properties from event callbacks
     glfwSetWindowUserPointer(m_window_ptr, &m_props);
 
-    m_props.vSync = true;
-    EnableVsync();
-
+    // Start setting application and input event callbacks //
     glfwSetWindowSizeCallback(m_window_ptr, [](GLFWwindow *window, int width, int height) {
         DisplaySystemProps &window_props = *(DisplaySystemProps *)glfwGetWindowUserPointer(window);
         window_props.width = width;
@@ -372,17 +366,11 @@ void DisplaySystemGLFW::StartUp(const DisplaySystemProps &props)
 void DisplaySystemGLFW::Update()
 {
     glfwPollEvents();
-    glfwSwapBuffers(m_window_ptr);
 }
 
 void DisplaySystemGLFW::ShutDown()
 {
     glfwDestroyWindow(m_window_ptr);
-    --s_SystemInstanceCount;
-
-    if (s_SystemInstanceCount == 0)
-    {
-        glfwTerminate();
-    }
+    glfwTerminate();
 }
 } // namespace PPGE

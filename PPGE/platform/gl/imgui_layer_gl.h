@@ -5,7 +5,7 @@
 
 namespace PPGE
 {
-class ImGuiLayerGL : public ImGuiLayer
+class PPGE_API ImGuiLayerGL : public ImGuiLayer
 {
   public:
     ImGuiLayerGL() : ImGuiLayer("ImGui Layer")

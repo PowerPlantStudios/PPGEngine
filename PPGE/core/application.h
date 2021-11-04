@@ -18,9 +18,9 @@ class PPGE_API Application
     Application();
     virtual ~Application();
 
-    void StartUp();
-    void ShutDown();
-    void Run();
+    virtual void StartUp();
+    virtual void ShutDown();
+    virtual void Run();
 
     void OnInputEvent(InputEvent &input_event);
     void OnApplicationEvent(ApplicationEvent &application_event);

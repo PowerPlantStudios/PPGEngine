@@ -2,9 +2,6 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "platform/dx11/context_dx11.h"
-#include "platform/dx11/device_dx11.h"
-#include "platform/dx11/swap_chain_dx11.h"
 #include "system/logger_system.h"
 #include "system/renderer_system.h"
 
@@ -20,9 +17,11 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
         m_depth_stencil_buffer = NULL;
         m_depth_stencil_view = NULL;
         m_render_target_view = NULL;
+        m_depth_stencil_buffer = NULL;
+        m_depth_stencil_view = NULL;
+        m_render_target_view = NULL;
 
         ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
-        
     }
     ~RendererSystemDX11()
     {
@@ -37,27 +36,45 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
         return RendererAPI::DX11;
     }
 
-    void CreateDevice() override;
-    void CreateContext() override;
-    void CreateSwapChain() override;
+    VertexBufferHandle CreateVertexBuffer(const VertexBufferDesc &desc) override;
+    IndexBufferHandle CreateIndexBuffer(const IndexBufferDesc &desc) override;
+    TextureHandle CreateTexture(const TextureDesc &desc) override;
+    ShaderHandle CreateShader(const ShaderDesc &desc) override;
 
-    Context &GetContext() override;
-    SwapChain &GetSwapChain() override;
+    void ReleaseVertexBuffer(VertexBufferHandle &hnd) override;
+    void ReleaseIndexBuffer(IndexBufferHandle &hnd) override;
+    void ReleaseTexture(TextureHandle &hnd) override;
+    void ReleaseShader(ShaderHandle &hnd) override;
+
+    void LoadVertexBuffer(const VertexBufferHandle &hnd) override;
+    void UnloadVertexBuffer(const VertexBufferHandle &hnd) override;
+    void LoadIndexBuffer(const IndexBufferHandle &hnd) override;
+    void UnloadIndexBuffer(const IndexBufferHandle &hnd) override;
+    void LoadTexture(const TextureHandle &hnd) override;
+    void UnloadTexture(const TextureHandle &hnd) override;
+    void LoadShader(const ShaderHandle &hnd) override;
+    void UnloadShader(const ShaderHandle &hnd) override;
 
     void OnResize() override;
 
-  private:
-    bool m_enable_4x_msaa = true;
+    void Submit() override;
 
-    std::unique_ptr<DeviceDX11> m_device;
-    std::unique_ptr<ContextDX11> m_context;
-    std::unique_ptr<SwapChainDX11> m_swap_chain;
+  private:
+    PPGE::Math::Color green = PPGE::Math::Color(0.15f, 0.15f, 0.15f);
     
+    bool m_enable_4x_msaa = true;
+    UINT m_4x_msaa_quality = 0;
+
+    D3D_DRIVER_TYPE m_driver_type = D3D_DRIVER_TYPE_HARDWARE;
+
+    ID3D11Device *m_device;
+    ID3D11DeviceContext *m_immediate_context;
+    IDXGISwapChain *m_swap_chain;
+
     ID3D11Texture2D *m_depth_stencil_buffer;
     ID3D11DepthStencilView *m_depth_stencil_view;
     ID3D11RenderTargetView *m_render_target_view;
 
     D3D11_VIEWPORT m_viewport;
-    PPGE::Math::Color green = PPGE::Math::Color(0.0f, 1.0f, 0.0f);
 };
 } // namespace PPGE

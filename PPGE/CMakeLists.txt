@@ -127,6 +127,7 @@ target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE)
 
 if (WIN32)
     target_compile_definitions(Engine PUBLIC PPGE_PLATFORM_WIN)
+    target_link_libraries(Engine PRIVATE dxgi.lib d3d11.lib d3d12.lib)
 elseif(APPLE)
     target_compile_definitions(Engine PUBLIC PPGE_PLATFORM_APPLE)
 elseif(UNIX)

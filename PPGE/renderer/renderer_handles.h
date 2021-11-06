@@ -5,7 +5,7 @@
 
 namespace PPGE
 {
-inline constexpr uint16_t Invalid_Handle = HANDLE_MAX;
+inline constexpr uint16_t Invalid_Handle = PPGE_HANDLE_MAX;
 
 PPGE_HANDLE(TextureHandle);
 PPGE_HANDLE(VertexBufferHandle);

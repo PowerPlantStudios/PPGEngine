@@ -4,6 +4,9 @@
 
 namespace PPGE
 {
+uint16_t RendererSystemDX11::s_vertex_buffer_count = 0;
+uint16_t RendererSystemDX11::s_index_buffer_count = 0;
+
 void RendererSystemDX11::StartUp(const RendererSystemProps &props)
 {
     UINT device_flags = 0;
@@ -96,11 +99,17 @@ void RendererSystemDX11::ShutDown()
     PPGE_RELEASE_COM(m_swap_chain);
     PPGE_RELEASE_COM(m_immediate_context);
     PPGE_RELEASE_COM(m_device);
+
+    s_vertex_buffer_count = 0;
+    s_index_buffer_count = 0;
 }
 
 VertexBufferHandle RendererSystemDX11::CreateVertexBuffer(const VertexBufferDesc &desc)
 {
-    return VertexBufferHandle();
+    VertexBufferHandle handle;
+    m_vertex_buffers[s_vertex_buffer_count] = VertexBufferD3D11();
+    handle.idx = s_vertex_buffer_count++;
+    return handle;
 }
 
 IndexBufferHandle RendererSystemDX11::CreateIndexBuffer(const IndexBufferDesc &desc)

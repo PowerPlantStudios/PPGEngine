@@ -20,11 +20,16 @@
 #error Other Platforms Not Ready Yet
 #endif
 
-#define HANDLE_MAX 0xffffui16
+#define PPGE_RENDERER_MAX_VERTEX_BUFFERS (4 << 10)
+#define PPGE_RENDERER_MAX_INDEX_BUFFERS (4 << 10)
+#define PPGE_RENDERER_MAX_TEXTURES (4 << 10)
+#define PPGE_RENDERER_MAX_SHADERS (1 << 9)
+#define PPGE_RENDERER_MAX_PROGRAMS (1 << 9)
+#define PPGE_HANDLE_MAX 0xffffui16
 #define PPGE_HANDLE(handle_name)                                                                                       \
     struct handle_name                                                                                                 \
     {                                                                                                                  \
-        uint16_t idx;                                                                                                  \
+        uint16_t idx = PPGE::Invalid_Handle;                                                                           \
     };                                                                                                                 \
     inline bool IsValid(handle_name HND)                                                                               \
     {                                                                                                                  \

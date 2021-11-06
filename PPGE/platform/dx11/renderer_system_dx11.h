@@ -2,6 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
+#include "platform/dx11/buffer_dx11.h"
 #include "system/logger_system.h"
 #include "system/renderer_system.h"
 
@@ -96,5 +97,11 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
     ID3D11RenderTargetView *m_render_target_view;
 
     D3D11_VIEWPORT m_viewport;
+
+    VertexBufferD3D11 m_vertex_buffers[PPGE_RENDERER_MAX_VERTEX_BUFFERS];
+    IndexBufferD3D11 m_index_buffers[PPGE_RENDERER_MAX_INDEX_BUFFERS];
+    
+    static uint16_t s_vertex_buffer_count;
+    static uint16_t s_index_buffer_count;
 };
 } // namespace PPGE

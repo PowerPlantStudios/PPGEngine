@@ -71,6 +71,10 @@ class VertexBufferLayout
         uint16_t m_offset = 0;
     };
 
+    VertexBufferLayout()
+    {
+    }
+
     VertexBufferLayout(std::initializer_list<VertexElement> elements) : m_elements(elements)
     {
         uint16_t offset = 0;
@@ -130,13 +134,21 @@ struct BufferDesc
     size_t m_size;
     UsageType m_usage;
     CPUFlag m_cpu_flags;
+
+    BufferDesc() : m_data(nullptr), m_size(0), m_usage(UsageType::Default), m_cpu_flags(CPUFlag::None)
+    {
+    }
 };
 
 typedef BufferDesc IndexBufferDesc;
 
 struct VertexBufferDesc : public BufferDesc
 {
-    VertexBufferLayout m_layour;
+    VertexBufferLayout m_layout;
+
+    VertexBufferDesc() : BufferDesc(), m_layout()
+    {
+    }
 };
 
 } // namespace PPGE

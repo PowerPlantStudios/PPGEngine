@@ -8,7 +8,7 @@ namespace PPGE
 class PPGE_API ImGuiLayerGL : public ImGuiLayer
 {
   public:
-    ImGuiLayerGL() : ImGuiLayer("ImGui Layer")
+    ImGuiLayerGL() : ImGuiLayer("ImGui Layer (GL)")
     {
     }
 

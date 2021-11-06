@@ -10,8 +10,8 @@ Application::Application()
     s_instance = this;
 
     LoggerSystem::Initialize();
-    DisplaySystem::Initialize(WindowAPI::GLFW);
-    RendererSystem::Initialize(RendererAPI::OpenGL);
+    DisplaySystem::Initialize(WindowAPI::Win32);
+    RendererSystem::Initialize(RendererAPI::DX11);
     UISystem::Initialize();
 }
 

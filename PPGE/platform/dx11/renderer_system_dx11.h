@@ -14,9 +14,9 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
   public:
     RendererSystemDX11()
     {
-        m_depth_stencil_buffer = NULL;
-        m_depth_stencil_view = NULL;
-        m_render_target_view = NULL;
+        m_device = NULL;
+        m_immediate_context = NULL;
+        m_swap_chain = NULL;
         m_depth_stencil_buffer = NULL;
         m_depth_stencil_view = NULL;
         m_render_target_view = NULL;
@@ -59,9 +59,29 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
 
     void Submit() override;
 
+    ID3D11Device *GetDeice() const
+    {
+        return m_device;
+    }
+
+    ID3D11DeviceContext *GetImmediateContext() const
+    {
+        return m_immediate_context;
+    }
+
+    ID3D11RenderTargetView *GetRenderTargetView() const
+    {
+        return m_render_target_view;
+    }
+
+    ID3D11DepthStencilView *GetDepthStencilView() const
+    {
+        return m_depth_stencil_view;
+    }
+
   private:
     PPGE::Math::Color green = PPGE::Math::Color(0.15f, 0.15f, 0.15f);
-    
+
     bool m_enable_4x_msaa = true;
     UINT m_4x_msaa_quality = 0;
 

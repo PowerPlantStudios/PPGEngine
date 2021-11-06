@@ -66,6 +66,13 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
         return *s_instance;
     }
 
+    template <typename Renderer> static Renderer *GetRenderer()
+    {
+        if (s_instance)
+            return static_cast<Renderer *>(s_instance);
+        return nullptr;
+    }
+
   private:
     static RendererSystem *s_instance;
 };

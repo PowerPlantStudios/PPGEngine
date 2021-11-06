@@ -5,10 +5,10 @@
 
 namespace PPGE
 {
-class ImGuiLayerDX11 : public ImGuiLayer
+class PPGE_API ImGuiLayerDX11 : public ImGuiLayer
 {
   public:
-    ImGuiLayerDX11() : ImGuiLayer("ImGui Layer")
+    ImGuiLayerDX11() : ImGuiLayer("ImGui Layer (DX11)")
     {
     }
 

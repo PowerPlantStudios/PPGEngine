@@ -4,6 +4,7 @@
 #include "core/defines.h"
 #include "event/application_event.h"
 #include "event/input_event.h"
+#include "system/logger_system.h"
 #include "ui/ui_layer.h"
 
 namespace PPGE

@@ -80,14 +80,19 @@ void RendererSystemDX11::StartUp(const RendererSystemProps &props)
 
 void RendererSystemDX11::Update()
 {
-    m_immediate_context->ClearRenderTargetView(m_render_target_view, green);
-    m_immediate_context->ClearDepthStencilView(m_depth_stencil_view, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    // m_immediate_context->ClearRenderTargetView(m_render_target_view, green);
+    // m_immediate_context->ClearDepthStencilView(m_depth_stencil_view, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f,
+    // 0);
 
     m_swap_chain->Present(0, 0);
 }
 
 void RendererSystemDX11::ShutDown()
 {
+    PPGE_RELEASE_COM(m_render_target_view);
+    PPGE_RELEASE_COM(m_depth_stencil_view);
+    PPGE_RELEASE_COM(m_depth_stencil_buffer);
+
     PPGE_RELEASE_COM(m_swap_chain);
     PPGE_RELEASE_COM(m_immediate_context);
     PPGE_RELEASE_COM(m_device);
@@ -163,9 +168,8 @@ void RendererSystemDX11::UnloadShader(const ShaderHandle &hnd)
 
 void RendererSystemDX11::OnResize()
 {
-    PPGE_ASSERT(m_device, "Render target cannot be initialized before D3D11 device is not created.");
-    PPGE_ASSERT(m_immediate_context, "Render target cannot be initialized before D3D11 context is not created.");
-    PPGE_ASSERT(m_swap_chain, "Render target cannot be initialized before D3D11 swap chain is not initialized.");
+    if (m_device == NULL)
+        return;
 
     PPGE_RELEASE_COM(m_render_target_view);
     PPGE_RELEASE_COM(m_depth_stencil_view);

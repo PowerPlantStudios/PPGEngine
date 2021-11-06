@@ -1,5 +1,6 @@
 #include "display_system_win32.h"
 
+#include <backends/imgui_impl_win32.h>
 #include <windowsx.h>
 #if defined(IsMinimized)
 #undef IsMinimized
@@ -9,6 +10,9 @@
 #endif
 
 #include "platform/win32/input_codes_win32.h"
+#include "system/renderer_system.h"
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace PPGE
 {
@@ -29,7 +33,7 @@ std::tuple<float, float> DisplaySystemWin32::GetMousePosition()
 }
 
 bool DisplaySystemWin32::IsKeyPressed(const KeyCode code)
-{   
+{
     return GetKeyState(static_cast<int>(Win32_Key_Codes[static_cast<size_t>(code)])) & 0x8000;
 }
 
@@ -123,18 +127,18 @@ void DisplaySystemWin32::StartUp(const DisplaySystemProps &props)
     m_hmodule = GetModuleHandle(NULL);
     WNDCLASSEX wc = {0}; // Create a new extended windows class
 
-    wc.cbSize = sizeof(WNDCLASSEX);                // Size of our windows class
-    wc.style = CS_HREDRAW | CS_VREDRAW;            // class styles
-    wc.lpfnWndProc = DisplaySystemWin32::WinProc;  // Default windows procedure function
-    wc.cbClsExtra = NULL;                          // Extra bytes after our wc structure
-    wc.cbWndExtra = NULL;                          // Extra bytes after our windows instance
-    wc.hInstance = m_hmodule;                      // Instance to current application
-    wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);        // Title bar Icon
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);      // Default mouse Icon
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2); // Window bg color
-    wc.lpszMenuName = NULL;                        // Name of the menu attached to our window
-    wc.lpszClassName = s_WndClassName;             // Name of our windows class
-    wc.hIconSm = LoadIcon(NULL, IDI_WINLOGO);      // Icon in your taskbar
+    wc.cbSize = sizeof(WNDCLASSEX);               // Size of our windows class
+    wc.style = CS_HREDRAW | CS_VREDRAW;           // class styles
+    wc.lpfnWndProc = DisplaySystemWin32::WinProc; // Default windows procedure function
+    wc.cbClsExtra = NULL;                         // Extra bytes after our wc structure
+    wc.cbWndExtra = NULL;                         // Extra bytes after our windows instance
+    wc.hInstance = m_hmodule;                     // Instance to current application
+    wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);       // Title bar Icon
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);     // Default mouse Icon
+    wc.hbrBackground = NULL;                      // Window bg color
+    wc.lpszMenuName = NULL;                       // Name of the menu attached to our window
+    wc.lpszClassName = s_WndClassName;            // Name of our windows class
+    wc.hIconSm = LoadIcon(NULL, IDI_WINLOGO);     // Icon in your taskbar
 
     if (!RegisterClassEx(&wc)) // Register our windows class
     {
@@ -146,18 +150,18 @@ void DisplaySystemWin32::StartUp(const DisplaySystemProps &props)
 
     PPGE_INFO("Creating Display '{0}' ({1} x {1}) | Platform : Windows", m_props.title, m_props.width, m_props.height);
 
-    m_hwnd = CreateWindowEx(          // Create our Extended Window
-        NULL,                         // Extended style
-        s_WndClassName,               // Name of our windows class
-        props.title.c_str(),          // Name in the title bar of our window
-        WS_OVERLAPPEDWINDOW,          // style of our window
-        CW_USEDEFAULT, CW_USEDEFAULT, // Top left corner of window
-        props.width,                  // Width of our window
-        props.height,                 // Height of our window
-        NULL,                         // Handle to parent window
-        NULL,                         // Handle to a Menu
-        m_hmodule,                    // Specifies instance of current program
-        this                          // used for an MDI client window
+    m_hwnd = CreateWindowEx(        // Create our Extended Window
+        NULL,                       // Extended style
+        s_WndClassName,             // Name of our windows class
+        props.title.c_str(),        // Name in the title bar of our window
+        WS_OVERLAPPEDWINDOW,        // style of our window
+        m_props.posX, m_props.posY, // Top left corner of window
+        m_props.width,              // Width of our window
+        m_props.height,             // Height of our window
+        NULL,                       // Handle to parent window
+        NULL,                       // Handle to a Menu
+        m_hmodule,                  // Specifies instance of current program
+        this                        // used for an MDI client window
     );
 
     if (!m_hwnd) // Make sure our window has been created
@@ -188,6 +192,9 @@ void DisplaySystemWin32::ShutDown()
 
 LRESULT DisplaySystemWin32::WinProc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param)
 {
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, w_param, l_param))
+        return true;
+
     DisplaySystemWin32 *window = nullptr;
 
     if (msg == WM_CREATE)
@@ -241,7 +248,7 @@ LRESULT DisplaySystemWin32::HandleMessage(UINT msg, WPARAM w_param, LPARAM l_par
             WindowRestoredEvent event;
             m_props.application_event_callback(event);
         }
-
+        RendererSystem::Get().OnResize();
         break;
     }
     case WM_MOVE: {

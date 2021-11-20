@@ -30,11 +30,12 @@
     struct handle_name                                                                                                 \
     {                                                                                                                  \
         uint16_t idx = PPGE::Invalid_Handle;                                                                           \
-    };                                                                                                                 \
-    inline bool IsValid(handle_name HND)                                                                               \
-    {                                                                                                                  \
-        return HND.idx != PPGE::Invalid_Handle;                                                                        \
-    }
+                                                                                                                       \
+        inline bool IsValid()                                                                                          \
+        {                                                                                                              \
+            return idx != PPGE::Invalid_Handle;                                                                        \
+        }                                                                                                              \
+    };
 
 #define PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(function) std::bind(&function, this, std::placeholders::_1)
 #define PPGE_BIND_CLASS_METHOD_ARG_COUNT_2(function)                                                                   \

@@ -7,8 +7,30 @@ namespace PPGE
 uint16_t RendererSystemDX11::s_vertex_buffer_count = 0;
 uint16_t RendererSystemDX11::s_index_buffer_count = 0;
 
+UINT GetMSAASampleCount(MSAAQuality quality)
+{
+    switch (quality)
+    {
+    case PPGE::MSAAQuality::MSAA_OFF:
+        return 0;
+    case PPGE::MSAAQuality::MSAA_2X:
+        return 2;
+    case PPGE::MSAAQuality::MSAA_4X:
+        return 4;
+    case PPGE::MSAAQuality::MSAA_8X:
+        return 8;
+    case PPGE::MSAAQuality::MSAA_16X:
+        return 16;
+    default:
+        PPGE_ASSERT(false, "Unknown MSAA Quality");
+    }
+    return 0;
+}
+
 void RendererSystemDX11::StartUp(const RendererSystemProps &props)
 {
+    m_props = props;
+
     UINT device_flags = 0;
 #if defined(PPGE_PLATFORM_WIN)
     device_flags |= D3D11_CREATE_DEVICE_DEBUG;
@@ -39,18 +61,18 @@ void RendererSystemDX11::StartUp(const RendererSystemProps &props)
     sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
     sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
-    if (m_enable_4x_msaa)
+    if (m_props.msaa_quality != MSAAQuality::MSAA_OFF)
     {
         PPGE_HR(m_device->CheckMultisampleQualityLevels(
             DXGI_FORMAT_R8G8B8A8_UNORM, // Render target format to check quality level for the given sample count
-            4,                          // Sample count for MSAA
-            &m_4x_msaa_quality // [out] Supported max quality level for the given render target format and sample count
+            GetMSAASampleCount(m_props.msaa_quality), // Sample count for MSAA
+            &m_msaa_quality // [out] Supported max quality level for the given render target format and sample count
             ));
         // Sample count 4 should be supported for all render targets for DX11 capable devices
-        PPGE_ASSERT((m_4x_msaa_quality > 0), "For the given render target and sample count, MSAA is not supported.");
+        PPGE_ASSERT((m_msaa_quality > 0), "For the given render target and sample count, MSAA is not supported.");
 
-        sd.SampleDesc.Count = 4;
-        sd.SampleDesc.Quality = m_4x_msaa_quality - 1;
+        sd.SampleDesc.Count = GetMSAASampleCount(m_props.msaa_quality);
+        sd.SampleDesc.Quality = m_msaa_quality - 1;
     }
     else
     {
@@ -104,77 +126,6 @@ void RendererSystemDX11::ShutDown()
     s_index_buffer_count = 0;
 }
 
-VertexBufferHandle RendererSystemDX11::CreateVertexBuffer(const VertexBufferDesc &desc)
-{
-    VertexBufferHandle handle;
-    m_vertex_buffers[s_vertex_buffer_count] = VertexBufferD3D11();
-    handle.idx = s_vertex_buffer_count++;
-    return handle;
-}
-
-IndexBufferHandle RendererSystemDX11::CreateIndexBuffer(const IndexBufferDesc &desc)
-{
-    return IndexBufferHandle();
-}
-
-TextureHandle RendererSystemDX11::CreateTexture(const TextureDesc &desc)
-{
-    return TextureHandle();
-}
-
-ShaderHandle RendererSystemDX11::CreateShader(const ShaderDesc &desc)
-{
-    return ShaderHandle();
-}
-
-void RendererSystemDX11::ReleaseVertexBuffer(VertexBufferHandle &hnd)
-{
-}
-
-void RendererSystemDX11::ReleaseIndexBuffer(IndexBufferHandle &hnd)
-{
-}
-
-void RendererSystemDX11::ReleaseTexture(TextureHandle &hnd)
-{
-}
-
-void RendererSystemDX11::ReleaseShader(ShaderHandle &hnd)
-{
-}
-
-void RendererSystemDX11::LoadVertexBuffer(const VertexBufferHandle &hnd)
-{
-}
-
-void RendererSystemDX11::UnloadVertexBuffer(const VertexBufferHandle &hnd)
-{
-}
-
-void RendererSystemDX11::LoadIndexBuffer(const IndexBufferHandle &hnd)
-{
-}
-
-void RendererSystemDX11::UnloadIndexBuffer(const IndexBufferHandle &hnd)
-{
-}
-
-void RendererSystemDX11::LoadTexture(const TextureHandle &hnd)
-{
-}
-
-void RendererSystemDX11::UnloadTexture(const TextureHandle &hnd)
-{
-}
-
-void RendererSystemDX11::LoadShader(const ShaderHandle &hnd)
-{
-}
-
-void RendererSystemDX11::UnloadShader(const ShaderHandle &hnd)
-{
-}
-
 void RendererSystemDX11::OnResize()
 {
     if (m_device == NULL)
@@ -198,10 +149,10 @@ void RendererSystemDX11::OnResize()
     depthStencilDesc.ArraySize = 1;
     depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
-    if (m_enable_4x_msaa)
+    if (m_props.msaa_quality != MSAAQuality::MSAA_OFF)
     {
-        depthStencilDesc.SampleDesc.Count = 4;
-        depthStencilDesc.SampleDesc.Quality = m_4x_msaa_quality - 1;
+        depthStencilDesc.SampleDesc.Count = GetMSAASampleCount(m_props.msaa_quality);
+        depthStencilDesc.SampleDesc.Quality = m_msaa_quality - 1;
     }
     else
     {
@@ -228,7 +179,93 @@ void RendererSystemDX11::OnResize()
 
     m_immediate_context->RSSetViewports(1, &m_viewport);
 }
-void RendererSystemDX11::Submit()
+
+VertexBufferHandle RendererSystemDX11::CreateVertexBuffer(const VertexBufferDesc &desc)
+{
+    VertexBufferHandle handle;
+    VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[s_vertex_buffer_count];
+    if (vertex_buffer.CreateBuffer(desc))
+        handle.idx = s_vertex_buffer_count++;
+    return handle;
+}
+
+void RendererSystemDX11::SetVertexBuffer(VertexBufferHandle handle)
+{
+    if (handle.IsValid())
+    {
+        VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
+        vertex_buffer.SetBuffer();
+    }
+}
+
+void RendererSystemDX11::ReleaseVertexBuffer(VertexBufferHandle &handle)
+{
+    if (handle.IsValid())
+    {
+        VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
+        vertex_buffer.DestroyBuffer();
+    }
+    handle.idx = PPGE_HANDLE_MAX;
+}
+
+IndexBufferHandle RendererSystemDX11::CreateIndexBuffer(const IndexBufferDesc &desc)
+{
+    IndexBufferHandle handle;
+    IndexBufferD3D11 &index_buffer = m_index_buffers[s_index_buffer_count];
+    if (index_buffer.CreateBuffer(desc))
+    {
+        handle.idx = s_index_buffer_count++;
+    }
+    return handle;
+}
+
+void RendererSystemDX11::SetIndexBuffer(IndexBufferHandle handle)
+{
+    if (handle.IsValid())
+    {
+        IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
+        index_buffer.SetBuffer();
+    }
+}
+
+void RendererSystemDX11::ReleaseIndexBuffer(IndexBufferHandle &handle)
+{
+    if (handle.IsValid())
+    {
+        IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
+        index_buffer.DestroyBuffer();
+    }
+    handle.idx = PPGE_HANDLE_MAX;
+}
+
+TextureHandle RendererSystemDX11::CreateTexture(const TextureDesc &desc)
+{
+    return TextureHandle();
+}
+
+void RendererSystemDX11::SetTexture(TextureHandle handle, Sampler sampler)
 {
 }
+
+void RendererSystemDX11::ReleaseTexture(TextureHandle &handle)
+{
+}
+
+UniformHandle RendererSystemDX11::CreateUniform(const UniformDesc &desc)
+{
+    return UniformHandle();
+}
+
+void RendererSystemDX11::SetUniform(UniformHandle handle, void *data)
+{
+}
+
+void RendererSystemDX11::SetRenderStates(const RenderStates &states)
+{
+}
+
+void RendererSystemDX11::Submit(ProgramHandle handle)
+{
+}
+
 } // namespace PPGE

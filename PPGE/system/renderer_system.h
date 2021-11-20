@@ -3,9 +3,11 @@
 
 #include "core/defines.h"
 #include "renderer/buffer.h"
+#include "renderer/render_states.h"
 #include "renderer/renderer_handles.h"
 #include "renderer/shader.h"
 #include "renderer/texture.h"
+#include "renderer/uniform.h"
 #include "system/isystem.h"
 #include "system/logger_system.h"
 
@@ -21,37 +23,45 @@ enum class RendererAPI
     Metal
 };
 
+enum class MSAAQuality
+{
+    MSAA_OFF = 0,
+    MSAA_2X,
+    MSAA_4X,
+    MSAA_8X,
+    MSAA_16X
+};
+
 struct RendererSystemProps
 {
+    MSAAQuality msaa_quality = MSAAQuality::MSAA_4X;
 };
 
 class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
 {
   public:
+    virtual void OnResize() = 0;
+
     virtual RendererAPI GetRendererAPI() = 0;
 
     virtual VertexBufferHandle CreateVertexBuffer(const VertexBufferDesc &desc) = 0;
+    virtual void SetVertexBuffer(VertexBufferHandle handle) = 0;
+    virtual void ReleaseVertexBuffer(VertexBufferHandle &handle) = 0;
+
     virtual IndexBufferHandle CreateIndexBuffer(const IndexBufferDesc &desc) = 0;
+    virtual void SetIndexBuffer(IndexBufferHandle handle) = 0;
+    virtual void ReleaseIndexBuffer(IndexBufferHandle &handle) = 0;
+
     virtual TextureHandle CreateTexture(const TextureDesc &desc) = 0;
-    virtual ShaderHandle CreateShader(const ShaderDesc &desc) = 0;
+    virtual void SetTexture(TextureHandle handle, Sampler sampler) = 0;
+    virtual void ReleaseTexture(TextureHandle &handle) = 0;
 
-    virtual void ReleaseVertexBuffer(VertexBufferHandle &hnd) = 0;
-    virtual void ReleaseIndexBuffer(IndexBufferHandle &hnd) = 0;
-    virtual void ReleaseTexture(TextureHandle &hnd) = 0;
-    virtual void ReleaseShader(ShaderHandle &hnd) = 0;
+    virtual UniformHandle CreateUniform(const UniformDesc &desc) = 0;
+    virtual void SetUniform(UniformHandle handle, void *data) = 0;
 
-    virtual void LoadVertexBuffer(const VertexBufferHandle &hnd) = 0;
-    virtual void UnloadVertexBuffer(const VertexBufferHandle &hnd) = 0;
-    virtual void LoadIndexBuffer(const IndexBufferHandle &hnd) = 0;
-    virtual void UnloadIndexBuffer(const IndexBufferHandle &hnd) = 0;
-    virtual void LoadTexture(const TextureHandle &hnd) = 0;
-    virtual void UnloadTexture(const TextureHandle &hnd) = 0;
-    virtual void LoadShader(const ShaderHandle &hnd) = 0;
-    virtual void UnloadShader(const ShaderHandle &hnd) = 0;
+    virtual void SetRenderStates(const RenderStates &states) = 0;
 
-    virtual void OnResize() = 0;
-
-    virtual void Submit() = 0;
+    virtual void Submit(ProgramHandle handle) = 0;
 
   public:
     static void Initialize(RendererAPI api);
@@ -66,10 +76,11 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
         return *s_instance;
     }
 
-    template <typename Renderer> static Renderer *GetRenderer()
+  protected:
+    template <typename RenderSystemImpl> static RenderSystemImpl *GetRendererSystem()
     {
         if (s_instance)
-            return static_cast<Renderer *>(s_instance);
+            return static_cast<RenderSystemImpl *>(s_instance);
         return nullptr;
     }
 

@@ -31,6 +31,11 @@ enum class TextureFormat
     D32F
 };
 
+enum class Sampler
+{
+    None = 0
+};
+
 struct TextureDesc
 {
     TextureFormat m_format;

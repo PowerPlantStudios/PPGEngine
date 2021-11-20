@@ -32,60 +32,35 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
     void Update() override;
     void ShutDown() override;
 
+    void OnResize() override;
+
     RendererAPI GetRendererAPI() override
     {
         return RendererAPI::DX11;
     }
 
     VertexBufferHandle CreateVertexBuffer(const VertexBufferDesc &desc) override;
+    void SetVertexBuffer(VertexBufferHandle handle) override;
+    void ReleaseVertexBuffer(VertexBufferHandle &handle) override;
+
     IndexBufferHandle CreateIndexBuffer(const IndexBufferDesc &desc) override;
+    void SetIndexBuffer(IndexBufferHandle handle) override;
+    void ReleaseIndexBuffer(IndexBufferHandle &handle) override;
+
     TextureHandle CreateTexture(const TextureDesc &desc) override;
-    ShaderHandle CreateShader(const ShaderDesc &desc) override;
+    void SetTexture(TextureHandle handle, Sampler sampler) override;
+    void ReleaseTexture(TextureHandle &handle) override;
 
-    void ReleaseVertexBuffer(VertexBufferHandle &hnd) override;
-    void ReleaseIndexBuffer(IndexBufferHandle &hnd) override;
-    void ReleaseTexture(TextureHandle &hnd) override;
-    void ReleaseShader(ShaderHandle &hnd) override;
+    UniformHandle CreateUniform(const UniformDesc &desc) override;
+    void SetUniform(UniformHandle handle, void *data) override;
 
-    void LoadVertexBuffer(const VertexBufferHandle &hnd) override;
-    void UnloadVertexBuffer(const VertexBufferHandle &hnd) override;
-    void LoadIndexBuffer(const IndexBufferHandle &hnd) override;
-    void UnloadIndexBuffer(const IndexBufferHandle &hnd) override;
-    void LoadTexture(const TextureHandle &hnd) override;
-    void UnloadTexture(const TextureHandle &hnd) override;
-    void LoadShader(const ShaderHandle &hnd) override;
-    void UnloadShader(const ShaderHandle &hnd) override;
+    void SetRenderStates(const RenderStates &states) override;
 
-    void OnResize() override;
-
-    void Submit() override;
-
-    ID3D11Device *GetDeice() const
-    {
-        return m_device;
-    }
-
-    ID3D11DeviceContext *GetImmediateContext() const
-    {
-        return m_immediate_context;
-    }
-
-    ID3D11RenderTargetView *GetRenderTargetView() const
-    {
-        return m_render_target_view;
-    }
-
-    ID3D11DepthStencilView *GetDepthStencilView() const
-    {
-        return m_depth_stencil_view;
-    }
+    void Submit(ProgramHandle handle) override;
 
   private:
-    PPGE::Math::Color green = PPGE::Math::Color(0.15f, 0.15f, 0.15f);
-
-    bool m_enable_4x_msaa = true;
-    UINT m_4x_msaa_quality = 0;
-
+    RendererSystemProps m_props;
+    UINT m_msaa_quality = 0;
     D3D_DRIVER_TYPE m_driver_type = D3D_DRIVER_TYPE_HARDWARE;
 
     ID3D11Device *m_device;
@@ -100,8 +75,12 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
 
     VertexBufferD3D11 m_vertex_buffers[PPGE_RENDERER_MAX_VERTEX_BUFFERS];
     IndexBufferD3D11 m_index_buffers[PPGE_RENDERER_MAX_INDEX_BUFFERS];
-    
+
     static uint16_t s_vertex_buffer_count;
     static uint16_t s_index_buffer_count;
+
+    friend BufferD3D11;
+    friend VertexBufferD3D11;
+    friend IndexBufferD3D11;
 };
 } // namespace PPGE

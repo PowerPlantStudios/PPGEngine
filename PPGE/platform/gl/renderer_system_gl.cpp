@@ -35,78 +35,73 @@ void RendererSystemGL::ShutDown()
 {
 }
 
-VertexBufferHandle RendererSystemGL::CreateVertexBuffer(const VertexBufferDesc &desc)
-{
-    return VertexBufferHandle();
-}
-
-IndexBufferHandle RendererSystemGL::CreateIndexBuffer(const IndexBufferDesc &desc)
-{
-    return IndexBufferHandle();
-}
-
-TextureHandle RendererSystemGL::CreateTexture(const TextureDesc &desc)
-{
-    return TextureHandle();
-}
-
-ShaderHandle RendererSystemGL::CreateShader(const ShaderDesc &desc)
-{
-    return ShaderHandle();
-}
-
-void RendererSystemGL::ReleaseVertexBuffer(VertexBufferHandle &hnd)
-{
-}
-
-void RendererSystemGL::ReleaseIndexBuffer(IndexBufferHandle &hnd)
-{
-}
-
-void RendererSystemGL::ReleaseTexture(TextureHandle &hnd)
-{
-}
-
-void RendererSystemGL::ReleaseShader(ShaderHandle &hnd)
-{
-}
-
-void RendererSystemGL::LoadVertexBuffer(const VertexBufferHandle &hnd)
-{
-}
-
-void RendererSystemGL::UnloadVertexBuffer(const VertexBufferHandle &hnd)
-{
-}
-
-void RendererSystemGL::LoadIndexBuffer(const IndexBufferHandle &hnd)
-{
-}
-
-void RendererSystemGL::UnloadIndexBuffer(const IndexBufferHandle &hnd)
-{
-}
-
-void RendererSystemGL::LoadTexture(const TextureHandle &hnd)
-{
-}
-
-void RendererSystemGL::UnloadTexture(const TextureHandle &hnd)
-{
-}
-
-void RendererSystemGL::LoadShader(const ShaderHandle &hnd)
-{
-}
-
-void RendererSystemGL::UnloadShader(const ShaderHandle &hnd)
-{
-}
-
 void RendererSystemGL::OnResize()
 {
 }
-void RendererSystemGL::Submit()
+
+bool RendererSystemGL::CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle)
 {
+    return false;
 }
+
+bool RendererSystemGL::SetVertexBuffer(VertexBufferHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::ReleaseVertexBuffer(VertexBufferHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::SetIndexBuffer(IndexBufferHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::ReleaseIndexBuffer(IndexBufferHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateTexture(const TextureDesc &desc, TextureHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::SetTexture(TextureHandle handle, Sampler sampler)
+{
+    return false;
+}
+
+bool RendererSystemGL::ReleaseTexture(TextureHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateUniform(const UniformDesc &desc, UniformHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::SetUniform(UniformHandle handle, void *data)
+{
+    return false;
+}
+
+bool RendererSystemGL::SetRenderStates(const RenderStates &states)
+{
+    return false;
+}
+
+bool RendererSystemGL::Submit(ProgramHandle handle)
+{
+    return false;
+}
+
 } // namespace PPGE

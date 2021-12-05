@@ -44,6 +44,11 @@ class Renderer
     static void Submit(ProgramHandle handle);
 
   private:
-    static SceneData s_data;
+    static SceneData s_scene_data;
+    static HandleAllocator<VertexBufferHandle> s_vb_handle_alloc;
+    static HandleAllocator<IndexBufferHandle> s_ib_handle_alloc;
+    static HandleAllocator<TextureHandle> s_texture_handle_alloc;
+    static HandleAllocator<ProgramHandle> s_program_handle_alloc;
+    static HandleAllocator<UniformHandle> s_uniform_handle_alloc;
 };
 } // namespace PPGE

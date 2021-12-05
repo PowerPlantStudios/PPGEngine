@@ -44,24 +44,24 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
 
     virtual RendererAPI GetRendererAPI() = 0;
 
-    virtual VertexBufferHandle CreateVertexBuffer(const VertexBufferDesc &desc) = 0;
-    virtual void SetVertexBuffer(VertexBufferHandle handle) = 0;
-    virtual void ReleaseVertexBuffer(VertexBufferHandle &handle) = 0;
+    virtual bool CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle) = 0;
+    virtual bool SetVertexBuffer(VertexBufferHandle handle) = 0;
+    virtual bool ReleaseVertexBuffer(VertexBufferHandle handle) = 0;
 
-    virtual IndexBufferHandle CreateIndexBuffer(const IndexBufferDesc &desc) = 0;
-    virtual void SetIndexBuffer(IndexBufferHandle handle) = 0;
-    virtual void ReleaseIndexBuffer(IndexBufferHandle &handle) = 0;
+    virtual bool CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle) = 0;
+    virtual bool SetIndexBuffer(IndexBufferHandle handle) = 0;
+    virtual bool ReleaseIndexBuffer(IndexBufferHandle handle) = 0;
 
-    virtual TextureHandle CreateTexture(const TextureDesc &desc) = 0;
-    virtual void SetTexture(TextureHandle handle, Sampler sampler) = 0;
-    virtual void ReleaseTexture(TextureHandle &handle) = 0;
+    virtual bool CreateTexture(const TextureDesc &desc, TextureHandle handle) = 0;
+    virtual bool SetTexture(TextureHandle handle, Sampler sampler) = 0;
+    virtual bool ReleaseTexture(TextureHandle handle) = 0;
 
-    virtual UniformHandle CreateUniform(const UniformDesc &desc) = 0;
-    virtual void SetUniform(UniformHandle handle, void *data) = 0;
+    virtual bool CreateUniform(const UniformDesc &desc, UniformHandle handle) = 0;
+    virtual bool SetUniform(UniformHandle handle, void *data) = 0;
 
-    virtual void SetRenderStates(const RenderStates &states) = 0;
+    virtual bool SetRenderStates(const RenderStates &states) = 0;
 
-    virtual void Submit(ProgramHandle handle) = 0;
+    virtual bool Submit(ProgramHandle handle) = 0;
 
   public:
     static void Initialize(RendererAPI api);
@@ -76,7 +76,6 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
         return *s_instance;
     }
 
-  protected:
     template <typename RenderSystemImpl> static RenderSystemImpl *GetRendererSystem()
     {
         if (s_instance)

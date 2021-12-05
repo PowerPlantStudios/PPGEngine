@@ -4,9 +4,6 @@
 
 namespace PPGE
 {
-uint16_t RendererSystemDX11::s_vertex_buffer_count = 0;
-uint16_t RendererSystemDX11::s_index_buffer_count = 0;
-
 UINT GetMSAASampleCount(MSAAQuality quality)
 {
     switch (quality)
@@ -121,9 +118,6 @@ void RendererSystemDX11::ShutDown()
     PPGE_RELEASE_COM(m_swap_chain);
     PPGE_RELEASE_COM(m_immediate_context);
     PPGE_RELEASE_COM(m_device);
-
-    s_vertex_buffer_count = 0;
-    s_index_buffer_count = 0;
 }
 
 void RendererSystemDX11::OnResize()
@@ -180,92 +174,83 @@ void RendererSystemDX11::OnResize()
     m_immediate_context->RSSetViewports(1, &m_viewport);
 }
 
-VertexBufferHandle RendererSystemDX11::CreateVertexBuffer(const VertexBufferDesc &desc)
+bool RendererSystemDX11::CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle)
 {
-    VertexBufferHandle handle;
-    VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[s_vertex_buffer_count];
+    VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
     if (vertex_buffer.CreateBuffer(desc))
-        handle.idx = s_vertex_buffer_count++;
-    return handle;
+        return true;
+    return false;
 }
 
-void RendererSystemDX11::SetVertexBuffer(VertexBufferHandle handle)
+bool RendererSystemDX11::SetVertexBuffer(VertexBufferHandle handle)
 {
-    if (handle.IsValid())
-    {
-        VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
-        vertex_buffer.SetBuffer();
-    }
+    VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
+    vertex_buffer.SetBuffer();
+    return true;
 }
 
-void RendererSystemDX11::ReleaseVertexBuffer(VertexBufferHandle &handle)
+bool RendererSystemDX11::ReleaseVertexBuffer(VertexBufferHandle handle)
 {
-    if (handle.IsValid())
-    {
-        VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
-        vertex_buffer.DestroyBuffer();
-    }
-    handle.idx = PPGE_HANDLE_MAX;
+    VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
+    vertex_buffer.DestroyBuffer();
+    return true;
 }
 
-IndexBufferHandle RendererSystemDX11::CreateIndexBuffer(const IndexBufferDesc &desc)
+bool RendererSystemDX11::CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle)
 {
-    IndexBufferHandle handle;
-    IndexBufferD3D11 &index_buffer = m_index_buffers[s_index_buffer_count];
+    IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
     if (index_buffer.CreateBuffer(desc))
-    {
-        handle.idx = s_index_buffer_count++;
-    }
-    return handle;
+        return true;
+    return false;
 }
 
-void RendererSystemDX11::SetIndexBuffer(IndexBufferHandle handle)
+bool RendererSystemDX11::SetIndexBuffer(IndexBufferHandle handle)
 {
-    if (handle.IsValid())
-    {
-        IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
-        index_buffer.SetBuffer();
-    }
+    IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
+    index_buffer.SetBuffer();
+    return true;
 }
 
-void RendererSystemDX11::ReleaseIndexBuffer(IndexBufferHandle &handle)
+bool RendererSystemDX11::ReleaseIndexBuffer(IndexBufferHandle handle)
 {
-    if (handle.IsValid())
-    {
-        IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
-        index_buffer.DestroyBuffer();
-    }
-    handle.idx = PPGE_HANDLE_MAX;
+    IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
+    index_buffer.DestroyBuffer();
+    return true;
 }
 
-TextureHandle RendererSystemDX11::CreateTexture(const TextureDesc &desc)
+bool RendererSystemDX11::CreateTexture(const TextureDesc &desc, TextureHandle handle)
 {
-    return TextureHandle();
+    return false;
 }
 
-void RendererSystemDX11::SetTexture(TextureHandle handle, Sampler sampler)
+bool RendererSystemDX11::SetTexture(TextureHandle handle, Sampler sampler)
 {
+    return false;
 }
 
-void RendererSystemDX11::ReleaseTexture(TextureHandle &handle)
+bool RendererSystemDX11::ReleaseTexture(TextureHandle handle)
 {
+    return false;
 }
 
-UniformHandle RendererSystemDX11::CreateUniform(const UniformDesc &desc)
+bool RendererSystemDX11::CreateUniform(const UniformDesc &desc, UniformHandle handle)
 {
-    return UniformHandle();
+    return false;
 }
 
-void RendererSystemDX11::SetUniform(UniformHandle handle, void *data)
+bool RendererSystemDX11::SetUniform(UniformHandle handle, void *data)
 {
+    return false;
 }
 
-void RendererSystemDX11::SetRenderStates(const RenderStates &states)
+bool RendererSystemDX11::SetRenderStates(const RenderStates &states)
 {
+    return false;
 }
 
-void RendererSystemDX11::Submit(ProgramHandle handle)
+bool RendererSystemDX11::Submit(ProgramHandle handle)
 {
+    return false;
 }
 
 } // namespace PPGE

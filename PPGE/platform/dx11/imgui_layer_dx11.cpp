@@ -31,8 +31,8 @@ void ImGuiLayerDX11::OnAttach()
     HWND window_handle = static_cast<HWND>(DisplaySystem::Get().GetNativeDisplayPtr());
     ImGui_ImplWin32_Init(window_handle);
 
-    RendererSystemDX11 *renderer = RendererSystem::GetRenderer<RendererSystemDX11>();
-    ImGui_ImplDX11_Init(renderer->GetDeice(), renderer->GetImmediateContext());
+    RendererSystemDX11 *renderer = RendererSystem::GetRendererSystem<RendererSystemDX11>();
+    ImGui_ImplDX11_Init(renderer->m_device, renderer->m_immediate_context);
 
     ImGui_ImplWin32_EnableDpiAwareness();
 }
@@ -60,11 +60,11 @@ void ImGuiLayerDX11::OnRender()
     bool show_demo_window = true;
     ImGui::ShowDemoWindow(&show_demo_window);
     ImGui::Render();
-    RendererSystemDX11 *renderer = RendererSystem::GetRenderer<RendererSystemDX11>();
-    ID3D11RenderTargetView *render_target_view = renderer->GetRenderTargetView();
-    ID3D11DepthStencilView *depth_stencil_view = renderer->GetDepthStencilView();
-    renderer->GetImmediateContext()->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
-    renderer->GetImmediateContext()->ClearRenderTargetView(render_target_view,
+    RendererSystemDX11 *renderer = RendererSystem::GetRendererSystem<RendererSystemDX11>();
+    ID3D11RenderTargetView *render_target_view = renderer->m_render_target_view;
+    ID3D11DepthStencilView *depth_stencil_view = renderer->m_depth_stencil_view;
+    renderer->m_immediate_context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
+    renderer->m_immediate_context->ClearRenderTargetView(render_target_view,
                                                            PPGE::Math::Color(0.15f, 0.15f, 0.15f));
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 

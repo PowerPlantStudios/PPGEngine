@@ -10,11 +10,7 @@ class TestLayer : public PPGE::UILayer
     PPGE::RenderStates m_rendererstates;
 
   public:
-    TestLayer() 
-        : UILayer("TestSubsystem")
-        , vector2(0, 0)
-        , m_vertexbuffer()
-        , m_indexbuffer()
+    TestLayer() : UILayer("TestSubsystem"), vector2(0, 0), m_vertexbuffer(), m_indexbuffer()
     {
     }
 
@@ -39,15 +35,12 @@ class TestLayer : public PPGE::UILayer
             {1.0f, -1.0f, -1.0f, 0xffffffff},  // v7
         };
 
-        PPGE::VertexLayout color_pos_layout({
-            {PPGE::VertexLayout::Attribute::Position, PPGE::VertexLayout::Type::Float, 3},
-            {PPGE::VertexLayout::Attribute::Color0, PPGE::VertexLayout::Type::Uint8, 4}
-        });
-
         PPGE::VertexBufferDesc vb_desc;
         vb_desc.m_data = &cube_vertices;
         vb_desc.m_size = sizeof(cube_vertices);
-        vb_desc.m_layout = color_pos_layout;
+        vb_desc.m_layout =
+            PPGE::VertexLayout{{PPGE::VertexLayout::Attribute::Position, PPGE::VertexLayout::Type::Float, 3},
+                               {PPGE::VertexLayout::Attribute::Color0, PPGE::VertexLayout::Type::Uint8, 4}};
         m_vertexbuffer = PPGE::Renderer::CreateVertexBuffer(vb_desc);
 
         uint16_t tri_indices[] = {
@@ -68,7 +61,7 @@ class TestLayer : public PPGE::UILayer
         PPGE::IndexBufferDesc ib_desc;
         ib_desc.m_data = &tri_indices;
         ib_desc.m_size = sizeof(tri_indices);
-        m_indexbuffer = PPGE::RendererSystem::Get().CreateIndexBuffer(ib_desc);
+        m_indexbuffer = PPGE::Renderer::CreateIndexBuffer(ib_desc);
     }
 
     void OnUpdate(float timestamp) override

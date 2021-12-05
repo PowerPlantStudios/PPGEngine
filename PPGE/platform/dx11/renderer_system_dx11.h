@@ -8,8 +8,6 @@
 
 namespace PPGE
 {
-class RendererContextDX11;
-
 class PPGE_API RendererSystemDX11 : public RendererSystem
 {
   public:
@@ -39,24 +37,24 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
         return RendererAPI::DX11;
     }
 
-    VertexBufferHandle CreateVertexBuffer(const VertexBufferDesc &desc) override;
-    void SetVertexBuffer(VertexBufferHandle handle) override;
-    void ReleaseVertexBuffer(VertexBufferHandle &handle) override;
+    bool CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle) override;
+    bool SetVertexBuffer(VertexBufferHandle handle) override;
+    bool ReleaseVertexBuffer(VertexBufferHandle handle) override;
 
-    IndexBufferHandle CreateIndexBuffer(const IndexBufferDesc &desc) override;
-    void SetIndexBuffer(IndexBufferHandle handle) override;
-    void ReleaseIndexBuffer(IndexBufferHandle &handle) override;
+    bool CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle) override;
+    bool SetIndexBuffer(IndexBufferHandle handle) override;
+    bool ReleaseIndexBuffer(IndexBufferHandle handle) override;
 
-    TextureHandle CreateTexture(const TextureDesc &desc) override;
-    void SetTexture(TextureHandle handle, Sampler sampler) override;
-    void ReleaseTexture(TextureHandle &handle) override;
+    bool CreateTexture(const TextureDesc &desc, TextureHandle handle) override;
+    bool SetTexture(TextureHandle handle, Sampler sampler) override;
+    bool ReleaseTexture(TextureHandle handle) override;
 
-    UniformHandle CreateUniform(const UniformDesc &desc) override;
-    void SetUniform(UniformHandle handle, void *data) override;
+    bool CreateUniform(const UniformDesc &desc, UniformHandle handle) override;
+    bool SetUniform(UniformHandle handle, void *data) override;
 
-    void SetRenderStates(const RenderStates &states) override;
+    bool SetRenderStates(const RenderStates &states) override;
 
-    void Submit(ProgramHandle handle) override;
+    bool Submit(ProgramHandle handle) override;
 
   private:
     RendererSystemProps m_props;
@@ -76,11 +74,9 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
     VertexBufferD3D11 m_vertex_buffers[PPGE_RENDERER_MAX_VERTEX_BUFFERS];
     IndexBufferD3D11 m_index_buffers[PPGE_RENDERER_MAX_INDEX_BUFFERS];
 
-    static uint16_t s_vertex_buffer_count;
-    static uint16_t s_index_buffer_count;
-
     friend BufferD3D11;
     friend VertexBufferD3D11;
     friend IndexBufferD3D11;
+    friend class ImGuiLayerDX11;
 };
 } // namespace PPGE

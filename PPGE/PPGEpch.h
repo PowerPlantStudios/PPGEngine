@@ -15,6 +15,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <numeric>
 
 // Platform dependent libraries
 #if defined(PPGE_PLATFORM_WIN)

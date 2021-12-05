@@ -29,7 +29,7 @@
 #define PPGE_HANDLE(handle_name, max_value)                                                                            \
     struct handle_name                                                                                                 \
     {                                                                                                                  \
-        uint16_t idx = max_value;                                                                                      \
+        uint16_t idx = GetMaxIdx();                                                                                    \
                                                                                                                        \
         inline bool IsValid()                                                                                          \
         {                                                                                                              \

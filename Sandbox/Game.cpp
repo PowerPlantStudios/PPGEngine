@@ -5,6 +5,9 @@ class TestLayer : public PPGE::UILayer
     PPGE::Math::Vector2 vector2;
     PPGE::VertexBufferHandle m_vertexbuffer;
     PPGE::IndexBufferHandle m_indexbuffer;
+    PPGE::ProgramHandle m_program;
+    PPGE::SceneData m_scenedata;
+    PPGE::RenderStates m_rendererstates;
 
   public:
     TestLayer() 
@@ -36,15 +39,16 @@ class TestLayer : public PPGE::UILayer
             {1.0f, -1.0f, -1.0f, 0xffffffff},  // v7
         };
 
-        PPGE::VertexBufferLayout color_pos_layout(
-            {{PPGE::VertexAttribute::Position, PPGE::VertexAttributeType::Float, 3},
-             {PPGE::VertexAttribute::Color0, PPGE::VertexAttributeType::Uint8, 4}});
+        PPGE::VertexLayout color_pos_layout({
+            {PPGE::VertexLayout::Attribute::Position, PPGE::VertexLayout::Type::Float, 3},
+            {PPGE::VertexLayout::Attribute::Color0, PPGE::VertexLayout::Type::Uint8, 4}
+        });
 
         PPGE::VertexBufferDesc vb_desc;
         vb_desc.m_data = &cube_vertices;
         vb_desc.m_size = sizeof(cube_vertices);
         vb_desc.m_layout = color_pos_layout;
-        m_vertexbuffer = PPGE::RendererSystem::Get().CreateVertexBuffer(vb_desc);
+        m_vertexbuffer = PPGE::Renderer::CreateVertexBuffer(vb_desc);
 
         uint16_t tri_indices[] = {
             0, 1, 2, // 0
@@ -73,16 +77,6 @@ class TestLayer : public PPGE::UILayer
         {
             APP_TRACE("Key E is pressed. Recorded mouse positions x-{0} y-{1}", vector2.x, vector2.y);
         }
-        else if (PPGE::Input::IsKeyPressed(PPGE_KEY_C))
-        {
-            PPGE::DisplaySystem::Get().SetWindowAttribute(PPGE::WindowProps::AttributeTag::RESIZABLE,
-                                                          static_cast<PPGE::WindowProps::AttributeValue>(0));
-        }
-        else if (PPGE::Input::IsKeyPressed(PPGE_KEY_D))
-        {
-            PPGE::DisplaySystem::Get().SetWindowAttribute(PPGE::WindowProps::AttributeTag::RESIZABLE,
-                                                          static_cast<PPGE::WindowProps::AttributeValue>(1));
-        }
         if (PPGE::Input::IsMouseButtonPressed(PPGE_MOUSE_BUTTON_0))
         {
             auto x_pose = PPGE::Input::GetMouseX();
@@ -96,8 +90,14 @@ class TestLayer : public PPGE::UILayer
             vector2.y = y_pose;
         }
 
-        PPGE::RendererSystem::Get().LoadVertexBuffer(m_vertexbuffer);
-        PPGE::RendererSystem::Get().LoadIndexBuffer(m_indexbuffer);
+        PPGE::Renderer::BeginScene(m_scenedata);
+        {
+            PPGE::Renderer::SetVertexBuffer(m_vertexbuffer);
+            PPGE::Renderer::SetIndexBuffer(m_indexbuffer);
+            PPGE::Renderer::SetRenderStates(m_rendererstates);
+            PPGE::Renderer::Submit(m_program);
+        }
+        PPGE::Renderer::EndScene();
 
         // Then continue rest of the rendering ...
     }

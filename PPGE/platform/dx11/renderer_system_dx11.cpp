@@ -4,7 +4,7 @@
 
 namespace PPGE
 {
-UINT GetMSAASampleCount(MSAAQuality quality)
+static UINT GetMSAASampleCount(MSAAQuality quality)
 {
     switch (quality)
     {
@@ -24,12 +24,34 @@ UINT GetMSAASampleCount(MSAAQuality quality)
     return 0;
 }
 
+static size_t GetUniformSize(UniformDesc::UniformType type)
+{
+    switch (type)
+    {
+    case PPGE::UniformDesc::UniformType::Scalar:
+        return 4;
+    case PPGE::UniformDesc::UniformType::Float2:
+        return 8;
+    case PPGE::UniformDesc::UniformType::Float3:
+        return 16;
+    case PPGE::UniformDesc::UniformType::Float4:
+        return 16;
+    case PPGE::UniformDesc::UniformType::Mat3:
+        return 64;
+    case PPGE::UniformDesc::UniformType::Mat4:
+        return 64;
+    default:
+        PPGE_ASSERT(false, "Uniform type is unknown.");
+        return 0;
+    }
+}
+
 void RendererSystemDX11::StartUp(const RendererSystemProps &props)
 {
     m_props = props;
 
     UINT device_flags = 0;
-#if defined(PPGE_PLATFORM_WIN)
+#if defined(PPGE_DEBUG)
     device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -98,19 +120,37 @@ void RendererSystemDX11::StartUp(const RendererSystemProps &props)
     PPGE_RELEASE_COM(dxgi_factory);
 
     OnResize();
+
+    m_vertex_buffers.fill(VertexBufferD3D11());
+    m_vertex_layouts.fill(VertexLayoutD3D11());
+    m_index_buffers.fill(IndexBufferD3D11());
+    m_shaders.fill(ShaderD3D11());
+    m_constant_buffers.fill(BufferD3D11());
+    m_programs.fill(ProgramD3D11());
 }
 
 void RendererSystemDX11::Update()
 {
-    // m_immediate_context->ClearRenderTargetView(m_render_target_view, green);
-    // m_immediate_context->ClearDepthStencilView(m_depth_stencil_view, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f,
-    // 0);
-
-    m_swap_chain->Present(0, 0);
+    m_swap_chain->Present(1, 0);
 }
 
 void RendererSystemDX11::ShutDown()
 {
+    for (auto &vb : m_vertex_buffers)
+        vb.Destroy();
+
+    for (auto &ly : m_vertex_layouts)
+        ly.Destroy();
+
+    for (auto &ib : m_index_buffers)
+        ib.Destroy();
+
+    for (auto &sh : m_shaders)
+        sh.Destroy();
+
+    for (auto &cb : m_constant_buffers)
+        cb.Destroy();
+
     PPGE_RELEASE_COM(m_render_target_view);
     PPGE_RELEASE_COM(m_depth_stencil_view);
     PPGE_RELEASE_COM(m_depth_stencil_buffer);
@@ -174,56 +214,61 @@ void RendererSystemDX11::OnResize()
     m_immediate_context->RSSetViewports(1, &m_viewport);
 }
 
+bool RendererSystemDX11::ClearColor(float r, float g, float b)
+{
+    float clear_color[] = {r, g, b, 1.0f};
+    m_immediate_context->ClearRenderTargetView(m_render_target_view, clear_color);
+    return true;
+}
+
+bool RendererSystemDX11::ClearDepthStencilBuffer(float depth, uint8_t stencil)
+{
+    UINT clear_flag = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;
+    m_immediate_context->ClearDepthStencilView(m_depth_stencil_view, clear_flag, depth, stencil);
+    return true;
+}
+
 bool RendererSystemDX11::CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle)
 {
     VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
-    if (vertex_buffer.CreateBuffer(desc))
-        return true;
-    return false;
-}
-
-bool RendererSystemDX11::SetVertexBuffer(VertexBufferHandle handle)
-{
-    VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
-    vertex_buffer.SetBuffer();
-    return true;
+    return vertex_buffer.Create(desc);
 }
 
 bool RendererSystemDX11::ReleaseVertexBuffer(VertexBufferHandle handle)
 {
     VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
-    vertex_buffer.DestroyBuffer();
+    vertex_buffer.Destroy();
+    return true;
+}
+
+bool RendererSystemDX11::CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle)
+{
+    VertexLayoutD3D11 &vertex_layout = m_vertex_layouts[handle.idx];
+    vertex_layout.SetLayout(layout);
+    return true;
+}
+
+bool RendererSystemDX11::ReleaseVertexLayout(VertexLayoutHandle handle)
+{
+    VertexLayoutD3D11 &vertex_layout = m_vertex_layouts[handle.idx];
+    vertex_layout.Destroy();
     return true;
 }
 
 bool RendererSystemDX11::CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle)
 {
     IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
-    if (index_buffer.CreateBuffer(desc))
-        return true;
-    return false;
-}
-
-bool RendererSystemDX11::SetIndexBuffer(IndexBufferHandle handle)
-{
-    IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
-    index_buffer.SetBuffer();
-    return true;
+    return index_buffer.Create(desc);
 }
 
 bool RendererSystemDX11::ReleaseIndexBuffer(IndexBufferHandle handle)
 {
     IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
-    index_buffer.DestroyBuffer();
+    index_buffer.Destroy();
     return true;
 }
 
 bool RendererSystemDX11::CreateTexture(const TextureDesc &desc, TextureHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemDX11::SetTexture(TextureHandle handle, Sampler sampler)
 {
     return false;
 }
@@ -233,14 +278,49 @@ bool RendererSystemDX11::ReleaseTexture(TextureHandle handle)
     return false;
 }
 
-bool RendererSystemDX11::CreateUniform(const UniformDesc &desc, UniformHandle handle)
+bool RendererSystemDX11::CreateProgram(const ProgramDesc &desc, ProgramHandle handle)
 {
-    return false;
+    ProgramD3D11 &program = m_programs[handle.idx];
+    return program.Create(desc);
 }
 
-bool RendererSystemDX11::SetUniform(UniformHandle handle, void *data)
+bool RendererSystemDX11::CreateShader(const ShaderDesc &desc, ShaderHandle handle)
 {
-    return false;
+    ShaderD3D11 &shader = m_shaders[handle.idx];
+    return shader.Create(desc);
+}
+
+bool RendererSystemDX11::CreateUniform(const UniformDesc &desc, UniformHandle handle)
+{
+    BufferD3D11 &c_buffer = m_constant_buffers[handle.idx];
+
+    BufferDesc bd;
+    bd.m_cpu_flags = BufferDesc::CPUFlag::Write;
+    bd.m_usage = BufferDesc::UsageType::Dynamic;
+    bd.m_resource.m_size = GetUniformSize(desc.m_type) * desc.m_num;
+
+    return c_buffer.Create(bd);
+}
+
+bool RendererSystemDX11::UpdateUniform(UniformHandle handle, const SubResource &resource)
+{
+    BufferD3D11 &c_buffer = m_constant_buffers[handle.idx];
+    c_buffer.Update(resource);
+    return true;
+}
+
+bool RendererSystemDX11::SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot)
+{
+    BufferD3D11 &c_buffer = m_constant_buffers[handle.idx];
+    c_buffer.Set(target, slot);
+    return true;
+}
+
+bool RendererSystemDX11::ReleaseUniform(UniformHandle handle)
+{
+    BufferD3D11 &c_buffer = m_constant_buffers[handle.idx];
+    c_buffer.Destroy();
+    return true;
 }
 
 bool RendererSystemDX11::SetRenderStates(const RenderStates &states)
@@ -248,9 +328,94 @@ bool RendererSystemDX11::SetRenderStates(const RenderStates &states)
     return false;
 }
 
-bool RendererSystemDX11::Submit(ProgramHandle handle)
+bool RendererSystemDX11::Submit(const Frame &frame)
 {
-    return false;
+    for (const auto &draw_data : frame)
+    {
+        VertexBufferHandle vb_handle = draw_data.vb_handle;
+        PPGE_ASSERT(vb_handle.IsValid(), "Invalid handle to vertex buffer is passed.");
+
+        VertexLayoutHandle ly_handle = draw_data.ly_handle;
+        PPGE_ASSERT(ly_handle.IsValid(), "Invalid handle to vertex layout is attached to vertex buffer.");
+
+        IndexBufferHandle ib_handle = draw_data.ib_handle;
+        PPGE_ASSERT(ib_handle.IsValid(), "Invalid handle to index buffer is passed.");
+
+        ProgramHandle pg_handle = draw_data.pg_handle;
+        PPGE_ASSERT(pg_handle.IsValid(), "Invalid handle to program is passed.");
+
+        for (uint8_t i = 0; i < draw_data.un_update_count; ++i)
+        {
+            const UniformUpdate &un_update = draw_data.un_updates[i];
+            UniformHandle un_handle = un_update.un_handle;
+            PPGE_ASSERT(un_handle.IsValid(), "Invalid handle to uniform is passed.");
+
+            BufferD3D11 &c_buffer = m_constant_buffers[un_handle.idx];
+            c_buffer.Update(un_update.subresource);
+        }
+
+        for (uint8_t i = 0; i < draw_data.un_bind_count; ++i)
+        {
+            const UniformBind &un_bind = draw_data.un_binds[i];
+            UniformHandle un_handle = un_bind.un_handle;
+            PPGE_ASSERT(un_handle.IsValid(), "Invalid handle to uniform is passed.");
+
+            BufferD3D11 &c_buffer = m_constant_buffers[un_handle.idx];
+            c_buffer.Set(un_bind.target, un_bind.slot);
+        }
+
+        if (m_current_vb != vb_handle)
+        {
+            VertexBufferD3D11 &vb = m_vertex_buffers[vb_handle.idx];
+            vb.Set();
+            m_current_vb = vb_handle;
+        }
+
+        if (m_current_ib != ib_handle)
+        {
+            IndexBufferD3D11 &ib = m_index_buffers[ib_handle.idx];
+            ib.Set();
+            m_current_ib = ib_handle;
+        }
+
+        if (m_current_pg != pg_handle)
+        {
+            ProgramD3D11 &pg = m_programs[pg_handle.idx];
+
+            ShaderHandle vs_handle = pg.GetVSHandle();
+            PPGE_ASSERT(vs_handle.IsValid(), "Invalid handle to vertex shader is obtained.");
+            ShaderD3D11 &vs = m_shaders[vs_handle.idx];
+            vs.Set();
+
+            ShaderHandle ps_handle = pg.GetPSHandle();
+            PPGE_ASSERT(ps_handle.IsValid(), "Invalid handle to pixel shader is obtained.");
+            ShaderD3D11 &ps = m_shaders[ps_handle.idx];
+            ps.Set();
+
+            VertexLayoutD3D11 &ly = m_vertex_layouts[ly_handle.idx];
+            PPGE_ASSERT(ly.HasLayoutDesc(), "Vertex layout is not initialized");
+
+            if (m_current_ly != ly_handle)
+            {
+                if (!ly.IsCreated())
+                    ly.Create(vs);
+                ly.Set();
+                m_current_ly = ly_handle;
+            }
+
+            m_current_pg = pg_handle;
+        }
+
+        if (m_current_topology != D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST)
+        {
+            m_immediate_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            m_current_topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+        }
+        IndexBufferD3D11 &ib = m_index_buffers[m_current_ib.idx];
+        m_immediate_context->DrawIndexed(ib.GetIndexCount(), 0, 0);
+    }
+
+    return true;
 }
 
 } // namespace PPGE

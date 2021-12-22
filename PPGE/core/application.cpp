@@ -39,8 +39,6 @@ void Application::StartUp()
 
     UISystemProps ls_props;
     UISystem::Get().StartUp(ls_props);
-
-    m_imgui_layer = UISystem::Get().PushLayerFront(ImGuiLayer::CreateImGuiLayer());
 }
 
 void Application::ShutDown()
@@ -48,6 +46,7 @@ void Application::ShutDown()
     PPGE_INFO("PPGE is shuting down.");
 
     UISystem::Get().ShutDown();
+    RendererSystem::Get().ShutDown();
     DisplaySystem::Get().ShutDown();
     LoggerSystem::Get().ShutDown();
 }
@@ -56,19 +55,18 @@ void Application::Run()
 {
     while (b_is_running)
     {
+        m_game_timer.Tick();
+        float m_delta_time = m_game_timer.GetDeltaTime();
+
+        DisplaySystem::Get().Update();
+
+        RendererSystem::Get().ClearColor(0.15, 0.15, 0.25);
+        RendererSystem::Get().ClearDepthStencilBuffer(1.0, 0);
         {
             for (auto &&subsys : UISystem::Get())
-                subsys->OnUpdate(0.0f);
+                subsys->OnUpdate(m_delta_time);
         }
-
-        auto imgui_layer = m_imgui_layer.lock();
-        imgui_layer->OnImGuiBegin();
-        {
-        }
-        imgui_layer->OnRender();
-
         RendererSystem::Get().Update();
-        DisplaySystem::Get().Update();
     }
 }
 
@@ -112,6 +110,10 @@ bool Application::OnWindowClose(WindowCloseEvent &)
 bool Application::OnWindowResize(WindowResizeEvent &)
 {
     b_is_paused = (DisplaySystem::Get().IsMinimized()) ? true : false;
+    if (b_is_paused)
+        m_game_timer.Pause();
+    else
+        m_game_timer.Resume();
 
     return true;
 }

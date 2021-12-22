@@ -2,12 +2,10 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/buffer.h"
+#include "renderer/descriptors.h"
+#include "renderer/frame.h"
 #include "renderer/render_states.h"
 #include "renderer/renderer_handles.h"
-#include "renderer/shader.h"
-#include "renderer/texture.h"
-#include "renderer/uniform.h"
 #include "system/isystem.h"
 #include "system/logger_system.h"
 
@@ -44,24 +42,33 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
 
     virtual RendererAPI GetRendererAPI() = 0;
 
+    virtual bool ClearColor(float r, float g, float b) = 0;
+    virtual bool ClearDepthStencilBuffer(float depth, uint8_t stencil) = 0;
+
     virtual bool CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle) = 0;
-    virtual bool SetVertexBuffer(VertexBufferHandle handle) = 0;
     virtual bool ReleaseVertexBuffer(VertexBufferHandle handle) = 0;
 
+    virtual bool CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle) = 0;
+    virtual bool ReleaseVertexLayout(VertexLayoutHandle handle) = 0;
+
     virtual bool CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle) = 0;
-    virtual bool SetIndexBuffer(IndexBufferHandle handle) = 0;
     virtual bool ReleaseIndexBuffer(IndexBufferHandle handle) = 0;
 
     virtual bool CreateTexture(const TextureDesc &desc, TextureHandle handle) = 0;
-    virtual bool SetTexture(TextureHandle handle, Sampler sampler) = 0;
     virtual bool ReleaseTexture(TextureHandle handle) = 0;
 
+    virtual bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) = 0;
+    virtual bool CreateShader(const ShaderDesc &desc, ShaderHandle handle) = 0;
+
     virtual bool CreateUniform(const UniformDesc &desc, UniformHandle handle) = 0;
-    virtual bool SetUniform(UniformHandle handle, void *data) = 0;
+    virtual bool UpdateUniform(UniformHandle handle, const SubResource &resource) = 0;
+    virtual bool SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot) = 0;
+    virtual bool ReleaseUniform(UniformHandle handle) = 0;
+
 
     virtual bool SetRenderStates(const RenderStates &states) = 0;
 
-    virtual bool Submit(ProgramHandle handle) = 0;
+    virtual bool Submit(const Frame &frame) = 0;
 
   public:
     static void Initialize(RendererAPI api);

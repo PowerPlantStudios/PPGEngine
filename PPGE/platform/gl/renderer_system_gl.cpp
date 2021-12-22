@@ -39,12 +39,17 @@ void RendererSystemGL::OnResize()
 {
 }
 
-bool RendererSystemGL::CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle)
+bool RendererSystemGL::ClearColor(float r, float g, float b)
 {
     return false;
 }
 
-bool RendererSystemGL::SetVertexBuffer(VertexBufferHandle handle)
+bool RendererSystemGL::ClearDepthStencilBuffer(float depth, uint8_t stencil)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle)
 {
     return false;
 }
@@ -54,12 +59,17 @@ bool RendererSystemGL::ReleaseVertexBuffer(VertexBufferHandle handle)
     return false;
 }
 
-bool RendererSystemGL::CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle)
+bool RendererSystemGL::CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle)
 {
     return false;
 }
 
-bool RendererSystemGL::SetIndexBuffer(IndexBufferHandle handle)
+bool RendererSystemGL::ReleaseVertexLayout(VertexLayoutHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle)
 {
     return false;
 }
@@ -74,12 +84,17 @@ bool RendererSystemGL::CreateTexture(const TextureDesc &desc, TextureHandle hand
     return false;
 }
 
-bool RendererSystemGL::SetTexture(TextureHandle handle, Sampler sampler)
+bool RendererSystemGL::ReleaseTexture(TextureHandle handle)
 {
     return false;
 }
 
-bool RendererSystemGL::ReleaseTexture(TextureHandle handle)
+bool RendererSystemGL::CreateProgram(const ProgramDesc &desc, ProgramHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateShader(const ShaderDesc &desc, ShaderHandle handle)
 {
     return false;
 }
@@ -89,7 +104,17 @@ bool RendererSystemGL::CreateUniform(const UniformDesc &desc, UniformHandle hand
     return false;
 }
 
-bool RendererSystemGL::SetUniform(UniformHandle handle, void *data)
+bool RendererSystemGL::UpdateUniform(UniformHandle handle, const SubResource &resource)
+{
+    return false;
+}
+
+bool RendererSystemGL::SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot)
+{
+    return false;
+}
+
+bool RendererSystemGL::ReleaseUniform(UniformHandle handle)
 {
     return false;
 }
@@ -99,7 +124,7 @@ bool RendererSystemGL::SetRenderStates(const RenderStates &states)
     return false;
 }
 
-bool RendererSystemGL::Submit(ProgramHandle handle)
+bool RendererSystemGL::Submit(const Frame &frame)
 {
     return false;
 }

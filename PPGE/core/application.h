@@ -2,6 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
+#include "core/game_timer.h"
 #include "event/application_event.h"
 #include "event/input_event.h"
 #include "system/display_system.h"
@@ -32,9 +33,10 @@ class PPGE_API Application
     bool OnWindowClose(WindowCloseEvent &win_close_event);
     bool OnWindowResize(WindowResizeEvent &win_resize_event);
 
-    std::weak_ptr<ImGuiLayer> m_imgui_layer;
     bool b_is_running = true;
     bool b_is_paused = false;
+
+    GameTimer m_game_timer;
 
   public:
     static Application &Get()

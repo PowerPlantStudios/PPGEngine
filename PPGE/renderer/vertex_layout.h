@@ -9,7 +9,7 @@ namespace PPGE
 class VertexLayout
 {
   public:
-    enum class Attribute
+    enum class Attribute : unsigned int
     {
         Position = 0,
         Normal,
@@ -22,26 +22,44 @@ class VertexLayout
         TexCoord0,
         TexCoord1,
         TexCoord2,
-        TexCoord3
+        TexCoord3,
+
+        Count
     };
 
-    enum class Type
+    static const unsigned int AttributeCount = static_cast<unsigned int>(Attribute::Count);
+
+    enum class Type : unsigned int
     {
         Uint8 = 0,
         Int16,
         Float
     };
 
-    struct Element
-    {
-        Attribute m_attribute;
-        Type m_type;
-        uint8_t m_num;
-        uint16_t m_offset = 0;
-    };
-    
-    VertexLayout() = default;
+    union Element {
+        struct
+        {
+            Attribute attribute : 5;
+            Type type : 5;
+            unsigned int num : 6;
+            unsigned int offset : 16;
+        } m_fields;
+        unsigned int m_code;
 
+        Element(Attribute attribute, Type type, unsigned int num)
+        {
+            m_fields.attribute = attribute;
+            m_fields.type = type;
+            m_fields.num = num;
+            m_fields.offset = 0U;
+        }
+
+        Element(unsigned int code) : m_code(code)
+        {
+        }
+    };
+
+    VertexLayout();
     VertexLayout(std::initializer_list<Element> elements);
 
     uint16_t GetStride() const
@@ -49,25 +67,39 @@ class VertexLayout
         return m_stride;
     }
 
-    std::vector<Element>::iterator begin()
+    uint64_t GetHashCode() const
+    {
+        return m_hash_code;
+    }
+
+    using ElementsArray = std::array<unsigned int, AttributeCount>;
+
+    ElementsArray::iterator begin()
     {
         return m_elements.begin();
     }
-    std::vector<Element>::iterator end()
-    {
-        return m_elements.end();
-    }
-    std::vector<Element>::const_iterator begin() const
-    {
-        return m_elements.begin();
-    }
-    std::vector<Element>::const_iterator end() const
+
+    ElementsArray::iterator end()
     {
         return m_elements.end();
     }
 
+    ElementsArray::const_iterator begin() const
+    {
+        return m_elements.cbegin();
+    }
+
+    ElementsArray::const_iterator end() const
+    {
+        return m_elements.cend();
+    }
+
   private:
-    std::vector<Element> m_elements;
-    uint16_t m_stride = 0;
+    using ElementsHasher = std::hash<ElementsArray>;
+    static ElementsHasher s_hasher;
+
+    ElementsArray m_elements;
+    uint16_t m_stride;
+    uint64_t m_hash_code;
 };
 } // namespace PPGE

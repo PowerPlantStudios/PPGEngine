@@ -3,6 +3,8 @@
 
 #include "core/defines.h"
 #include "platform/dx11/buffer_dx11.h"
+#include "platform/dx11/shader_dx11.h"
+#include "platform/dx11/vertex_layout_dx11.h"
 #include "system/logger_system.h"
 #include "system/renderer_system.h"
 
@@ -37,24 +39,32 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
         return RendererAPI::DX11;
     }
 
+    bool ClearColor(float r, float g, float b) override;
+    bool ClearDepthStencilBuffer(float depth, uint8_t stencil) override;
+
     bool CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle) override;
-    bool SetVertexBuffer(VertexBufferHandle handle) override;
     bool ReleaseVertexBuffer(VertexBufferHandle handle) override;
 
+    bool CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle) override;
+    bool ReleaseVertexLayout(VertexLayoutHandle handle) override;
+
     bool CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle) override;
-    bool SetIndexBuffer(IndexBufferHandle handle) override;
     bool ReleaseIndexBuffer(IndexBufferHandle handle) override;
 
     bool CreateTexture(const TextureDesc &desc, TextureHandle handle) override;
-    bool SetTexture(TextureHandle handle, Sampler sampler) override;
     bool ReleaseTexture(TextureHandle handle) override;
 
+    bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) override;
+    bool CreateShader(const ShaderDesc &desc, ShaderHandle handle) override;
+
     bool CreateUniform(const UniformDesc &desc, UniformHandle handle) override;
-    bool SetUniform(UniformHandle handle, void *data) override;
+    bool UpdateUniform(UniformHandle handle, const SubResource &resource) override;
+    bool SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot) override;
+    bool ReleaseUniform(UniformHandle handle) override;
 
     bool SetRenderStates(const RenderStates &states) override;
 
-    bool Submit(ProgramHandle handle) override;
+    bool Submit(const Frame &frame) override;
 
   private:
     RendererSystemProps m_props;
@@ -71,12 +81,25 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
 
     D3D11_VIEWPORT m_viewport;
 
-    VertexBufferD3D11 m_vertex_buffers[PPGE_RENDERER_MAX_VERTEX_BUFFERS];
-    IndexBufferD3D11 m_index_buffers[PPGE_RENDERER_MAX_INDEX_BUFFERS];
+    std::array<VertexBufferD3D11, PPGE_RENDERER_MAX_VERTEX_BUFFERS> m_vertex_buffers;
+    std::array<VertexLayoutD3D11, PPGE_RENDERER_MAX_VERTEX_LAYOUTS> m_vertex_layouts;
+    std::array<IndexBufferD3D11, PPGE_RENDERER_MAX_INDEX_BUFFERS> m_index_buffers;
+    std::array<ShaderD3D11, PPGE_RENDERER_MAX_SHADERS> m_shaders;
+    std::array<BufferD3D11, PPGE_RENDERER_MAX_UNIFORMS> m_constant_buffers;
+    std::array<ProgramD3D11, PPGE_RENDERER_MAX_PROGRAMS> m_programs;
+
+    VertexBufferHandle m_current_vb;
+    IndexBufferHandle m_current_ib;
+    VertexLayoutHandle m_current_ly;
+    ProgramHandle m_current_pg;
+    D3D11_PRIMITIVE_TOPOLOGY m_current_topology;
 
     friend BufferD3D11;
     friend VertexBufferD3D11;
+    friend VertexLayoutD3D11;
     friend IndexBufferD3D11;
+    friend ShaderD3D11;
+    friend ProgramD3D11;
     friend class ImGuiLayerDX11;
 };
 } // namespace PPGE

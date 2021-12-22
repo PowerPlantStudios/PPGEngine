@@ -2,7 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/buffer.h"
+#include "renderer/descriptors.h"
 #include "system/logger_system.h"
 
 namespace PPGE
@@ -14,38 +14,54 @@ class PPGE_API BufferD3D11
   public:
     BufferD3D11();
 
-    virtual ~BufferD3D11();
+    ~BufferD3D11();
 
-    virtual void DestroyBuffer();
+    void Destroy();
+    bool Create(const BufferDesc &desc);
+    void Update(const SubResource &res);
+    void Set(ShaderDesc::ShaderType target, uint8_t slot);
 
-  protected:
+  private:
     RendererSystemDX11 *m_renderer;
     ID3D11Buffer *m_buffer;
 };
 
-class PPGE_API IndexBufferD3D11 : public BufferD3D11
+class PPGE_API IndexBufferD3D11
 {
   public:
-    using BufferD3D11::BufferD3D11;
+    IndexBufferD3D11();
 
-    bool CreateBuffer(const IndexBufferDesc &desc);
+    ~IndexBufferD3D11();
 
-    void SetBuffer();
+    void Destroy();
+    bool Create(const IndexBufferDesc &desc);
+    void Set();
+
+    inline UINT GetIndexCount() const
+    {
+        return m_index_count;
+    }
 
   private:
-    DXGI_FORMAT m_format = DXGI_FORMAT_R16_UINT;
+    RendererSystemDX11 *m_renderer;
+    ID3D11Buffer *m_buffer;
+    UINT m_index_count = 0;
 };
 
-class PPGE_API VertexBufferD3D11 : public BufferD3D11
+class PPGE_API VertexBufferD3D11
 {
   public:
-    using BufferD3D11::BufferD3D11;
+    VertexBufferD3D11();
 
-    bool CreateBuffer(const VertexBufferDesc &desc);
+    ~VertexBufferD3D11();
 
-    void SetBuffer();
+    void Destroy();
+    bool Create(const VertexBufferDesc &desc);
+    void Set();
 
   private:
+    RendererSystemDX11 *m_renderer;
+    ID3D11Buffer *m_buffer;
     UINT m_stride = 0;
     UINT m_offset = 0;
 };

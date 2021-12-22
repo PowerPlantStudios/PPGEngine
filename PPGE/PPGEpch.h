@@ -3,11 +3,13 @@
 // Commonly used standard libraries
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <deque>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -15,7 +17,6 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <numeric>
 
 // Platform dependent libraries
 #if defined(PPGE_PLATFORM_WIN)

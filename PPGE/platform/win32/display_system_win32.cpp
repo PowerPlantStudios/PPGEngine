@@ -180,9 +180,11 @@ void DisplaySystemWin32::StartUp(const DisplaySystemProps &props)
 
 void DisplaySystemWin32::Update()
 {
-    GetMessage(&m_msg, NULL, 0, 0);
-    TranslateMessage(&m_msg);
-    DispatchMessage(&m_msg);
+    if (PeekMessage(&m_msg, 0, 0, 0, PM_REMOVE))
+    {
+        TranslateMessage(&m_msg);
+        DispatchMessage(&m_msg);
+    }
 }
 
 void DisplaySystemWin32::ShutDown()

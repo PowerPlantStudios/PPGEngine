@@ -35,6 +35,30 @@ struct RendererSystemProps
     MSAAQuality msaa_quality = MSAAQuality::MSAA_4X;
 };
 
+struct PredefinedUniform
+{
+    enum Handle
+    {
+        Transform0 = 0,
+        Transform1,
+        Transform2,
+        Transform3,
+        Light0,
+        Light1,
+        Light2,
+        Light3,
+        
+        // Reserved
+
+        Count = PPGE_RENDERER_PREDEFINED_UNIFORMS
+    };
+
+    UniformHandle handle;
+    Subresource subresource;
+    UniformDesc::Target target;
+    uint8_t slot;
+};
+
 class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
 {
   public:
@@ -58,14 +82,15 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
     virtual bool ReleaseTexture(TextureHandle handle) = 0;
 
     virtual bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) = 0;
+    virtual bool ReleaseProgram(ProgramHandle handle) = 0;
+
     virtual bool CreateShader(const ShaderDesc &desc, ShaderHandle handle) = 0;
+    virtual bool ReleaseShader(ShaderHandle handle) = 0;
 
     virtual bool CreateUniform(const UniformDesc &desc, UniformHandle handle) = 0;
-    virtual bool UpdateUniform(UniformHandle handle, const SubResource &resource) = 0;
-    virtual bool SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot) = 0;
     virtual bool ReleaseUniform(UniformHandle handle) = 0;
 
-
+    virtual bool SetPredefinedUniform(const PredefinedUniform &uniform) = 0;
     virtual bool SetRenderStates(const RenderStates &states) = 0;
 
     virtual bool Submit(const Frame &frame) = 0;

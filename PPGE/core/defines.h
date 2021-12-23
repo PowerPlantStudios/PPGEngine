@@ -28,6 +28,7 @@
 #define PPGE_RENDERER_MAX_PROGRAMS (1 << 9)
 #define PPGE_RENDERER_MAX_UNIFORMS (4 << 10)
 #define PPGE_RENDERER_MAX_DRAWCALLS (4 << 10)
+#define PPGE_RENDERER_PREDEFINED_UNIFORMS (1 << 4)
 #define PPGE_HANDLE(handle_name, max_value)                                                                            \
     struct handle_name                                                                                                 \
     {                                                                                                                  \

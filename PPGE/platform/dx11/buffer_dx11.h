@@ -18,12 +18,18 @@ class PPGE_API BufferD3D11
 
     void Destroy();
     bool Create(const BufferDesc &desc);
-    void Update(const SubResource &res);
-    void Set(ShaderDesc::ShaderType target, uint8_t slot);
+    void Update(const Subresource &res);
+    void Set(UniformDesc::Target target, uint8_t slot);
+
+    inline UINT GetBufferSize() const
+    {
+        return m_size;
+    }
 
   private:
     RendererSystemDX11 *m_renderer;
     ID3D11Buffer *m_buffer;
+    UINT m_size = 0;
 };
 
 class PPGE_API IndexBufferD3D11

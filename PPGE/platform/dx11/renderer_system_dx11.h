@@ -55,13 +55,15 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
     bool ReleaseTexture(TextureHandle handle) override;
 
     bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) override;
+    bool ReleaseProgram(ProgramHandle handle) override;
+
     bool CreateShader(const ShaderDesc &desc, ShaderHandle handle) override;
+    bool ReleaseShader(ShaderHandle handle) override;
 
     bool CreateUniform(const UniformDesc &desc, UniformHandle handle) override;
-    bool UpdateUniform(UniformHandle handle, const SubResource &resource) override;
-    bool SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot) override;
     bool ReleaseUniform(UniformHandle handle) override;
 
+    bool SetPredefinedUniform(const PredefinedUniform &uniform) override;
     bool SetRenderStates(const RenderStates &states) override;
 
     bool Submit(const Frame &frame) override;
@@ -85,7 +87,8 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
     std::array<VertexLayoutD3D11, PPGE_RENDERER_MAX_VERTEX_LAYOUTS> m_vertex_layouts;
     std::array<IndexBufferD3D11, PPGE_RENDERER_MAX_INDEX_BUFFERS> m_index_buffers;
     std::array<ShaderD3D11, PPGE_RENDERER_MAX_SHADERS> m_shaders;
-    std::array<BufferD3D11, PPGE_RENDERER_MAX_UNIFORMS> m_constant_buffers;
+    std::array<BufferD3D11, PPGE_RENDERER_MAX_UNIFORMS> m_uniforms;
+    std::array<BufferD3D11, PPGE_RENDERER_PREDEFINED_UNIFORMS> m_predefined_uniforms;
     std::array<ProgramD3D11, PPGE_RENDERER_MAX_PROGRAMS> m_programs;
 
     VertexBufferHandle m_current_vb;

@@ -94,7 +94,17 @@ bool RendererSystemGL::CreateProgram(const ProgramDesc &desc, ProgramHandle hand
     return false;
 }
 
+bool RendererSystemGL::ReleaseProgram(ProgramHandle handle)
+{
+    return false;
+}
+
 bool RendererSystemGL::CreateShader(const ShaderDesc &desc, ShaderHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::ReleaseShader(ShaderHandle handle)
 {
     return false;
 }
@@ -104,17 +114,12 @@ bool RendererSystemGL::CreateUniform(const UniformDesc &desc, UniformHandle hand
     return false;
 }
 
-bool RendererSystemGL::UpdateUniform(UniformHandle handle, const SubResource &resource)
-{
-    return false;
-}
-
-bool RendererSystemGL::SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot)
-{
-    return false;
-}
-
 bool RendererSystemGL::ReleaseUniform(UniformHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::SetPredefinedUniform(const PredefinedUniform &uniform)
 {
     return false;
 }

@@ -46,13 +46,15 @@ class PPGE_API RendererSystemGL : public RendererSystem
     bool ReleaseTexture(TextureHandle handle) override;
 
     bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) override;
+    bool ReleaseProgram(ProgramHandle handle) override;
+
     bool CreateShader(const ShaderDesc &desc, ShaderHandle handle) override;
+    bool ReleaseShader(ShaderHandle handle) override;
     
     bool CreateUniform(const UniformDesc &desc, UniformHandle handle) override;
-    bool UpdateUniform(UniformHandle handle, const SubResource &resource) override;
-    bool SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot) override;
     bool ReleaseUniform(UniformHandle handle) override;
 
+    bool SetPredefinedUniform(const PredefinedUniform &uniform) override;
     bool SetRenderStates(const RenderStates &states) override;
 
     bool Submit(const Frame &frame) override;

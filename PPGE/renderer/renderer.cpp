@@ -3,7 +3,6 @@
 namespace PPGE
 {
 Frame Renderer::s_frame_data{};
-SceneData Renderer::s_scene_data{};
 Renderer::VertexLayoutCache Renderer::s_vertex_layout_cash;
 Renderer::VertexBufferLayoutTable Renderer::s_vertex_buffer_layout_table;
 HandleAllocator<VertexBufferHandle> Renderer::s_vb_handle_alloc;
@@ -16,7 +15,22 @@ HandleAllocator<UniformHandle> Renderer::s_uniform_handle_alloc;
 
 void Renderer::BeginScene(const SceneData &scene_data)
 {
-    s_scene_data = scene_data;
+    struct VSPerFrameData
+    {
+        Math::Matrix g_view;
+        Math::Matrix g_proj;
+        Math::Matrix g_viewproj;
+    } vs_per_frame_data{scene_data.m_view, scene_data.m_projection, scene_data.m_projection * scene_data.m_view};
+
+    PredefinedUniform pred_un;
+    pred_un.handle = UniformHandle{static_cast<uint8_t>(PredefinedUniform::Transform0)};
+    pred_un.subresource.m_pData = &vs_per_frame_data;
+    pred_un.subresource.m_size = sizeof(VSPerFrameData);
+    pred_un.target = UniformDesc::Target::VS;
+    pred_un.slot = 0;
+    bool result = RendererSystem::Get().SetPredefinedUniform(pred_un);
+    PPGE_ASSERT(result, "Setting predefined uniform has failed.");
+
     s_frame_data.Reset();
 }
 void Renderer::EndScene()
@@ -168,13 +182,13 @@ UniformHandle Renderer::CreateUniform(const UniformDesc &desc)
     }
     return handle;
 }
-void Renderer::UpdateUniform(UniformHandle handle, const SubResource &subresource)
+void Renderer::UpdateUniform(UniformHandle handle, const Subresource &subresource)
 {
     PPGE_ASSERT(handle.IsValid(), "Invalid handle to uniform is passed for binding resource.");
     PPGE_ASSERT(subresource.m_size <= 1024, "Single per object uniform uniform size limit has exceeded.");
     s_frame_data.UpdateObjectUniform(handle, subresource);
 }
-void Renderer::SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot)
+void Renderer::SetUniform(UniformHandle handle, UniformDesc::Target target, uint8_t slot)
 {
     PPGE_ASSERT(handle.IsValid(), "Invalid handle to uniform is passed for binding resource.");
     s_frame_data.SetObjectUniform(handle, target, slot);

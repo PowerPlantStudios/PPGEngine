@@ -125,7 +125,8 @@ void RendererSystemDX11::StartUp(const RendererSystemProps &props)
     m_vertex_layouts.fill(VertexLayoutD3D11());
     m_index_buffers.fill(IndexBufferD3D11());
     m_shaders.fill(ShaderD3D11());
-    m_constant_buffers.fill(BufferD3D11());
+    m_uniforms.fill(BufferD3D11());
+    m_predefined_uniforms.fill(BufferD3D11());
     m_programs.fill(ProgramD3D11());
 }
 
@@ -148,7 +149,7 @@ void RendererSystemDX11::ShutDown()
     for (auto &sh : m_shaders)
         sh.Destroy();
 
-    for (auto &cb : m_constant_buffers)
+    for (auto &cb : m_uniforms)
         cb.Destroy();
 
     PPGE_RELEASE_COM(m_render_target_view);
@@ -284,15 +285,29 @@ bool RendererSystemDX11::CreateProgram(const ProgramDesc &desc, ProgramHandle ha
     return program.Create(desc);
 }
 
+bool RendererSystemDX11::ReleaseProgram(ProgramHandle handle)
+{
+    ProgramD3D11 &program = m_programs[handle.idx];
+    program.Destroy();
+    return true;
+}
+
 bool RendererSystemDX11::CreateShader(const ShaderDesc &desc, ShaderHandle handle)
 {
     ShaderD3D11 &shader = m_shaders[handle.idx];
     return shader.Create(desc);
 }
 
+bool RendererSystemDX11::ReleaseShader(ShaderHandle handle)
+{
+    ShaderD3D11 &shader = m_shaders[handle.idx];
+    shader.Destroy();
+    return true;
+}
+
 bool RendererSystemDX11::CreateUniform(const UniformDesc &desc, UniformHandle handle)
 {
-    BufferD3D11 &c_buffer = m_constant_buffers[handle.idx];
+    BufferD3D11 &c_buffer = m_uniforms[handle.idx];
 
     BufferDesc bd;
     bd.m_cpu_flags = BufferDesc::CPUFlag::Write;
@@ -302,24 +317,29 @@ bool RendererSystemDX11::CreateUniform(const UniformDesc &desc, UniformHandle ha
     return c_buffer.Create(bd);
 }
 
-bool RendererSystemDX11::UpdateUniform(UniformHandle handle, const SubResource &resource)
-{
-    BufferD3D11 &c_buffer = m_constant_buffers[handle.idx];
-    c_buffer.Update(resource);
-    return true;
-}
-
-bool RendererSystemDX11::SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot)
-{
-    BufferD3D11 &c_buffer = m_constant_buffers[handle.idx];
-    c_buffer.Set(target, slot);
-    return true;
-}
-
 bool RendererSystemDX11::ReleaseUniform(UniformHandle handle)
 {
-    BufferD3D11 &c_buffer = m_constant_buffers[handle.idx];
+    BufferD3D11 &c_buffer = m_uniforms[handle.idx];
     c_buffer.Destroy();
+    return true;
+}
+
+bool RendererSystemDX11::SetPredefinedUniform(const PredefinedUniform &uniform)
+{
+    BufferD3D11 &c_buffer = m_predefined_uniforms[uniform.handle.idx];
+    if (c_buffer.GetBufferSize() < uniform.subresource.m_size)
+    {
+        BufferDesc bd;
+        bd.m_cpu_flags = BufferDesc::CPUFlag::Write;
+        bd.m_usage = BufferDesc::UsageType::Dynamic;
+        bd.m_resource.m_size = uniform.subresource.m_size;
+        if (!c_buffer.Create(bd))
+            return false;
+    }
+
+    c_buffer.Update(uniform.subresource);
+    c_buffer.Set(uniform.target, uniform.slot);
+
     return true;
 }
 
@@ -350,7 +370,7 @@ bool RendererSystemDX11::Submit(const Frame &frame)
             UniformHandle un_handle = un_update.un_handle;
             PPGE_ASSERT(un_handle.IsValid(), "Invalid handle to uniform is passed.");
 
-            BufferD3D11 &c_buffer = m_constant_buffers[un_handle.idx];
+            BufferD3D11 &c_buffer = m_uniforms[un_handle.idx];
             c_buffer.Update(un_update.subresource);
         }
 
@@ -360,7 +380,7 @@ bool RendererSystemDX11::Submit(const Frame &frame)
             UniformHandle un_handle = un_bind.un_handle;
             PPGE_ASSERT(un_handle.IsValid(), "Invalid handle to uniform is passed.");
 
-            BufferD3D11 &c_buffer = m_constant_buffers[un_handle.idx];
+            BufferD3D11 &c_buffer = m_uniforms[un_handle.idx];
             c_buffer.Set(un_bind.target, un_bind.slot);
         }
 

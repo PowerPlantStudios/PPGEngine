@@ -40,8 +40,8 @@ class Renderer
     static ProgramHandle CreateProgram(const ProgramDesc &desc);
 
     static UniformHandle CreateUniform(const UniformDesc &desc);
-    static void UpdateUniform(UniformHandle handle, const SubResource &subresource);
-    static void SetUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot);
+    static void UpdateUniform(UniformHandle handle, const Subresource &subresource);
+    static void SetUniform(UniformHandle handle, UniformDesc::Target target, uint8_t slot);
     static void ReleaseUniform(UniformHandle handle);
 
     static void SetRenderStates(const RenderStates &states);
@@ -59,8 +59,6 @@ class Renderer
     static VertexBufferLayoutTable s_vertex_buffer_layout_table;
 
     static Frame s_frame_data;
-
-    static SceneData s_scene_data;
 
     static HandleAllocator<VertexBufferHandle> s_vb_handle_alloc;
     static HandleAllocator<VertexLayoutHandle> s_layout_handle_alloc;

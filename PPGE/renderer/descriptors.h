@@ -7,7 +7,7 @@
 
 namespace PPGE
 {
-struct SubResource
+struct Subresource
 {
     void *m_pData = nullptr;
     size_t m_size = 0;
@@ -30,7 +30,7 @@ struct BufferDesc
         Write
     };
 
-    SubResource m_resource;
+    Subresource m_resource;
     UsageType m_usage = UsageType::Default;
     CPUFlag m_cpu_flags = CPUFlag::None;
 };
@@ -113,6 +113,15 @@ struct ShaderDesc
 
 struct UniformDesc
 {
+    enum class Target
+    {
+        VS,
+        HS,
+        DS,
+        GS,
+        PS
+    };
+
     enum class UniformType
     {
         Scalar,

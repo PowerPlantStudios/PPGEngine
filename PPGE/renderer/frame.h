@@ -11,13 +11,13 @@ namespace PPGE
 struct UniformUpdate
 {
     UniformHandle un_handle;
-    SubResource subresource;
+    Subresource subresource;
 };
 
 struct UniformBind
 {
     UniformHandle un_handle;
-    ShaderDesc::ShaderType target;
+    UniformDesc::Target target;
     uint8_t slot;
 };
 
@@ -32,7 +32,7 @@ struct DrawData
     UniformBind un_binds[10];
     uint8_t un_bind_count = 0;
 
-    void PushUniformUpdate(UniformHandle handle, SubResource subresource)
+    void PushUniformUpdate(UniformHandle handle, Subresource subresource)
     {
         PPGE_ASSERT(un_update_count < 10, "Number of per object uniform update has exceeded the maximum limit.");
         UniformUpdate &update = un_updates[un_update_count++];
@@ -40,7 +40,7 @@ struct DrawData
         update.subresource = subresource;
     }
 
-    void PushUniformBind(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot)
+    void PushUniformBind(UniformHandle handle, UniformDesc::Target target, uint8_t slot)
     {
         PPGE_ASSERT(un_bind_count < 10, "Number of per object uniform bind has exceeded the maximum limit.");
         UniformBind &update = un_binds[un_bind_count++];
@@ -62,8 +62,8 @@ class Frame
     void SetVertexBufferHandle(VertexBufferHandle handle);
     void SetVertexLayoutHandle(VertexLayoutHandle handle);
     void SetIndexBufferHandle(IndexBufferHandle handle);
-    void UpdateObjectUniform(UniformHandle handle, SubResource subresource);
-    void SetObjectUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot);
+    void UpdateObjectUniform(UniformHandle handle, Subresource subresource);
+    void SetObjectUniform(UniformHandle handle, UniformDesc::Target target, uint8_t slot);
     void Submit(ProgramHandle handle);
 
     void Reset()

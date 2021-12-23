@@ -16,6 +16,7 @@ BufferD3D11::~BufferD3D11()
 void BufferD3D11::Destroy()
 {
     PPGE_RELEASE_COM(m_buffer);
+    m_size = 0;
 }
 
 bool BufferD3D11::Create(const BufferDesc &desc)
@@ -32,10 +33,12 @@ bool BufferD3D11::Create(const BufferDesc &desc)
     bd.StructureByteStride = 0;
     PPGE_HR(m_renderer->m_device->CreateBuffer(&bd, NULL, &m_buffer));
 
+    m_size = desc.m_resource.m_size;
+
     return m_buffer != NULL;
 }
 
-void BufferD3D11::Update(const SubResource &res)
+void BufferD3D11::Update(const Subresource &res)
 {
     PPGE_ASSERT(m_renderer, "Creating D3D11 resource buffer has failed. RendererSystemDX11 is inaccessible.");
 
@@ -47,29 +50,28 @@ void BufferD3D11::Update(const SubResource &res)
     m_renderer->m_immediate_context->Unmap(m_buffer, 0);
 }
 
-void BufferD3D11::Set(ShaderDesc::ShaderType target, uint8_t slot)
+void BufferD3D11::Set(UniformDesc::Target target, uint8_t slot)
 {
     PPGE_ASSERT(m_renderer, "Binding D3D11 buffer to the pipeline has failed. RendererSystemDX11 is inaccessible.");
 
     UINT number_of_buffer = 1;
     switch (target)
     {
-    case PPGE::ShaderDesc::ShaderType::VS:
+    case UniformDesc::Target::VS:
         m_renderer->m_immediate_context->VSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case PPGE::ShaderDesc::ShaderType::HS:
+    case UniformDesc::Target::HS:
         m_renderer->m_immediate_context->HSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case PPGE::ShaderDesc::ShaderType::DS:
+    case UniformDesc::Target::DS:
         m_renderer->m_immediate_context->DSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case PPGE::ShaderDesc::ShaderType::GS:
+    case UniformDesc::Target::GS:
         m_renderer->m_immediate_context->GSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case PPGE::ShaderDesc::ShaderType::PS:
+    case UniformDesc::Target::PS:
         m_renderer->m_immediate_context->PSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case PPGE::ShaderDesc::ShaderType::Unknown:
     default:
         PPGE_ASSERT(false, "Unknown shader type for setting constant buffer into the pipeline.");
         break;

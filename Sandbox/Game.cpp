@@ -4,13 +4,14 @@ static std::string_view vs_code =
     R"(
 cbuffer g_PerFrame : register(b0)
 {
-	float4x4 viewMatrix;
-	float4x4 projectionMatrix;
+	float4x4 view;
+	float4x4 proj;
+	float4x4 viewProj;
 };
 
 cbuffer g_PerObject : register(b1)
 {
-	float4x4 worldMatrix;
+	float4x4 world;
 };
 
 struct VertexIn
@@ -29,9 +30,8 @@ VertexOut main(VertexIn vin)
 {
 	VertexOut vout;
 	vout.PosH = float4(vin.PosL, 1.0f);
-    vout.PosH = mul(vout.PosH, worldMatrix);
-    vout.PosH = mul(vout.PosH, viewMatrix);
-    vout.PosH = mul(vout.PosH, projectionMatrix);
+    vout.PosH = mul(vout.PosH, world);
+    vout.PosH = mul(vout.PosH, viewProj);
 	vout.Color = vin.Color; 
     return vout;
 }
@@ -174,8 +174,8 @@ class TestLayer : public PPGE::UILayer
         : UILayer("TestSubsystem"), m_vertexbuffer{}, m_indexbuffer{}, m_program{}, m_rendererstates{}, m_scenedata{},
           m_camera_controller{}, m_viewproj{}, m_mouse_x{0.0f}, m_mouse_y{0.0f}, m_sping_angle{0.0f}
     {
-        m_scenedata.m_projection = m_camera_controller.GetPorojection();
-        m_scenedata.m_view = m_camera_controller.GetView();
+        m_scenedata.m_projection = m_camera_controller.GetPorojection().Transpose();
+        m_scenedata.m_view = m_camera_controller.GetView().Transpose();
     }
 
     void OnAttach() override
@@ -281,8 +281,6 @@ class TestLayer : public PPGE::UILayer
             m_camera_controller.RotateYaw(delta_time * delta_x);
         }
 
-        m_scenedata.m_view = m_camera_controller.GetView();
-
         struct g_ViewProj
         {
             PPGE::Math::Matrix m_view;
@@ -294,15 +292,7 @@ class TestLayer : public PPGE::UILayer
             PPGE::Math::Matrix m_model;
         } modelData;
 
-        PPGE::SubResource subresource;
-
-        viewProjData.m_view = m_camera_controller.GetView().Transpose();
-        viewProjData.m_proj = m_camera_controller.GetPorojection().Transpose();
-        subresource.m_pData = &viewProjData;
-        subresource.m_size = sizeof(viewProjData);
-        PPGE::RendererSystem::Get().UpdateUniform(m_viewproj, subresource);
-        PPGE::RendererSystem::Get().SetUniform(m_viewproj, PPGE::ShaderDesc::ShaderType::VS, 0);
-
+        m_scenedata.m_view = m_camera_controller.GetView().Transpose();
         PPGE::Renderer::BeginScene(m_scenedata);
         {
             m_sping_angle += (delta_time * 45.5f / 180.0f * pi);
@@ -321,11 +311,12 @@ class TestLayer : public PPGE::UILayer
 
                     auto trns_anim =
                         PPGE::Math::Matrix::CreateTranslation(i * 3.5f - 49.0f, 0.0f, j * 3.5f - 49.0f).Transpose();
+                    PPGE::Subresource subresource;
                     modelData.m_model = trns_anim * rot_anim;
                     subresource.m_pData = &modelData;
                     subresource.m_size = sizeof(modelData);
                     PPGE::Renderer::UpdateUniform(m_model, subresource);
-                    PPGE::Renderer::SetUniform(m_model, PPGE::ShaderDesc::ShaderType::VS, 1);
+                    PPGE::Renderer::SetUniform(m_model, PPGE::UniformDesc::Target::VS, 1);
 
                     PPGE::Renderer::Submit(m_program);
                 }

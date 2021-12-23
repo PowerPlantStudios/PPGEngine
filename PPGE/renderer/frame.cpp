@@ -29,7 +29,7 @@ void Frame::SetIndexBufferHandle(IndexBufferHandle handle)
     draw_data.ib_handle = handle;
 }
 
-void Frame::UpdateObjectUniform(UniformHandle handle, SubResource subresource)
+void Frame::UpdateObjectUniform(UniformHandle handle, Subresource subresource)
 {
     PPGE_ASSERT(handle.IsValid(), "Updating per object uniform has failed. Handle to uniform is not valid.");
     PPGE_ASSERT(!ReachedDrawCallLimit(), "Number of draw calls per frame has exceeded maximum limit.");
@@ -39,7 +39,7 @@ void Frame::UpdateObjectUniform(UniformHandle handle, SubResource subresource)
     memcpy(cache, subresource.m_pData, subresource.m_size);
     m_uniform_cache_offset += subresource.m_size;
 
-    SubResource sr;
+    Subresource sr;
     sr.m_pData = cache;
     sr.m_size = subresource.m_size;
     
@@ -47,7 +47,7 @@ void Frame::UpdateObjectUniform(UniformHandle handle, SubResource subresource)
     draw_data.PushUniformUpdate(handle, sr);
 }
 
-void Frame::SetObjectUniform(UniformHandle handle, ShaderDesc::ShaderType target, uint8_t slot)
+void Frame::SetObjectUniform(UniformHandle handle, UniformDesc::Target target, uint8_t slot)
 {
     PPGE_ASSERT(handle.IsValid(),
                 "Adding index buffer handle to frame has failed. Handle to index buffer is not valid.");

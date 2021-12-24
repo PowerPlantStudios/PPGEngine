@@ -8,13 +8,12 @@
 namespace PPGE
 {
 
-class PPGE_API UILayer
+class PPGE_API Widget
 {
   public:
-    UILayer(const std::string &debug_name = "Subsystem") : m_debug_name(debug_name)
-    {
-    }
-    virtual ~UILayer() = default;
+    Widget(const std::string &debug_name = "Subsystem");
+
+    virtual ~Widget() = default;
 
     virtual void OnAttach()
     {
@@ -22,10 +21,13 @@ class PPGE_API UILayer
     virtual void OnDetach()
     {
     }
-    virtual void OnUpdate(float timestamp)
+    virtual void OnUpdate(float delta_time)
     {
     }
     virtual void OnRender()
+    {
+    }
+    virtual void OnImGui()
     {
     }
     virtual void OnInputEvent(InputEvent &event)
@@ -35,12 +37,14 @@ class PPGE_API UILayer
     {
     }
 
-    const std::string &GetName() const
+    inline const std::string &GetName() const
     {
         return m_debug_name;
     }
 
   protected:
+    void Destroy();
+
     std::string m_debug_name;
 };
 

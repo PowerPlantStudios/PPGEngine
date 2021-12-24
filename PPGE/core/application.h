@@ -3,13 +3,12 @@
 
 #include "core/defines.h"
 #include "core/game_timer.h"
+#include "core/widget.h"
 #include "event/application_event.h"
 #include "event/input_event.h"
 #include "system/display_system.h"
 #include "system/renderer_system.h"
-#include "system/ui_system.h"
-#include "ui/imgui_layer.h"
-#include "ui/ui_layer.h"
+#include "system/widget_system.h"
 
 namespace PPGE
 {
@@ -26,8 +25,11 @@ class PPGE_API Application
     void OnInputEvent(InputEvent &input_event);
     void OnApplicationEvent(ApplicationEvent &application_event);
 
-    void PushLayerFront(std::unique_ptr<UILayer> layer);
-    void PushLayerBack(std::unique_ptr<UILayer> layer);
+    template <class WidgetType, class... Args, std::enable_if_t<std::is_base_of_v<Widget, WidgetType>, int> = 0>
+    void CreateWidget(Args &&... args)
+    {
+        WidgetSystem::Get().CreateWidget<WidgetType>(std::forward<Args>(args)...);
+    }
 
   private:
     bool OnWindowClose(WindowCloseEvent &win_close_event);

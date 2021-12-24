@@ -47,7 +47,7 @@ struct PredefinedUniform
         Light1,
         Light2,
         Light3,
-        
+
         // Reserved
 
         Count = PPGE_RENDERER_PREDEFINED_UNIFORMS
@@ -62,6 +62,8 @@ struct PredefinedUniform
 class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
 {
   public:
+    virtual void Update() = 0;
+
     virtual void OnResize() = 0;
 
     virtual RendererAPI GetRendererAPI() = 0;

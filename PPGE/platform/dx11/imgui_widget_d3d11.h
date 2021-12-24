@@ -1,14 +1,14 @@
 #pragma once
 #include "PPGEpch.h"
 
-#include "ui/imgui_layer.h"
+#include "ui/imgui_widget.h"
 
 namespace PPGE
 {
-class PPGE_API ImGuiLayerDX11 : public ImGuiLayer
+class PPGE_API ImGuiWidgetD3D11 : public ImGuiWidget
 {
   public:
-    ImGuiLayerDX11() : ImGuiLayer("ImGui Layer (DX11)")
+    ImGuiWidgetD3D11() : ImGuiWidget("ImGui Layer (D3D11)")
     {
     }
 
@@ -16,9 +16,9 @@ class PPGE_API ImGuiLayerDX11 : public ImGuiLayer
 
     void OnDetach() override;
 
-    void OnImGuiBegin() override;
+    void ImGuiBegin() override;
 
-    void OnRender() override;
+    void ImGuiEnd() override;
 
     void OnInputEvent(InputEvent &event) override;
 

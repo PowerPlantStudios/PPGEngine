@@ -154,12 +154,11 @@ class CameraController
     float m_pitch;
 };
 
-class TestLayer : public PPGE::UILayer
+class TestLayer : public PPGE::Widget
 {
     PPGE::VertexBufferHandle m_vertexbuffer;
     PPGE::IndexBufferHandle m_indexbuffer;
     PPGE::ProgramHandle m_program;
-    PPGE::UniformHandle m_viewproj;
     PPGE::UniformHandle m_model;
     PPGE::RenderStates m_rendererstates;
     PPGE::SceneData m_scenedata;
@@ -171,8 +170,8 @@ class TestLayer : public PPGE::UILayer
 
   public:
     TestLayer()
-        : UILayer("TestSubsystem"), m_vertexbuffer{}, m_indexbuffer{}, m_program{}, m_rendererstates{}, m_scenedata{},
-          m_camera_controller{}, m_viewproj{}, m_mouse_x{0.0f}, m_mouse_y{0.0f}, m_sping_angle{0.0f}
+        : Widget("TestSubsystem"), m_vertexbuffer{}, m_indexbuffer{}, m_program{}, m_rendererstates{}, m_scenedata{},
+          m_camera_controller{}, m_mouse_x{0.0f}, m_mouse_y{0.0f}, m_sping_angle{0.0f}
     {
         m_scenedata.m_projection = m_camera_controller.GetPorojection().Transpose();
         m_scenedata.m_view = m_camera_controller.GetView().Transpose();
@@ -236,15 +235,16 @@ class TestLayer : public PPGE::UILayer
         m_program = PPGE::Renderer::CreateProgram(pg_desc);
 
         PPGE::UniformDesc un_desc;
-        un_desc.m_name = "g_viewproj";
-        un_desc.m_type = PPGE::UniformDesc::UniformType::Mat4;
-        un_desc.m_num = 2;
-        m_viewproj = PPGE::Renderer::CreateUniform(un_desc);
-
         un_desc.m_name = "g_model";
         un_desc.m_type = PPGE::UniformDesc::UniformType::Mat4;
         un_desc.m_num = 1;
         m_model = PPGE::Renderer::CreateUniform(un_desc);
+    }
+
+    void OnDetach() override
+    {
+        PPGE::Renderer::ReleaseVertexBuffer(m_vertexbuffer);
+        PPGE::Renderer::ReleaseIndexBuffer(m_indexbuffer);
     }
 
     void OnUpdate(float delta_time) override
@@ -281,23 +281,17 @@ class TestLayer : public PPGE::UILayer
             m_camera_controller.RotateYaw(delta_time * delta_x);
         }
 
-        struct g_ViewProj
-        {
-            PPGE::Math::Matrix m_view;
-            PPGE::Math::Matrix m_proj;
-        } viewProjData;
-
-        struct g_Model
-        {
-            PPGE::Math::Matrix m_model;
-        } modelData;
-
         m_scenedata.m_view = m_camera_controller.GetView().Transpose();
+
+        m_sping_angle += (delta_time * 45.5f / 180.0f * pi);
+        if (m_sping_angle > 360.0f)
+            m_sping_angle = 0.0f;
+    }
+
+    void OnRender() override
+    {
         PPGE::Renderer::BeginScene(m_scenedata);
         {
-            m_sping_angle += (delta_time * 45.5f / 180.0f * pi);
-            if (m_sping_angle > 360.0f)
-                m_sping_angle = 0.0f;
             auto rot_anim = PPGE::Math::Matrix::CreateRotationY(m_sping_angle).Transpose();
 
             for (unsigned int i = 0; i < 29; i++)
@@ -311,8 +305,12 @@ class TestLayer : public PPGE::UILayer
 
                     auto trns_anim =
                         PPGE::Math::Matrix::CreateTranslation(i * 3.5f - 49.0f, 0.0f, j * 3.5f - 49.0f).Transpose();
-                    PPGE::Subresource subresource;
+                    struct g_Model
+                    {
+                        PPGE::Math::Matrix m_model;
+                    } modelData;
                     modelData.m_model = trns_anim * rot_anim;
+                    PPGE::Subresource subresource;
                     subresource.m_pData = &modelData;
                     subresource.m_size = sizeof(modelData);
                     PPGE::Renderer::UpdateUniform(m_model, subresource);
@@ -325,18 +323,20 @@ class TestLayer : public PPGE::UILayer
         PPGE::Renderer::EndScene();
     }
 
-    void OnDetach() override
-    {
-        PPGE::Renderer::ReleaseVertexBuffer(m_vertexbuffer);
-        PPGE::Renderer::ReleaseIndexBuffer(m_indexbuffer);
-    }
-
-    void OnRender() override
-    {
-    }
-
     void OnInputEvent(PPGE::InputEvent &inputEvent) override
     {
+        PPGE::DispatchInputEvent<PPGE::KeyPressedEvent>(
+            inputEvent, PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(TestLayer::HandleKeyPressedEvenet));
+    }
+
+    bool HandleKeyPressedEvenet(PPGE::KeyPressedEvent &e)
+    {
+        if (e.Keycode() == PPGE_KEY_J)
+        {
+            Destroy();
+            return true;
+        }
+        return false;
     }
 };
 
@@ -354,7 +354,7 @@ class Game : public PPGE::Application
     void StartUp() override
     {
         Application::StartUp();
-        PushLayerBack(std::make_unique<TestLayer>());
+        CreateWidget<TestLayer>();
         APP_INFO("Application is started up.");
     }
 

@@ -21,7 +21,6 @@ class PPGE_API LoggerSystem : public ISystem<LoggerSystemProps>
     }
 
     virtual void StartUp(const LoggerSystemProps &props) override;
-    virtual void Update() override;
     virtual void ShutDown() override;
 
     inline std::shared_ptr<spdlog::logger> &GetPPGELogger()

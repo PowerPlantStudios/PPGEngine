@@ -1,4 +1,4 @@
-#include "imgui_layer_dx11.h"
+#include "imgui_widget_d3d11.h"
 
 #include <backends/imgui_impl_dx11.h>
 #include <backends/imgui_impl_win32.h>
@@ -10,7 +10,7 @@
 
 namespace PPGE
 {
-void ImGuiLayerDX11::OnAttach()
+void ImGuiWidgetD3D11::OnAttach()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -37,21 +37,21 @@ void ImGuiLayerDX11::OnAttach()
     ImGui_ImplWin32_EnableDpiAwareness();
 }
 
-void ImGuiLayerDX11::OnDetach()
+void ImGuiWidgetD3D11::OnDetach()
 {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 }
 
-void ImGuiLayerDX11::OnImGuiBegin()
+void ImGuiWidgetD3D11::ImGuiBegin()
 {
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 }
 
-void ImGuiLayerDX11::OnRender()
+void ImGuiWidgetD3D11::ImGuiEnd()
 {
     ImGuiIO &io = ImGui::GetIO();
     io.DisplaySize = ImVec2((float)DisplaySystem::Get().GetWidth(), (float)DisplaySystem::Get().GetHeight());
@@ -60,12 +60,12 @@ void ImGuiLayerDX11::OnRender()
     bool show_demo_window = true;
     ImGui::ShowDemoWindow(&show_demo_window);
     ImGui::Render();
-    RendererSystemDX11 *renderer = RendererSystem::GetRendererSystem<RendererSystemDX11>();
-    ID3D11RenderTargetView *render_target_view = renderer->m_render_target_view;
-    ID3D11DepthStencilView *depth_stencil_view = renderer->m_depth_stencil_view;
-    renderer->m_immediate_context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
-    renderer->m_immediate_context->ClearRenderTargetView(render_target_view,
-                                                           PPGE::Math::Color(0.15f, 0.15f, 0.15f));
+    //RendererSystemDX11 *renderer = RendererSystem::GetRendererSystem<RendererSystemDX11>();
+    //ID3D11RenderTargetView *render_target_view = renderer->m_render_target_view;
+    //ID3D11DepthStencilView *depth_stencil_view = renderer->m_depth_stencil_view;
+    //renderer->m_immediate_context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
+    //renderer->m_immediate_context->ClearRenderTargetView(render_target_view,
+    //                                                       PPGE::Math::Color(0.15f, 0.15f, 0.15f));
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -75,14 +75,14 @@ void ImGuiLayerDX11::OnRender()
     }
 }
 
-void ImGuiLayerDX11::OnInputEvent(InputEvent &event)
+void ImGuiWidgetD3D11::OnInputEvent(InputEvent &event)
 {
     ImGuiIO &io = ImGui::GetIO();
     event.SetHandled(event.IsInCategory(InputEventCategoryBit::Mouse) & io.WantCaptureMouse);
     event.SetHandled(event.IsInCategory(InputEventCategoryBit::Keyboard) & io.WantCaptureKeyboard);
 }
 
-void ImGuiLayerDX11::OnApplicationEvent(ApplicationEvent &event)
+void ImGuiWidgetD3D11::OnApplicationEvent(ApplicationEvent &event)
 {
     /* Maybe we can handle window size changed, application minimized or maximized events */
 }

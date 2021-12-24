@@ -294,7 +294,9 @@ template <typename T, typename F> bool DispatchInputEvent(const InputEvent &e, c
 {
     if (e.GetInputEventType() == T::RetreiveInputEventTypeEnum())
     {
-        e.SetHandled(func(static_cast<T &>(e)));
+        T _e = *(T *)(&e);
+        bool b_handled = func(_e);
+        _e.SetHandled(b_handled);
         return true;
     }
     return false;

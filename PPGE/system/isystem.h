@@ -9,7 +9,6 @@ template <typename ISystemProps> class PPGE_API ISystem
 {
   public:
     virtual void StartUp(const ISystemProps &props) = 0;
-    virtual void Update() = 0;
     virtual void ShutDown() = 0;
 };
 } // namespace PPGE

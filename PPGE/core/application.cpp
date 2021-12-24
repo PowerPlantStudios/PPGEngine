@@ -12,7 +12,7 @@ Application::Application()
     LoggerSystem::Initialize();
     DisplaySystem::Initialize(WindowAPI::Win32);
     RendererSystem::Initialize(RendererAPI::DX11);
-    UISystem::Initialize();
+    WidgetSystem::Initialize();
 }
 
 Application::~Application()
@@ -20,7 +20,7 @@ Application::~Application()
     LoggerSystem::Destroy();
     DisplaySystem::Destroy();
     RendererSystem::Destroy();
-    UISystem::Destroy();
+    WidgetSystem::Destroy();
 }
 
 void Application::StartUp()
@@ -37,15 +37,16 @@ void Application::StartUp()
     RendererSystemProps rs_props;
     RendererSystem::Get().StartUp(rs_props);
 
-    UISystemProps ls_props;
-    UISystem::Get().StartUp(ls_props);
+    WidgetSystemProps ws_props;
+    ws_props.enable_imgui_debug_layer = true;
+    WidgetSystem::Get().StartUp(ws_props);
 }
 
 void Application::ShutDown()
 {
     PPGE_INFO("PPGE is shuting down.");
 
-    UISystem::Get().ShutDown();
+    WidgetSystem::Get().ShutDown();
     RendererSystem::Get().ShutDown();
     DisplaySystem::Get().ShutDown();
     LoggerSystem::Get().ShutDown();
@@ -56,48 +57,27 @@ void Application::Run()
     while (b_is_running)
     {
         m_game_timer.Tick();
-        float m_delta_time = m_game_timer.GetDeltaTime();
+        float delta_time = m_game_timer.GetDeltaTime();
 
         DisplaySystem::Get().Update();
-
         RendererSystem::Get().ClearColor(0.15, 0.15, 0.25);
         RendererSystem::Get().ClearDepthStencilBuffer(1.0, 0);
-        {
-            for (auto &&subsys : UISystem::Get())
-                subsys->OnUpdate(m_delta_time);
-        }
+        WidgetSystem::Get().Update(delta_time);
         RendererSystem::Get().Update();
     }
 }
 
 void Application::OnInputEvent(InputEvent &input_event)
 {
-    // PPGE_TRACE(input_event.ToString());
-    for (auto it = UISystem::Get().rbegin(); it != UISystem::Get().rend(); ++it)
-    {
-        if (input_event.Handled())
-            break;
-        (*it)->OnInputEvent(input_event);
-    }
+    WidgetSystem::Get().OnInputEvent(input_event);
 }
 
 void Application::OnApplicationEvent(ApplicationEvent &application_event)
 {
-    // PPGE_TRACE(appEvent.ToString());
     DispatchApplicationEvent<WindowCloseEvent>(application_event,
                                                PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnWindowClose));
     DispatchApplicationEvent<WindowResizeEvent>(application_event,
                                                 PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnWindowResize));
-}
-
-void Application::PushLayerFront(std::unique_ptr<UILayer> layer)
-{
-    UISystem::Get().PushLayerFront(std::move(layer));
-}
-
-void Application::PushLayerBack(std::unique_ptr<UILayer> layer)
-{
-    UISystem::Get().PushLayerBack(std::move(layer));
 }
 
 bool Application::OnWindowClose(WindowCloseEvent &)

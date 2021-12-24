@@ -57,6 +57,8 @@ struct DisplaySystemProps
 class PPGE_API DisplaySystem : public ISystem<DisplaySystemProps>
 {
   public:
+    virtual void Update() = 0;
+
     virtual void *GetNativeDisplayPtr() const = 0;
 
     virtual std::tuple<float, float> GetMousePosition() = 0;

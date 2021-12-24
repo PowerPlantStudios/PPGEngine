@@ -5,6 +5,7 @@
 #include "platform/dx11/buffer_dx11.h"
 #include "platform/dx11/shader_dx11.h"
 #include "platform/dx11/vertex_layout_dx11.h"
+#include "platform/dx11/imgui_widget_d3d11.h"
 #include "system/logger_system.h"
 #include "system/renderer_system.h"
 
@@ -103,6 +104,6 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
     friend IndexBufferD3D11;
     friend ShaderD3D11;
     friend ProgramD3D11;
-    friend class ImGuiLayerDX11;
+    friend ImGuiWidgetD3D11;
 };
 } // namespace PPGE

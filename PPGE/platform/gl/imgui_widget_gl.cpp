@@ -1,4 +1,4 @@
-#include "imgui_layer_gl.h"
+#include "imgui_widget_gl.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -10,7 +10,7 @@
 
 namespace PPGE
 {
-void ImGuiLayerGL::OnAttach()
+void ImGuiWidgetGL::OnAttach()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -34,14 +34,14 @@ void ImGuiLayerGL::OnAttach()
     ImGui_ImplOpenGL3_Init("#version 410");
 }
 
-void ImGuiLayerGL::OnDetach()
+void ImGuiWidgetGL::OnDetach()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void PPGE::ImGuiLayerGL::OnImGuiBegin()
+void ImGuiWidgetGL::ImGuiBegin()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ImGui_ImplOpenGL3_NewFrame();
@@ -49,7 +49,7 @@ void PPGE::ImGuiLayerGL::OnImGuiBegin()
     ImGui::NewFrame();
 }
 
-void ImGuiLayerGL::OnRender()
+void ImGuiWidgetGL::ImGuiEnd()
 {
     ImGuiIO &io = ImGui::GetIO();
     io.DisplaySize = ImVec2((float)DisplaySystem::Get().GetWidth(), (float)DisplaySystem::Get().GetHeight());
@@ -69,14 +69,14 @@ void ImGuiLayerGL::OnRender()
     }
 }
 
-void ImGuiLayerGL::OnInputEvent(InputEvent &event)
+void ImGuiWidgetGL::OnInputEvent(InputEvent &event)
 {
     ImGuiIO &io = ImGui::GetIO();
     event.SetHandled(event.IsInCategory(InputEventCategoryBit::Mouse) & io.WantCaptureMouse);
     event.SetHandled(event.IsInCategory(InputEventCategoryBit::Keyboard) & io.WantCaptureKeyboard);
 }
 
-void ImGuiLayerGL::OnApplicationEvent(ApplicationEvent &event)
+void ImGuiWidgetGL::OnApplicationEvent(ApplicationEvent &event)
 {
     /* Maybe we can handle window size changed, application minimized or maximized events */
 }

@@ -51,6 +51,40 @@
         }                                                                                                              \
     };
 
+#define PPGE_ITERABLE_CLASS(type, object)                                                                              \
+    type::iterator begin()                                                                                             \
+    {                                                                                                                  \
+        return object.begin();                                                                                         \
+    }                                                                                                                  \
+    type::iterator end()                                                                                               \
+    {                                                                                                                  \
+        return object.end();                                                                                           \
+    }                                                                                                                  \
+    type::reverse_iterator rbegin()                                                                                    \
+    {                                                                                                                  \
+        return object.rbegin();                                                                                        \
+    }                                                                                                                  \
+    type::reverse_iterator rend()                                                                                      \
+    {                                                                                                                  \
+        return object.rend();                                                                                          \
+    }                                                                                                                  \
+    type::const_iterator begin() const                                                                                 \
+    {                                                                                                                  \
+        return object.begin();                                                                                         \
+    }                                                                                                                  \
+    type::const_iterator end() const                                                                                   \
+    {                                                                                                                  \
+        return object.end();                                                                                           \
+    }                                                                                                                  \
+    type::const_reverse_iterator rbegin() const                                                                        \
+    {                                                                                                                  \
+        return object.rbegin();                                                                                        \
+    }                                                                                                                  \
+    type::const_reverse_iterator rend() const                                                                          \
+    {                                                                                                                  \
+        return object.rend();                                                                                          \
+    }
+
 #define PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(function) std::bind(&function, this, std::placeholders::_1)
 #define PPGE_BIND_CLASS_METHOD_ARG_COUNT_2(function)                                                                   \
     std::bind(&function, this, std::placeholders::_1, std::placeholders::_2)

@@ -27,10 +27,6 @@ void LoggerSystem::StartUp(const LoggerSystemProps &props)
     s_client_logger->flush_on(spdlog::level::trace);
 }
 
-void LoggerSystem::Update()
-{
-}
-
 void LoggerSystem::ShutDown()
 {
     s_PPGE_logger.reset();

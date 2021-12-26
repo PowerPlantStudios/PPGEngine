@@ -13,4 +13,8 @@
 [submodule "Thirdparty/math/dxmath"]
 	path = Thirdparty/math/dxmath
 	url = https://github.com/microsoft/DirectXMath.git
-	branc = jan2021
+	branch = jan2021
+[submodule "Thirdparty/directxtex"]
+	path = Thirdparty/directxtex
+	url = https://github.com/microsoft/DirectXTex.git
+	branch = sept2021

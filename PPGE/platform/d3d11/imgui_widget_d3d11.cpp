@@ -4,7 +4,7 @@
 #include <backends/imgui_impl_win32.h>
 #include <imgui.h>
 
-#include "platform/dx11/renderer_system_dx11.h"
+#include "platform/d3d11/renderer_system_d3d11.h"
 #include "system/display_system.h"
 #include "system/renderer_system.h"
 
@@ -31,7 +31,7 @@ void ImGuiWidgetD3D11::OnAttach()
     HWND window_handle = static_cast<HWND>(DisplaySystem::Get().GetNativeDisplayPtr());
     ImGui_ImplWin32_Init(window_handle);
 
-    RendererSystemDX11 *renderer = RendererSystem::GetRendererSystem<RendererSystemDX11>();
+    RendererSystemD3D11 *renderer = RendererSystem::GetRendererSystem<RendererSystemD3D11>();
     ImGui_ImplDX11_Init(renderer->m_device, renderer->m_immediate_context);
 
     ImGui_ImplWin32_EnableDpiAwareness();
@@ -60,12 +60,6 @@ void ImGuiWidgetD3D11::ImGuiEnd()
     bool show_demo_window = true;
     ImGui::ShowDemoWindow(&show_demo_window);
     ImGui::Render();
-    //RendererSystemDX11 *renderer = RendererSystem::GetRendererSystem<RendererSystemDX11>();
-    //ID3D11RenderTargetView *render_target_view = renderer->m_render_target_view;
-    //ID3D11DepthStencilView *depth_stencil_view = renderer->m_depth_stencil_view;
-    //renderer->m_immediate_context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
-    //renderer->m_immediate_context->ClearRenderTargetView(render_target_view,
-    //                                                       PPGE::Math::Color(0.15f, 0.15f, 0.15f));
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

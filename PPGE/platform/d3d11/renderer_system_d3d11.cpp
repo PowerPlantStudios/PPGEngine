@@ -1,4 +1,4 @@
-#include "platform/dx11/renderer_system_dx11.h"
+#include "platform/d3d11/renderer_system_d3d11.h"
 
 #include "system/display_system.h"
 
@@ -46,7 +46,7 @@ static size_t GetUniformSize(UniformDesc::UniformType type)
     }
 }
 
-void RendererSystemDX11::StartUp(const RendererSystemProps &props)
+void RendererSystemD3D11::StartUp(const RendererSystemProps &props)
 {
     m_props = props;
 
@@ -69,7 +69,7 @@ void RendererSystemDX11::StartUp(const RendererSystemProps &props)
         );
     PPGE_HR(hr);
     PPGE_ASSERT((feature_level != D3D_FEATURE_LEVEL_11_1),
-                "PPGE requires DX feature level 11_1 to use DX11 as the rendering API.");
+                "PPGE requires DX feature level 11_1 to use D3D11 as the rendering API.");
 
     DXGI_SWAP_CHAIN_DESC sd;
     sd.BufferDesc.Width = DisplaySystem::Get().GetWidth();
@@ -87,7 +87,7 @@ void RendererSystemDX11::StartUp(const RendererSystemProps &props)
             GetMSAASampleCount(m_props.msaa_quality), // Sample count for MSAA
             &m_msaa_quality // [out] Supported max quality level for the given render target format and sample count
             ));
-        // Sample count 4 should be supported for all render targets for DX11 capable devices
+        // Sample count 4 should be supported for all render targets for D3D11 capable devices
         PPGE_ASSERT((m_msaa_quality > 0), "For the given render target and sample count, MSAA is not supported.");
 
         sd.SampleDesc.Count = GetMSAASampleCount(m_props.msaa_quality);
@@ -130,12 +130,12 @@ void RendererSystemDX11::StartUp(const RendererSystemProps &props)
     m_programs.fill(ProgramD3D11());
 }
 
-void RendererSystemDX11::Update()
+void RendererSystemD3D11::Update()
 {
     m_swap_chain->Present(1, 0);
 }
 
-void RendererSystemDX11::ShutDown()
+void RendererSystemD3D11::ShutDown()
 {
     for (auto &vb : m_vertex_buffers)
         vb.Destroy();
@@ -161,7 +161,7 @@ void RendererSystemDX11::ShutDown()
     PPGE_RELEASE_COM(m_device);
 }
 
-void RendererSystemDX11::OnResize()
+void RendererSystemD3D11::OnResize()
 {
     if (m_device == NULL)
         return;
@@ -215,97 +215,97 @@ void RendererSystemDX11::OnResize()
     m_immediate_context->RSSetViewports(1, &m_viewport);
 }
 
-bool RendererSystemDX11::ClearColor(float r, float g, float b)
+bool RendererSystemD3D11::ClearColor(float r, float g, float b)
 {
     float clear_color[] = {r, g, b, 1.0f};
     m_immediate_context->ClearRenderTargetView(m_render_target_view, clear_color);
     return true;
 }
 
-bool RendererSystemDX11::ClearDepthStencilBuffer(float depth, uint8_t stencil)
+bool RendererSystemD3D11::ClearDepthStencilBuffer(float depth, uint8_t stencil)
 {
     UINT clear_flag = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;
     m_immediate_context->ClearDepthStencilView(m_depth_stencil_view, clear_flag, depth, stencil);
     return true;
 }
 
-bool RendererSystemDX11::CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle)
+bool RendererSystemD3D11::CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle)
 {
     VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
     return vertex_buffer.Create(desc);
 }
 
-bool RendererSystemDX11::ReleaseVertexBuffer(VertexBufferHandle handle)
+bool RendererSystemD3D11::ReleaseVertexBuffer(VertexBufferHandle handle)
 {
     VertexBufferD3D11 &vertex_buffer = m_vertex_buffers[handle.idx];
     vertex_buffer.Destroy();
     return true;
 }
 
-bool RendererSystemDX11::CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle)
+bool RendererSystemD3D11::CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle)
 {
     VertexLayoutD3D11 &vertex_layout = m_vertex_layouts[handle.idx];
     vertex_layout.SetLayout(layout);
     return true;
 }
 
-bool RendererSystemDX11::ReleaseVertexLayout(VertexLayoutHandle handle)
+bool RendererSystemD3D11::ReleaseVertexLayout(VertexLayoutHandle handle)
 {
     VertexLayoutD3D11 &vertex_layout = m_vertex_layouts[handle.idx];
     vertex_layout.Destroy();
     return true;
 }
 
-bool RendererSystemDX11::CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle)
+bool RendererSystemD3D11::CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle)
 {
     IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
     return index_buffer.Create(desc);
 }
 
-bool RendererSystemDX11::ReleaseIndexBuffer(IndexBufferHandle handle)
+bool RendererSystemD3D11::ReleaseIndexBuffer(IndexBufferHandle handle)
 {
     IndexBufferD3D11 &index_buffer = m_index_buffers[handle.idx];
     index_buffer.Destroy();
     return true;
 }
 
-bool RendererSystemDX11::CreateTexture(const TextureDesc &desc, TextureHandle handle)
+bool RendererSystemD3D11::CreateTexture(const TextureDesc &desc, TextureHandle handle)
 {
     return false;
 }
 
-bool RendererSystemDX11::ReleaseTexture(TextureHandle handle)
+bool RendererSystemD3D11::ReleaseTexture(TextureHandle handle)
 {
     return false;
 }
 
-bool RendererSystemDX11::CreateProgram(const ProgramDesc &desc, ProgramHandle handle)
+bool RendererSystemD3D11::CreateProgram(const ProgramDesc &desc, ProgramHandle handle)
 {
     ProgramD3D11 &program = m_programs[handle.idx];
     return program.Create(desc);
 }
 
-bool RendererSystemDX11::ReleaseProgram(ProgramHandle handle)
+bool RendererSystemD3D11::ReleaseProgram(ProgramHandle handle)
 {
     ProgramD3D11 &program = m_programs[handle.idx];
     program.Destroy();
     return true;
 }
 
-bool RendererSystemDX11::CreateShader(const ShaderDesc &desc, ShaderHandle handle)
+bool RendererSystemD3D11::CreateShader(const ShaderDesc &desc, ShaderHandle handle)
 {
     ShaderD3D11 &shader = m_shaders[handle.idx];
     return shader.Create(desc);
 }
 
-bool RendererSystemDX11::ReleaseShader(ShaderHandle handle)
+bool RendererSystemD3D11::ReleaseShader(ShaderHandle handle)
 {
     ShaderD3D11 &shader = m_shaders[handle.idx];
     shader.Destroy();
     return true;
 }
 
-bool RendererSystemDX11::CreateUniform(const UniformDesc &desc, UniformHandle handle)
+bool RendererSystemD3D11::CreateUniform(const UniformDesc &desc, UniformHandle handle)
 {
     BufferD3D11 &c_buffer = m_uniforms[handle.idx];
 
@@ -317,14 +317,14 @@ bool RendererSystemDX11::CreateUniform(const UniformDesc &desc, UniformHandle ha
     return c_buffer.Create(bd);
 }
 
-bool RendererSystemDX11::ReleaseUniform(UniformHandle handle)
+bool RendererSystemD3D11::ReleaseUniform(UniformHandle handle)
 {
     BufferD3D11 &c_buffer = m_uniforms[handle.idx];
     c_buffer.Destroy();
     return true;
 }
 
-bool RendererSystemDX11::SetPredefinedUniform(const PredefinedUniform &uniform)
+bool RendererSystemD3D11::SetPredefinedUniform(const PredefinedUniform &uniform)
 {
     BufferD3D11 &c_buffer = m_predefined_uniforms[uniform.handle.idx];
     if (c_buffer.GetBufferSize() < uniform.subresource.m_size)
@@ -343,12 +343,12 @@ bool RendererSystemDX11::SetPredefinedUniform(const PredefinedUniform &uniform)
     return true;
 }
 
-bool RendererSystemDX11::SetRenderStates(const RenderStates &states)
+bool RendererSystemD3D11::SetRenderStates(const RenderStates &states)
 {
     return false;
 }
 
-bool RendererSystemDX11::Submit(const Frame &frame)
+bool RendererSystemD3D11::Submit(const Frame &frame)
 {
     for (const auto &draw_data : frame)
     {

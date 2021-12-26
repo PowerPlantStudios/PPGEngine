@@ -8,7 +8,7 @@
 
 namespace PPGE
 {
-class RendererSystemDX11;
+class RendererSystemD3D11;
 class ShaderD3D11;
 
 class PPGE_API VertexLayoutD3D11
@@ -33,7 +33,7 @@ class PPGE_API VertexLayoutD3D11
     }
 
   private:
-    RendererSystemDX11 *m_renderer;
+    RendererSystemD3D11 *m_renderer;
     ID3D11InputLayout *m_layout;
     VertexLayout m_layout_desc;
     bool b_haslayout_desc;

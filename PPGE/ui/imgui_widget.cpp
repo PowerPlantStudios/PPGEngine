@@ -1,6 +1,6 @@
  #include "imgui_widget.h"
 
- #include "platform/dx11/imgui_widget_d3d11.h"
+ #include "platform/d3d11/imgui_widget_d3d11.h"
  #include "platform/gl/imgui_widget_gl.h"
  #include "system/renderer_system.h"
 
@@ -16,9 +16,9 @@
      case PPGE::RendererAPI::Vulkan:
          return nullptr;
  #if defined(PPGE_PLATFORM_WIN)
-     case PPGE::RendererAPI::DX11:
+     case PPGE::RendererAPI::D3D11:
          return std::make_unique<ImGuiWidgetD3D11>();
-     case PPGE::RendererAPI::DX12:
+     case PPGE::RendererAPI::D3D12:
          return nullptr;
  #endif
  #if defined(PPGE_PLATFORM_APPLE)

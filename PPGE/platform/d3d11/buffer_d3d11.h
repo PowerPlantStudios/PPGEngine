@@ -7,7 +7,7 @@
 
 namespace PPGE
 {
-class RendererSystemDX11;
+class RendererSystemD3D11;
 
 class PPGE_API BufferD3D11
 {
@@ -27,7 +27,7 @@ class PPGE_API BufferD3D11
     }
 
   private:
-    RendererSystemDX11 *m_renderer;
+    RendererSystemD3D11 *m_renderer;
     ID3D11Buffer *m_buffer;
     UINT m_size = 0;
 };
@@ -49,7 +49,7 @@ class PPGE_API IndexBufferD3D11
     }
 
   private:
-    RendererSystemDX11 *m_renderer;
+    RendererSystemD3D11 *m_renderer;
     ID3D11Buffer *m_buffer;
     UINT m_index_count = 0;
 };
@@ -66,7 +66,7 @@ class PPGE_API VertexBufferD3D11
     void Set();
 
   private:
-    RendererSystemDX11 *m_renderer;
+    RendererSystemD3D11 *m_renderer;
     ID3D11Buffer *m_buffer;
     UINT m_stride = 0;
     UINT m_offset = 0;

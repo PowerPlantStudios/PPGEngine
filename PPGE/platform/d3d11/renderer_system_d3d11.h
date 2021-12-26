@@ -2,19 +2,19 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "platform/dx11/buffer_dx11.h"
-#include "platform/dx11/shader_dx11.h"
-#include "platform/dx11/vertex_layout_dx11.h"
-#include "platform/dx11/imgui_widget_d3d11.h"
+#include "platform/d3d11/buffer_d3d11.h"
+#include "platform/d3d11/shader_d3d11.h"
+#include "platform/d3d11/vertex_layout_d3d11.h"
+#include "platform/d3d11/imgui_widget_d3d11.h"
 #include "system/logger_system.h"
 #include "system/renderer_system.h"
 
 namespace PPGE
 {
-class PPGE_API RendererSystemDX11 : public RendererSystem
+class PPGE_API RendererSystemD3D11 : public RendererSystem
 {
   public:
-    RendererSystemDX11()
+    RendererSystemD3D11()
     {
         m_device = NULL;
         m_immediate_context = NULL;
@@ -25,7 +25,7 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
 
         ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
     }
-    ~RendererSystemDX11()
+    ~RendererSystemD3D11()
     {
     }
 
@@ -37,7 +37,7 @@ class PPGE_API RendererSystemDX11 : public RendererSystem
 
     RendererAPI GetRendererAPI() override
     {
-        return RendererAPI::DX11;
+        return RendererAPI::D3D11;
     }
 
     bool ClearColor(float r, float g, float b) override;

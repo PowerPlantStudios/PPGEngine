@@ -1,10 +1,10 @@
-#include "buffer_dx11.h"
+#include "buffer_d3d11.h"
 
-#include "platform/dx11/renderer_system_dx11.h"
+#include "platform/d3d11/renderer_system_d3d11.h"
 
 namespace PPGE
 {
-BufferD3D11::BufferD3D11() : m_renderer(RendererSystem::GetRendererSystem<RendererSystemDX11>()), m_buffer(NULL)
+BufferD3D11::BufferD3D11() : m_renderer(RendererSystem::GetRendererSystem<RendererSystemD3D11>()), m_buffer(NULL)
 {
 }
 
@@ -21,7 +21,7 @@ void BufferD3D11::Destroy()
 
 bool BufferD3D11::Create(const BufferDesc &desc)
 {
-    PPGE_ASSERT(m_renderer, "Creating D3D11 resource buffer has failed. RendererSystemDX11 is inaccessible.");
+    PPGE_ASSERT(m_renderer, "Creating D3D11 resource buffer has failed. RendererSystemD3D11 is inaccessible.");
     Destroy();
 
     D3D11_BUFFER_DESC bd;
@@ -40,7 +40,7 @@ bool BufferD3D11::Create(const BufferDesc &desc)
 
 void BufferD3D11::Update(const Subresource &res)
 {
-    PPGE_ASSERT(m_renderer, "Creating D3D11 resource buffer has failed. RendererSystemDX11 is inaccessible.");
+    PPGE_ASSERT(m_renderer, "Creating D3D11 resource buffer has failed. RendererSystemD3D11 is inaccessible.");
 
     D3D11_MAPPED_SUBRESOURCE mapped_resource;
     // Lock the buffer
@@ -52,7 +52,7 @@ void BufferD3D11::Update(const Subresource &res)
 
 void BufferD3D11::Set(UniformDesc::Target target, uint8_t slot)
 {
-    PPGE_ASSERT(m_renderer, "Binding D3D11 buffer to the pipeline has failed. RendererSystemDX11 is inaccessible.");
+    PPGE_ASSERT(m_renderer, "Binding D3D11 buffer to the pipeline has failed. RendererSystemD3D11 is inaccessible.");
 
     UINT number_of_buffer = 1;
     switch (target)
@@ -79,7 +79,7 @@ void BufferD3D11::Set(UniformDesc::Target target, uint8_t slot)
 }
 
 IndexBufferD3D11::IndexBufferD3D11()
-    : m_renderer(RendererSystem::GetRendererSystem<RendererSystemDX11>()), m_buffer(NULL)
+    : m_renderer(RendererSystem::GetRendererSystem<RendererSystemD3D11>()), m_buffer(NULL)
 {
 }
 
@@ -96,7 +96,7 @@ void IndexBufferD3D11::Destroy()
 
 bool IndexBufferD3D11::Create(const IndexBufferDesc &desc)
 {
-    PPGE_ASSERT(m_renderer, "Creating D3D11 index buffer has failed. RendererSystemDX11 is inaccessible.");
+    PPGE_ASSERT(m_renderer, "Creating D3D11 index buffer has failed. RendererSystemD3D11 is inaccessible.");
     Destroy();
 
     D3D11_BUFFER_DESC ibd;
@@ -118,13 +118,13 @@ bool IndexBufferD3D11::Create(const IndexBufferDesc &desc)
 void IndexBufferD3D11::Set()
 {
     PPGE_ASSERT(m_renderer,
-                "Binding D3D11 index buffer to the pipeline has failed. RendererSystemDX11 is inaccessible.");
+                "Binding D3D11 index buffer to the pipeline has failed. RendererSystemD3D11 is inaccessible.");
 
     m_renderer->m_immediate_context->IASetIndexBuffer(m_buffer, DXGI_FORMAT_R16_UINT, 0);
 }
 
 VertexBufferD3D11::VertexBufferD3D11()
-    : m_renderer(RendererSystem::GetRendererSystem<RendererSystemDX11>()), m_buffer(NULL)
+    : m_renderer(RendererSystem::GetRendererSystem<RendererSystemD3D11>()), m_buffer(NULL)
 {
 }
 
@@ -142,7 +142,7 @@ void VertexBufferD3D11::Destroy()
 
 bool VertexBufferD3D11::Create(const VertexBufferDesc &desc)
 {
-    PPGE_ASSERT(m_renderer, "Creating D3D11 vertex buffer has failed. RendererSystemDX11 is inaccessible.");
+    PPGE_ASSERT(m_renderer, "Creating D3D11 vertex buffer has failed. RendererSystemD3D11 is inaccessible.");
     Destroy();
 
     D3D11_BUFFER_DESC vbd;
@@ -164,7 +164,7 @@ bool VertexBufferD3D11::Create(const VertexBufferDesc &desc)
 void VertexBufferD3D11::Set()
 {
     PPGE_ASSERT(m_renderer,
-                "Binding D3D11 vertex buffer to the pipeline has failed. RendererSystemDX11 is inaccessible.");
+                "Binding D3D11 vertex buffer to the pipeline has failed. RendererSystemD3D11 is inaccessible.");
 
     m_renderer->m_immediate_context->IASetVertexBuffers(0, 1, &m_buffer, &m_stride, &m_offset);
 }

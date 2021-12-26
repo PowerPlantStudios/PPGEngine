@@ -16,8 +16,8 @@ enum class RendererAPI
     None = 0,
     OpenGL,
     Vulkan,
-    DX11,
-    DX12,
+    D3D11,
+    D3D12,
     Metal
 };
 

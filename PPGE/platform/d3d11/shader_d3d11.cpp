@@ -1,8 +1,8 @@
-#include "shader_dx11.h"
+#include "shader_d3d11.h"
 
 #include <d3dcompiler.h>
 
-#include "platform/dx11/renderer_system_dx11.h"
+#include "platform/d3d11/renderer_system_d3d11.h"
 
 namespace PPGE
 {
@@ -28,7 +28,7 @@ static const char *GetShaderTarget(ShaderDesc::ShaderType type)
 }
 
 ShaderD3D11::ShaderD3D11()
-    : m_renderer(RendererSystem::GetRendererSystem<RendererSystemDX11>()), m_buffer(NULL), m_shader(NULL),
+    : m_renderer(RendererSystem::GetRendererSystem<RendererSystemD3D11>()), m_buffer(NULL), m_shader(NULL),
       m_type(ShaderDesc::ShaderType::Unknown)
 {
 }

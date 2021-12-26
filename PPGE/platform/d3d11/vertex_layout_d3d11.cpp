@@ -1,7 +1,7 @@
-#include "vertex_layout_dx11.h"
+#include "vertex_layout_d3d11.h"
 
-#include "platform/dx11/renderer_system_dx11.h"
-#include "platform/dx11/shader_dx11.h"
+#include "platform/d3d11/renderer_system_d3d11.h"
+#include "platform/d3d11/shader_d3d11.h"
 
 namespace PPGE
 {
@@ -111,7 +111,7 @@ DXGI_FORMAT GetLayoutFormat(VertexLayout::Type type, unsigned int noe)
 }
 
 VertexLayoutD3D11::VertexLayoutD3D11()
-    : m_renderer(RendererSystem::GetRendererSystem<RendererSystemDX11>()), m_layout(NULL), b_haslayout_desc(false),
+    : m_renderer(RendererSystem::GetRendererSystem<RendererSystemD3D11>()), m_layout(NULL), b_haslayout_desc(false),
       m_layout_desc(VertexLayout{})
 {
 }

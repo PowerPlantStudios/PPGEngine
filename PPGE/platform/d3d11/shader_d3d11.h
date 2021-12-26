@@ -7,7 +7,7 @@
 
 namespace PPGE
 {
-class RendererSystemDX11;
+class RendererSystemD3D11;
 
 class PPGE_API ShaderD3D11
 {
@@ -26,7 +26,7 @@ class PPGE_API ShaderD3D11
     }
 
   private:
-    RendererSystemDX11 *m_renderer;
+    RendererSystemD3D11 *m_renderer;
     ID3DBlob *m_buffer;
     union {
         ID3D11PixelShader *m_pixel_shader;

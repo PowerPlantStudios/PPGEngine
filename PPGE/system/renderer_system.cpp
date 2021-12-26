@@ -2,10 +2,10 @@
 
 #include "platform/gl/renderer_system_gl.h"
 #if defined(PPGE_PLATFORM_WIN)
-#include "platform/dx11/renderer_system_dx11.h"
+#include "platform/d3d11/renderer_system_d3d11.h"
 #endif
 #if defined(PPGE_PLATFORM_APPLE)
-#include "platform/dx11/renderer_system_mtl.h"
+#include "platform/mtl/renderer_system_mtl.h"
 #endif
 
 namespace PPGE
@@ -22,10 +22,10 @@ void RendererSystem::Initialize(RendererAPI api)
     case PPGE::RendererAPI::Vulkan:
         break;
 #if defined(PPGE_PLATFORM_WIN)
-    case PPGE::RendererAPI::DX11:
-        s_instance = new RendererSystemDX11();
+    case PPGE::RendererAPI::D3D11:
+        s_instance = new RendererSystemD3D11();
         break;
-    case PPGE::RendererAPI::DX12:
+    case PPGE::RendererAPI::D3D12:
         break;
 #endif
 #if defined(PPGE_PLATFORM_APPLE)

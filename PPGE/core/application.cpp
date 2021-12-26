@@ -11,7 +11,7 @@ Application::Application()
 
     LoggerSystem::Initialize();
     DisplaySystem::Initialize(WindowAPI::Win32);
-    RendererSystem::Initialize(RendererAPI::DX11);
+    RendererSystem::Initialize(RendererAPI::D3D11);
     WidgetSystem::Initialize();
 }
 

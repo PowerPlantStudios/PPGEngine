@@ -65,13 +65,13 @@ if (WIN32)
         ${PPGE_CORE_DIR}/platform/win32/*.cpp)
     set(PPGE_HDRS ${PPGE_HDRS} ${PLATFORM_WIN32_HDRS})
     set(PPGE_SRCS ${PPGE_SRCS} ${PLATFOMR_WIN32_SRCS})
-    # Add platform dx11 related files to the project
-    file(GLOB PLATFORM_DX11_HDRS
-        ${PPGE_CORE_DIR}/platform/dx11/*.h)
-    file(GLOB PLATFOMR_DX11_SRCS
-        ${PPGE_CORE_DIR}/platform/dx11/*.cpp)
-    set(PPGE_HDRS ${PPGE_HDRS} ${PLATFORM_DX11_HDRS})
-    set(PPGE_SRCS ${PPGE_SRCS} ${PLATFOMR_DX11_SRCS})
+    # Add platform D3D11 related files to the project
+    file(GLOB PLATFORM_D3D11_HDRS
+        ${PPGE_CORE_DIR}/platform/d3d11/*.h)
+    file(GLOB PLATFOMR_D3D11_SRCS
+        ${PPGE_CORE_DIR}/platform/d3d11/*.cpp)
+    set(PPGE_HDRS ${PPGE_HDRS} ${PLATFORM_D3D11_HDRS})
+    set(PPGE_SRCS ${PPGE_SRCS} ${PLATFOMR_D3D11_SRCS})
     # Add platform dx12 related files to the project
     file(GLOB PLATFORM_DX12_HDRS
         ${PPGE_CORE_DIR}/platform/dx12/*.h)

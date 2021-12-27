@@ -14,3 +14,7 @@
 	path = Thirdparty/math/dxmath
 	url = https://github.com/microsoft/DirectXMath.git
 	branch = jan2021
+[submodule "Thirdparty/directxtk/src"]
+	path = Thirdparty/directxtk/src
+	url = https://github.com/microsoft/DirectXTK.git
+	branch = sept2021

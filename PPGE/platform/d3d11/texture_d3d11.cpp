@@ -19,6 +19,8 @@ void TextureD3D11::Destroy()
 
 bool TextureD3D11::Create(const Texture2DDesc &desc)
 {
+    DirectX::CreateWICTextureFromFile(m_renderer->m_device, m_renderer->m_immediate_context, L"texture.png",
+                                      (ID3D11Resource **)&m_texture, &m_srv);
     return false;
 }
 

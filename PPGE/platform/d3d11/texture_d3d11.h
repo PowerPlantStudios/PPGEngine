@@ -22,6 +22,7 @@ class PPGE_API TextureD3D11
 
   private:
     RendererSystemD3D11 *m_renderer;
-    ID3D11Texture2D *m_textre;
+    ID3D11Texture2D *m_texture;
+    ID3D11ShaderResourceView *m_srv;
 };
 } // namespace PPGE

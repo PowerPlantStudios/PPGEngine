@@ -4,6 +4,10 @@ project(Sandbox VERSION 0.0.1 LANGUAGES CXX)
 include_directories(
     ${DEPENDENCIES_DIR}/spdlog/include
     ${DEPENDENCIES_DIR}/math/simplemath/include)
+if(WIN32)
+    include_directories(
+        ${DEPENDENCIES_DIR}/directxtk/src/Inc)
+endif()
 
 if(WIN32)
     add_executable(Game WIN32 ${CMAKE_CURRENT_SOURCE_DIR}/Game.cpp)

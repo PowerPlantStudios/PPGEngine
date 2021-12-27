@@ -20,3 +20,6 @@ set_target_properties(imgui PROPERTIES FOLDER "Dependencies")
 # Fast and efficient vectorized math dependency
 add_subdirectory(math)
 set_target_properties(simplemath PROPERTIES FOLDER "Dependencies")
+
+add_subdirectory(directxtk)
+set_target_properties(simpletexture PROPERTIES FOLDER "Dependencies")

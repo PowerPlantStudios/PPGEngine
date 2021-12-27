@@ -8,6 +8,10 @@ include_directories(
     ${DEPENDENCIES_DIR}/imgui
     ${DEPENDENCIES_DIR}/math/simplemath/include
     ${CMAKE_CURRENT_SOURCE_DIR})
+if(WIN32)
+    include_directories(
+        ${DEPENDENCIES_DIR}/directxtk/src/Inc)
+endif()
 
 file(GLOB PPGE_HDRS 
     ${PPGE_CORE_DIR}/core/*.h
@@ -16,8 +20,7 @@ file(GLOB PPGE_HDRS
     ${PPGE_CORE_DIR}/system/*.h
     ${PPGE_CORE_DIR}/ui/*.h)
 set(PPGE_HDRS ${PPGE_HDRS} 
-    ${PPGE_CORE_DIR}/PPGE.h
-    ${PPGE_CORE_DIR}/PPGEpch.h)
+    ${PPGE_CORE_DIR}/PPGE.h)
 
 file(GLOB PPGE_SRCS 
     ${PPGE_CORE_DIR}/core/*.cpp
@@ -26,7 +29,7 @@ file(GLOB PPGE_SRCS
     ${PPGE_CORE_DIR}/system/*.cpp
     ${PPGE_CORE_DIR}/ui/*.cpp)
 set(PPGE_SRCS ${PPGE_SRCS} 
-    ${PPGE_CORE_DIR}/PPGEpch.cpp)
+    ${PPGE_CORE_DIR}/PPGEpch.h)
 
 # Add platform glfw related files for every PC platform
 file(GLOB PLATFORM_GLFW_HDRS
@@ -106,32 +109,35 @@ else()
     message(FATAL_ERROR "Current platform is not supported.")
 endif()
 
-add_library(Engine STATIC 
+add_library(${PROJECT_NAME} STATIC 
     ${PPGE_SRCS} 
     ${PPGE_HDRS})
 
-target_compile_definitions(Engine PRIVATE 
+target_precompile_headers(${PROJECT_NAME} PRIVATE 
+    ${PPGE_CORE_DIR}/PPGEpch.h)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Debug>:PPGE_DEBUG> 
     $<$<CONFIG:Release>:PPGE_RELEASE>)
 
-target_include_directories(Engine PUBLIC 
+target_include_directories(${PROJECT_NAME} PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(Engine PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
     glfw
     glad
     imgui 
     simplemath)
 
-target_compile_definitions(Engine PRIVATE GLFW_INCLUDE_NONE)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 
 if (WIN32)
-    target_compile_definitions(Engine PUBLIC PPGE_PLATFORM_WIN)
-    target_link_libraries(Engine PRIVATE d3dcompiler.lib dxgi.lib d3d11.lib d3d12.lib)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC PPGE_PLATFORM_WIN)
+    target_link_libraries(${PROJECT_NAME} PRIVATE d3dcompiler.lib dxgi.lib d3d11.lib d3d12.lib)
 elseif(APPLE)
-    target_compile_definitions(Engine PUBLIC PPGE_PLATFORM_APPLE)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC PPGE_PLATFORM_APPLE)
 elseif(UNIX)
-    target_compile_definitions(Engine PUBLIC PPGE_PLATFORM_UNIX)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC PPGE_PLATFORM_UNIX)
 else()
     message(FATAL_ERROR "Current platform is not supported.")
 endif()

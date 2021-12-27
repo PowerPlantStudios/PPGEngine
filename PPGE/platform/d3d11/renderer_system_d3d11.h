@@ -3,6 +3,7 @@
 
 #include "core/defines.h"
 #include "platform/d3d11/buffer_d3d11.h"
+#include "platform/d3d11/texture_d3d11.h"
 #include "platform/d3d11/shader_d3d11.h"
 #include "platform/d3d11/vertex_layout_d3d11.h"
 #include "platform/d3d11/imgui_widget_d3d11.h"
@@ -102,6 +103,7 @@ class PPGE_API RendererSystemD3D11 : public RendererSystem
     friend VertexBufferD3D11;
     friend VertexLayoutD3D11;
     friend IndexBufferD3D11;
+    friend TextureD3D11;
     friend ShaderD3D11;
     friend ProgramD3D11;
     friend ImGuiWidgetD3D11;

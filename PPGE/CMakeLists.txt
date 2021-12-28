@@ -133,7 +133,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 
 if (WIN32)
     target_compile_definitions(${PROJECT_NAME} PUBLIC PPGE_PLATFORM_WIN)
-    target_link_libraries(${PROJECT_NAME} PRIVATE d3dcompiler.lib dxgi.lib d3d11.lib d3d12.lib)
+    target_link_libraries(${PROJECT_NAME} PRIVATE simpletexture d3dcompiler.lib dxgi.lib d3d11.lib d3d12.lib)
 elseif(APPLE)
     target_compile_definitions(${PROJECT_NAME} PUBLIC PPGE_PLATFORM_APPLE)
 elseif(UNIX)

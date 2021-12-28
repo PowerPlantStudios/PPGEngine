@@ -3,10 +3,11 @@
 
 #include "core/defines.h"
 #include "platform/d3d11/buffer_d3d11.h"
-#include "platform/d3d11/texture_d3d11.h"
-#include "platform/d3d11/shader_d3d11.h"
-#include "platform/d3d11/vertex_layout_d3d11.h"
 #include "platform/d3d11/imgui_widget_d3d11.h"
+#include "platform/d3d11/sampler_d3d11.h"
+#include "platform/d3d11/shader_d3d11.h"
+#include "platform/d3d11/texture_d3d11.h"
+#include "platform/d3d11/vertex_layout_d3d11.h"
 #include "system/logger_system.h"
 #include "system/renderer_system.h"
 
@@ -54,7 +55,13 @@ class PPGE_API RendererSystemD3D11 : public RendererSystem
     bool ReleaseIndexBuffer(IndexBufferHandle handle) override;
 
     bool CreateTexture(const TextureDesc &desc, TextureHandle handle) override;
+    bool CreateTexture(const Texture2DDesc &desc, TextureHandle handle) override;
+    bool CreateTexture(const Texture3DDesc &desc, TextureHandle handle) override;
+    bool CreateTexture(const TextureResurceDesc &desc, TextureHandle handle) override;
     bool ReleaseTexture(TextureHandle handle) override;
+
+    bool CreateSampler(const SamplerDesc &desc, SamplerHandle handle) override;
+    bool ReleaseSampler(SamplerHandle handle) override;
 
     bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) override;
     bool ReleaseProgram(ProgramHandle handle) override;
@@ -88,6 +95,8 @@ class PPGE_API RendererSystemD3D11 : public RendererSystem
     std::array<VertexBufferD3D11, PPGE_RENDERER_MAX_VERTEX_BUFFERS> m_vertex_buffers;
     std::array<VertexLayoutD3D11, PPGE_RENDERER_MAX_VERTEX_LAYOUTS> m_vertex_layouts;
     std::array<IndexBufferD3D11, PPGE_RENDERER_MAX_INDEX_BUFFERS> m_index_buffers;
+    std::array<TextureD3D11, PPGE_RENDERER_MAX_TEXTURES> m_textures;
+    std::array<SamplerD3D11, PPGE_RENDERER_MAX_SAMPLER> m_samplers;
     std::array<ShaderD3D11, PPGE_RENDERER_MAX_SHADERS> m_shaders;
     std::array<BufferD3D11, PPGE_RENDERER_MAX_UNIFORMS> m_uniforms;
     std::array<BufferD3D11, PPGE_RENDERER_PREDEFINED_UNIFORMS> m_predefined_uniforms;
@@ -104,6 +113,7 @@ class PPGE_API RendererSystemD3D11 : public RendererSystem
     friend VertexLayoutD3D11;
     friend IndexBufferD3D11;
     friend TextureD3D11;
+    friend SamplerD3D11;
     friend ShaderD3D11;
     friend ProgramD3D11;
     friend ImGuiWidgetD3D11;

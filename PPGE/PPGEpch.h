@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cstdint>
 #include <deque>
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -21,10 +22,10 @@
 // Platform dependent libraries
 #if defined(PPGE_PLATFORM_WIN)
 // Windows libraries
-#include <Windows.h>
-#include <d3d11.h>
 #include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
+#include <Windows.h>
+#include <d3d11.h>
 #elif defined(PPGE_PLATFORM_UNIX)
 // Linux libraries
 #include <signal.h>
@@ -33,6 +34,8 @@
 #endif
 
 // Commonly used (mostly unchanged) PPGE third party libraries
+// ImGui includes
+#include <imgui.h>
 
 // Logger includes
 // Do not change order of the includes

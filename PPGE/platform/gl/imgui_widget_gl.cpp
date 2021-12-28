@@ -4,7 +4,6 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
-#include <imgui.h>
 
 #include "system/display_system.h"
 

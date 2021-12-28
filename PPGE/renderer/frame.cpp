@@ -47,13 +47,30 @@ void Frame::UpdateObjectUniform(UniformHandle handle, Subresource subresource)
     draw_data.PushUniformUpdate(handle, sr);
 }
 
-void Frame::SetObjectUniform(UniformHandle handle, UniformDesc::Target target, uint8_t slot)
+void Frame::SetObjectUniform(UniformHandle handle, ShaderResourceTarget target, uint8_t slot)
 {
     PPGE_ASSERT(handle.IsValid(),
-                "Adding index buffer handle to frame has failed. Handle to index buffer is not valid.");
+                "Adding per object uniform to frame has failed. Handle to uniform is not valid.");
     PPGE_ASSERT(!ReachedDrawCallLimit(), "Number of draw calls per frame has exceeded maximum limit.");
     DrawData &draw_data = m_draw_data[m_num_of_draw_calls];
     draw_data.PushUniformBind(handle, target, slot);
+}
+
+void Frame::SetObjectTexture(TextureHandle handle, ShaderResourceTarget target, uint8_t slot)
+{
+    PPGE_ASSERT(handle.IsValid(),
+                "Adding per object texture to frame has failed. Handle to texture is not valid.");
+    PPGE_ASSERT(!ReachedDrawCallLimit(), "Number of draw calls per frame has exceeded maximum limit.");
+    DrawData &draw_data = m_draw_data[m_num_of_draw_calls];
+    draw_data.PushTextureBind(handle, target, slot);
+}
+
+void Frame::SetObjectSampler(SamplerHandle handle, ShaderResourceTarget target, uint8_t slot)
+{
+    PPGE_ASSERT(handle.IsValid(), "Adding per object sampler to frame has failed. Handle to sampler is not valid.");
+    PPGE_ASSERT(!ReachedDrawCallLimit(), "Number of draw calls per frame has exceeded maximum limit.");
+    DrawData &draw_data = m_draw_data[m_num_of_draw_calls];
+    draw_data.PushSamplerBind(handle, target, slot);
 }
 
 void Frame::Submit(ProgramHandle handle)

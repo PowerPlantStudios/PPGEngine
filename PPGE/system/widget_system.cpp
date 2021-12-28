@@ -68,9 +68,9 @@ void WidgetSystem::Update(float delta_time)
     if (b_imgui_layer_enabled)
     {
         m_imgui_widget->ImGuiBegin();
+        for (auto &widget : m_widgets)
         {
-            for (auto &widget : m_widgets)
-                widget->OnImGui();
+            widget->OnImGui();
         }
         m_imgui_widget->ImGuiEnd();
     }
@@ -78,7 +78,11 @@ void WidgetSystem::Update(float delta_time)
 
 void WidgetSystem::OnInputEvent(InputEvent &input_event)
 {
-    m_imgui_widget->OnInputEvent(input_event);
+    if (b_imgui_layer_enabled)
+    {
+        m_imgui_widget->OnInputEvent(input_event);
+    }
+
     if (!input_event.Handled())
     {
         for (auto &widget : m_widgets)
@@ -93,7 +97,11 @@ void WidgetSystem::OnInputEvent(InputEvent &input_event)
 
 void WidgetSystem::OnApplicationEvent(ApplicationEvent &application_event)
 {
-    m_imgui_widget->OnApplicationEvent(application_event);
+    if (b_imgui_layer_enabled)
+    {
+        m_imgui_widget->OnApplicationEvent(application_event);
+    }
+
     if (!application_event.Handled())
     {
         for (auto &widget : m_widgets)

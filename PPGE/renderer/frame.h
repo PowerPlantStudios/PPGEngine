@@ -8,43 +8,73 @@
 
 namespace PPGE
 {
-struct UniformUpdate
+template <class Handle> struct UpdatableResource
 {
-    UniformHandle un_handle;
+    Handle handle;
     Subresource subresource;
 };
 
-struct UniformBind
+template <class Handle> struct BindableShaderResource
 {
-    UniformHandle un_handle;
-    UniformDesc::Target target;
+    Handle handle;
+    ShaderResourceTarget target;
     uint8_t slot;
 };
 
 struct DrawData
 {
+    using UniformUpdate = UpdatableResource<UniformHandle>;
+
+    using UniformBind = BindableShaderResource<UniformHandle>;
+    using TextureBind = BindableShaderResource<TextureHandle>;
+    using SamplerBind = BindableShaderResource<SamplerHandle>;
+
     VertexBufferHandle vb_handle;
     VertexLayoutHandle ly_handle;
     IndexBufferHandle ib_handle;
     ProgramHandle pg_handle;
+
     UniformUpdate un_updates[10];
     uint8_t un_update_count = 0;
+
     UniformBind un_binds[10];
     uint8_t un_bind_count = 0;
+    TextureBind tex_binds[10];
+    uint8_t tex_bind_count = 0;
+    SamplerBind sp_binds[10];
+    uint8_t sp_bind_count = 0;
 
     void PushUniformUpdate(UniformHandle handle, Subresource subresource)
     {
         PPGE_ASSERT(un_update_count < 10, "Number of per object uniform update has exceeded the maximum limit.");
         UniformUpdate &update = un_updates[un_update_count++];
-        update.un_handle = handle;
+        update.handle = handle;
         update.subresource = subresource;
     }
 
-    void PushUniformBind(UniformHandle handle, UniformDesc::Target target, uint8_t slot)
+    void PushUniformBind(UniformHandle handle, ShaderResourceTarget target, uint8_t slot)
     {
         PPGE_ASSERT(un_bind_count < 10, "Number of per object uniform bind has exceeded the maximum limit.");
         UniformBind &update = un_binds[un_bind_count++];
-        update.un_handle = handle;
+        update.handle = handle;
+        update.target = target;
+        update.slot = slot;
+    }
+
+    void PushTextureBind(TextureHandle handle, ShaderResourceTarget target, uint8_t slot)
+    {
+        PPGE_ASSERT(tex_bind_count < 10, "Number of per object texture bind has exceeded the maximum limit.");
+        TextureBind &update = tex_binds[tex_bind_count++];
+        update.handle = handle;
+        update.target = target;
+        update.slot = slot;
+    }
+
+    void PushSamplerBind(SamplerHandle handle, ShaderResourceTarget target, uint8_t slot)
+    {
+        PPGE_ASSERT(sp_bind_count < 10, "Number of per object sampler bind has exceeded the maximum limit.");
+        SamplerBind &update = sp_binds[sp_bind_count++];
+        update.handle = handle;
         update.target = target;
         update.slot = slot;
     }
@@ -53,6 +83,8 @@ struct DrawData
     {
         un_update_count = 0;
         un_bind_count = 0;
+        tex_bind_count = 0;
+        sp_bind_count = 0;
     }
 };
 
@@ -63,7 +95,9 @@ class Frame
     void SetVertexLayoutHandle(VertexLayoutHandle handle);
     void SetIndexBufferHandle(IndexBufferHandle handle);
     void UpdateObjectUniform(UniformHandle handle, Subresource subresource);
-    void SetObjectUniform(UniformHandle handle, UniformDesc::Target target, uint8_t slot);
+    void SetObjectUniform(UniformHandle handle, ShaderResourceTarget target, uint8_t slot);
+    void SetObjectTexture(TextureHandle handle, ShaderResourceTarget target, uint8_t slot);
+    void SetObjectSampler(SamplerHandle handle, ShaderResourceTarget target, uint8_t slot);
     void Submit(ProgramHandle handle);
 
     void Reset()

@@ -10,7 +10,6 @@
 #endif
 
 #include "platform/win32/input_codes_win32.h"
-#include "system/renderer_system.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -34,12 +33,14 @@ std::tuple<float, float> DisplaySystemWin32::GetMousePosition()
 
 bool DisplaySystemWin32::IsKeyPressed(const KeyCode code)
 {
-    return GetKeyState(static_cast<int>(Win32_Key_Codes[static_cast<size_t>(code)])) & 0x8000;
+    return m_props.window_attributes[static_cast<size_t>(WindowProps::AttributeTag::FOCUSED)] &&
+           GetKeyState(static_cast<int>(Win32_Key_Codes[static_cast<size_t>(code)])) & 0x8000;
 }
 
 bool DisplaySystemWin32::IsMouseButtonPressed(const MouseCode code)
 {
-    return GetKeyState(static_cast<int>(Win32_Mouse_Codes[static_cast<size_t>(code)])) & 0x8000;
+    return m_props.window_attributes[static_cast<size_t>(WindowProps::AttributeTag::FOCUSED)] &&
+           GetKeyState(static_cast<int>(Win32_Mouse_Codes[static_cast<size_t>(code)])) & 0x8000;
 }
 
 float DisplaySystemWin32::GetMouseX()
@@ -56,7 +57,7 @@ float DisplaySystemWin32::GetMouseY()
 
 WindowProps::AttributeValue DisplaySystemWin32::GetWindowAttribute(WindowProps::AttributeTag attribute) const
 {
-    return 0;
+    return m_props.window_attributes[static_cast<size_t>(attribute)];
 }
 
 void DisplaySystemWin32::SetWindowAttribute(WindowProps::AttributeTag attribute, WindowProps::AttributeValue value)
@@ -74,15 +75,17 @@ void DisplaySystemWin32::SetWindowMode(WindowProps::WindowMode mode)
 
 bool DisplaySystemWin32::IsVsyncEnabled() const
 {
-    return true;
+    return m_props.vSync;
 }
 
 void DisplaySystemWin32::EnableVsync()
 {
+    m_props.vSync = true;
 }
 
 void DisplaySystemWin32::DisableVsync()
 {
+    m_props.vSync = false;
 }
 
 bool DisplaySystemWin32::IsMinimized() const
@@ -194,9 +197,6 @@ void DisplaySystemWin32::ShutDown()
 
 LRESULT DisplaySystemWin32::WinProc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param)
 {
-    if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, w_param, l_param))
-        return true;
-
     DisplaySystemWin32 *window = nullptr;
 
     if (msg == WM_CREATE)
@@ -218,6 +218,9 @@ LRESULT DisplaySystemWin32::WinProc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM 
 
 LRESULT DisplaySystemWin32::HandleMessage(UINT msg, WPARAM w_param, LPARAM l_param)
 {
+    if (ImGui_ImplWin32_WndProcHandler(m_hwnd, msg, w_param, l_param))
+        return 1;
+
     switch (msg)
     {
     case WM_CLOSE: {
@@ -250,7 +253,6 @@ LRESULT DisplaySystemWin32::HandleMessage(UINT msg, WPARAM w_param, LPARAM l_par
             WindowRestoredEvent event;
             m_props.application_event_callback(event);
         }
-        RendererSystem::Get().OnResize();
         break;
     }
     case WM_MOVE: {

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(Sandbox VERSION 0.0.1 LANGUAGES CXX)
 
 include_directories(
+    ${DEPENDENCIES_DIR}/imgui/src
     ${DEPENDENCIES_DIR}/spdlog/include
     ${DEPENDENCIES_DIR}/math/simplemath/include)
 if(WIN32)

@@ -55,7 +55,7 @@ struct PredefinedUniform
 
     UniformHandle handle;
     Subresource subresource;
-    UniformDesc::Target target;
+    ShaderResourceTarget target;
     uint8_t slot;
 };
 
@@ -81,7 +81,13 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
     virtual bool ReleaseIndexBuffer(IndexBufferHandle handle) = 0;
 
     virtual bool CreateTexture(const TextureDesc &desc, TextureHandle handle) = 0;
+    virtual bool CreateTexture(const Texture2DDesc &desc, TextureHandle handle) = 0;
+    virtual bool CreateTexture(const Texture3DDesc &desc, TextureHandle handle) = 0;
+    virtual bool CreateTexture(const TextureResurceDesc &desc, TextureHandle handle) = 0;
     virtual bool ReleaseTexture(TextureHandle handle) = 0;
+
+    virtual bool CreateSampler(const SamplerDesc &desc, SamplerHandle handle) = 0;
+    virtual bool ReleaseSampler(SamplerHandle handle) = 0;
 
     virtual bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) = 0;
     virtual bool ReleaseProgram(ProgramHandle handle) = 0;

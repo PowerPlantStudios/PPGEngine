@@ -43,14 +43,20 @@ class PPGE_API RendererSystemGL : public RendererSystem
     bool ReleaseIndexBuffer(IndexBufferHandle handle) override;
 
     bool CreateTexture(const TextureDesc &desc, TextureHandle handle) override;
+    bool CreateTexture(const Texture2DDesc &desc, TextureHandle handle) override;
+    bool CreateTexture(const Texture3DDesc &desc, TextureHandle handle) override;
+    bool CreateTexture(const TextureResurceDesc &desc, TextureHandle handle) override;
     bool ReleaseTexture(TextureHandle handle) override;
+
+    bool CreateSampler(const SamplerDesc &desc, SamplerHandle handle) override;
+    bool ReleaseSampler(SamplerHandle handle) override;
 
     bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) override;
     bool ReleaseProgram(ProgramHandle handle) override;
 
     bool CreateShader(const ShaderDesc &desc, ShaderHandle handle) override;
     bool ReleaseShader(ShaderHandle handle) override;
-    
+
     bool CreateUniform(const UniformDesc &desc, UniformHandle handle) override;
     bool ReleaseUniform(UniformHandle handle) override;
 

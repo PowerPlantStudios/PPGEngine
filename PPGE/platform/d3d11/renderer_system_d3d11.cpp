@@ -124,6 +124,8 @@ void RendererSystemD3D11::StartUp(const RendererSystemProps &props)
     m_vertex_buffers.fill(VertexBufferD3D11());
     m_vertex_layouts.fill(VertexLayoutD3D11());
     m_index_buffers.fill(IndexBufferD3D11());
+    m_textures.fill(TextureD3D11());
+    m_samplers.fill(SamplerD3D11());
     m_shaders.fill(ShaderD3D11());
     m_uniforms.fill(BufferD3D11());
     m_predefined_uniforms.fill(BufferD3D11());
@@ -145,6 +147,12 @@ void RendererSystemD3D11::ShutDown()
 
     for (auto &ib : m_index_buffers)
         ib.Destroy();
+
+    for (auto &tex : m_textures)
+        tex.Destroy();
+
+    for (auto &samp : m_samplers)
+        samp.Destroy();
 
     for (auto &sh : m_shaders)
         sh.Destroy();
@@ -271,12 +279,46 @@ bool RendererSystemD3D11::ReleaseIndexBuffer(IndexBufferHandle handle)
 
 bool RendererSystemD3D11::CreateTexture(const TextureDesc &desc, TextureHandle handle)
 {
-    return false;
+    TextureD3D11 &texture = m_textures[handle.idx];
+    return texture.Create(desc);
+}
+
+bool RendererSystemD3D11::CreateTexture(const Texture2DDesc &desc, TextureHandle handle)
+{
+    TextureD3D11 &texture = m_textures[handle.idx];
+    return texture.Create(desc);
+}
+
+bool RendererSystemD3D11::CreateTexture(const Texture3DDesc &desc, TextureHandle handle)
+{
+    TextureD3D11 &texture = m_textures[handle.idx];
+    return texture.Create(desc);
+}
+
+bool RendererSystemD3D11::CreateTexture(const TextureResurceDesc &desc, TextureHandle handle)
+{
+    TextureD3D11 &texture = m_textures[handle.idx];
+    return texture.Create(desc);
 }
 
 bool RendererSystemD3D11::ReleaseTexture(TextureHandle handle)
 {
-    return false;
+    TextureD3D11 &texture = m_textures[handle.idx];
+    texture.Destroy();
+    return true;
+}
+
+bool RendererSystemD3D11::CreateSampler(const SamplerDesc &desc, SamplerHandle handle)
+{
+    SamplerD3D11 &samplers = m_samplers[handle.idx];
+    return samplers.Create(desc);
+}
+
+bool RendererSystemD3D11::ReleaseSampler(SamplerHandle handle)
+{
+    SamplerD3D11 &samplers = m_samplers[handle.idx];
+    samplers.Destroy();
+    return true;
 }
 
 bool RendererSystemD3D11::CreateProgram(const ProgramDesc &desc, ProgramHandle handle)
@@ -366,8 +408,8 @@ bool RendererSystemD3D11::Submit(const Frame &frame)
 
         for (uint8_t i = 0; i < draw_data.un_update_count; ++i)
         {
-            const UniformUpdate &un_update = draw_data.un_updates[i];
-            UniformHandle un_handle = un_update.un_handle;
+            const DrawData::UniformUpdate &un_update = draw_data.un_updates[i];
+            UniformHandle un_handle = un_update.handle;
             PPGE_ASSERT(un_handle.IsValid(), "Invalid handle to uniform is passed.");
 
             BufferD3D11 &c_buffer = m_uniforms[un_handle.idx];
@@ -376,12 +418,32 @@ bool RendererSystemD3D11::Submit(const Frame &frame)
 
         for (uint8_t i = 0; i < draw_data.un_bind_count; ++i)
         {
-            const UniformBind &un_bind = draw_data.un_binds[i];
-            UniformHandle un_handle = un_bind.un_handle;
+            const DrawData::UniformBind &un_bind = draw_data.un_binds[i];
+            UniformHandle un_handle = un_bind.handle;
             PPGE_ASSERT(un_handle.IsValid(), "Invalid handle to uniform is passed.");
 
             BufferD3D11 &c_buffer = m_uniforms[un_handle.idx];
             c_buffer.Set(un_bind.target, un_bind.slot);
+        }
+
+        for (uint8_t i = 0; i < draw_data.tex_bind_count; ++i)
+        {
+            const DrawData::TextureBind &tex_bind = draw_data.tex_binds[i];
+            TextureHandle tex_handle = tex_bind.handle;
+            PPGE_ASSERT(tex_handle.IsValid(), "Invalid handle to texture is passed.");
+
+            TextureD3D11 &texture = m_textures[tex_handle.idx];
+            texture.Set(tex_bind.target, tex_bind.slot);
+        }
+
+        for (uint8_t i = 0; i < draw_data.sp_bind_count; ++i)
+        {
+            const DrawData::SamplerBind &sp_bind = draw_data.sp_binds[i];
+            SamplerHandle sp_handle = sp_bind.handle;
+            PPGE_ASSERT(sp_handle.IsValid(), "Invalid handle to sampler is passed.");
+
+            SamplerD3D11 &sampler = m_samplers[sp_handle.idx];
+            sampler.Set(sp_bind.target, sp_bind.slot);
         }
 
         if (m_current_vb != vb_handle)

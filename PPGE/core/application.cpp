@@ -60,10 +60,10 @@ void Application::Run()
         float delta_time = m_game_timer.GetDeltaTime();
 
         DisplaySystem::Get().Update();
-        RendererSystem::Get().ClearColor(0.15, 0.15, 0.25);
-        RendererSystem::Get().ClearDepthStencilBuffer(1.0, 0);
         WidgetSystem::Get().Update(delta_time);
         RendererSystem::Get().Update();
+        RendererSystem::Get().ClearColor(0.15, 0.15, 0.25);
+        RendererSystem::Get().ClearDepthStencilBuffer(1.0, 0);
     }
 }
 
@@ -94,6 +94,8 @@ bool Application::OnWindowResize(WindowResizeEvent &)
         m_game_timer.Pause();
     else
         m_game_timer.Resume();
+
+    RendererSystem::Get().OnResize();
 
     return true;
 }

@@ -9,6 +9,7 @@ HandleAllocator<VertexBufferHandle> Renderer::s_vb_handle_alloc;
 HandleAllocator<VertexLayoutHandle> Renderer::s_layout_handle_alloc;
 HandleAllocator<IndexBufferHandle> Renderer::s_ib_handle_alloc;
 HandleAllocator<TextureHandle> Renderer::s_texture_handle_alloc;
+HandleAllocator<SamplerHandle> Renderer::s_sampler_handle_alloc;
 HandleAllocator<ShaderHandle> Renderer::s_shader_handle_alloc;
 HandleAllocator<ProgramHandle> Renderer::s_program_handle_alloc;
 HandleAllocator<UniformHandle> Renderer::s_uniform_handle_alloc;
@@ -26,7 +27,7 @@ void Renderer::BeginScene(const SceneData &scene_data)
     pred_un.handle = UniformHandle{static_cast<uint8_t>(PredefinedUniform::Transform0)};
     pred_un.subresource.m_pData = &vs_per_frame_data;
     pred_un.subresource.m_size = sizeof(VSPerFrameData);
-    pred_un.target = UniformDesc::Target::VS;
+    pred_un.target = ShaderResourceTarget::VS;
     pred_un.slot = 0;
     bool result = RendererSystem::Get().SetPredefinedUniform(pred_un);
     PPGE_ASSERT(result, "Setting predefined uniform has failed.");
@@ -68,7 +69,7 @@ void Renderer::SetVertexBuffer(VertexBufferHandle handle)
                 "Vertex layout associated with vertex buffer cannot be found.");
     s_frame_data.SetVertexLayoutHandle(search->second);
 }
-void Renderer::ReleaseVertexBuffer(VertexBufferHandle &handle)
+void Renderer::ReleaseVertexBuffer(VertexBufferHandle handle)
 {
     PPGE_ASSERT(handle.IsValid(), "Invalid handle to vertex buffer is passed for releasing resource.");
     bool result = RendererSystem::Get().ReleaseVertexBuffer(handle);
@@ -116,7 +117,7 @@ void Renderer::SetIndexBuffer(IndexBufferHandle handle)
     PPGE_ASSERT(handle.IsValid(), "Invalid handle to index buffer is passed for binding resource.");
     s_frame_data.SetIndexBufferHandle(handle);
 }
-void Renderer::ReleaseIndexBuffer(IndexBufferHandle &handle)
+void Renderer::ReleaseIndexBuffer(IndexBufferHandle handle)
 {
     PPGE_ASSERT(handle.IsValid(), "Invalid handle to index buffer is passed for releasing resource.");
     bool result = RendererSystem::Get().ReleaseIndexBuffer(handle);
@@ -135,16 +136,77 @@ TextureHandle Renderer::CreateTexture(const TextureDesc &desc)
     }
     return handle;
 }
-void Renderer::SetTexture(TextureHandle handle, TextureDesc::Sampler sampler)
+TextureHandle Renderer::CreateTexture(const Texture2DDesc &desc)
+{
+    TextureHandle handle = s_texture_handle_alloc.GetNext();
+    PPGE_ASSERT(handle.IsValid(), "No handle is available to create texture resource.");
+    if (!RendererSystem::Get().CreateTexture(desc, handle))
+    {
+        PPGE_ASSERT(false, "Creating renderer resource has failed for texture.");
+        s_texture_handle_alloc.Restore(handle);
+        handle = TextureHandle{};
+    }
+    return handle;
+}
+TextureHandle Renderer::CreateTexture(const Texture3DDesc &desc)
+{
+    TextureHandle handle = s_texture_handle_alloc.GetNext();
+    PPGE_ASSERT(handle.IsValid(), "No handle is available to create texture resource.");
+    if (!RendererSystem::Get().CreateTexture(desc, handle))
+    {
+        PPGE_ASSERT(false, "Creating renderer resource has failed for texture.");
+        s_texture_handle_alloc.Restore(handle);
+        handle = TextureHandle{};
+    }
+    return handle;
+}
+TextureHandle Renderer::CreateTexture(const TextureResurceDesc &desc)
+{
+    TextureHandle handle = s_texture_handle_alloc.GetNext();
+    PPGE_ASSERT(handle.IsValid(), "No handle is available to create texture resource.");
+    if (!RendererSystem::Get().CreateTexture(desc, handle))
+    {
+        PPGE_ASSERT(false, "Creating renderer resource has failed for texture.");
+        s_texture_handle_alloc.Restore(handle);
+        handle = TextureHandle{};
+    }
+    return handle;
+}
+void Renderer::SetTexture(TextureHandle handle, ShaderResourceTarget target, uint8_t slot)
 {
     PPGE_ASSERT(handle.IsValid(), "Invalid handle to texture is passed for binding resource.");
+    s_frame_data.SetObjectTexture(handle, target, slot);
 }
-void Renderer::ReleaseTexture(TextureHandle &handle)
+void Renderer::ReleaseTexture(TextureHandle handle)
 {
     PPGE_ASSERT(handle.IsValid(), "Invalid handle to texture is passed for releasing resource.");
     bool result = RendererSystem::Get().ReleaseTexture(handle);
     PPGE_ASSERT(result, "Releasing renderer resource has failed for texture.");
     s_texture_handle_alloc.Restore(handle);
+}
+SamplerHandle Renderer::CreateSampler(const SamplerDesc &desc)
+{
+    SamplerHandle handle = s_sampler_handle_alloc.GetNext();
+    PPGE_ASSERT(handle.IsValid(), "No handle is available to create sampler.");
+    if (!RendererSystem::Get().CreateSampler(desc, handle))
+    {
+        PPGE_ASSERT(false, "Creating renderer resource has failed for sampler.");
+        s_sampler_handle_alloc.Restore(handle);
+        handle = SamplerHandle{};
+    }
+    return handle;
+}
+void Renderer::SetSampler(SamplerHandle handle, ShaderResourceTarget target, uint8_t slot)
+{
+    PPGE_ASSERT(handle.IsValid(), "Invalid handle to sampler is passed for binding resource.");
+    s_frame_data.SetObjectSampler(handle, target, slot);
+}
+void Renderer::ReleaseSampler(SamplerHandle handle)
+{
+    PPGE_ASSERT(handle.IsValid(), "Invalid handle to sampler is passed for releasing resource.");
+    bool result = RendererSystem::Get().ReleaseSampler(handle);
+    PPGE_ASSERT(result, "Releasing renderer resource has failed for sampler.");
+    s_sampler_handle_alloc.Restore(handle);
 }
 ShaderHandle Renderer::CreateShader(const ShaderDesc &desc)
 {
@@ -188,7 +250,7 @@ void Renderer::UpdateUniform(UniformHandle handle, const Subresource &subresourc
     PPGE_ASSERT(subresource.m_size <= 1024, "Single per object uniform uniform size limit has exceeded.");
     s_frame_data.UpdateObjectUniform(handle, subresource);
 }
-void Renderer::SetUniform(UniformHandle handle, UniformDesc::Target target, uint8_t slot)
+void Renderer::SetUniform(UniformHandle handle, ShaderResourceTarget target, uint8_t slot)
 {
     PPGE_ASSERT(handle.IsValid(), "Invalid handle to uniform is passed for binding resource.");
     s_frame_data.SetObjectUniform(handle, target, slot);

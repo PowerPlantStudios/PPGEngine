@@ -84,7 +84,32 @@ bool RendererSystemGL::CreateTexture(const TextureDesc &desc, TextureHandle hand
     return false;
 }
 
+bool RendererSystemGL::CreateTexture(const Texture2DDesc &desc, TextureHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateTexture(const Texture3DDesc &desc, TextureHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateTexture(const TextureResurceDesc &desc, TextureHandle handle)
+{
+    return false;
+}
+
 bool RendererSystemGL::ReleaseTexture(TextureHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::CreateSampler(const SamplerDesc &desc, SamplerHandle handle)
+{
+    return false;
+}
+
+bool RendererSystemGL::ReleaseSampler(SamplerHandle handle)
 {
     return false;
 }

@@ -17,21 +17,24 @@ cbuffer g_PerObject : register(b1)
 struct VertexIn
 {
 	float3 PosL  : POSITION;
+	float2 Tex   : TEXCOORD;
     float4 Color : COLOR;
 };
 
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
+    float2 Tex   : TEXCOORD;
     float4 Color : COLOR;
 };
 
 VertexOut main(VertexIn vin)
 {
 	VertexOut vout;
-	vout.PosH = float4(vin.PosL, 1.0f);
-    vout.PosH = mul(vout.PosH, world);
-    vout.PosH = mul(vout.PosH, viewProj);
+	vout.PosH  = float4(vin.PosL, 1.0f);
+    vout.PosH  = mul(vout.PosH, world);
+    vout.PosH  = mul(vout.PosH, viewProj);
+    vout.Tex   = vin.Tex;
 	vout.Color = vin.Color; 
     return vout;
 }
@@ -39,15 +42,20 @@ VertexOut main(VertexIn vin)
 
 static std::string_view ps_code_1 =
     R"(
+Texture2D g_crateTexture : register(t0);
+
+SamplerState g_sampler : register(s0);
+
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
+    float2 Tex   : TEXCOORD;
     float4 Color : COLOR;
 };
 
 float4 main(VertexOut pin) : SV_Target
 {
-    return pin.Color;
+   return g_crateTexture.Sample(g_sampler, pin.Tex);
 }
 )";
 
@@ -162,11 +170,16 @@ class TestLayer : public PPGE::Widget
     PPGE::UniformHandle m_model;
     PPGE::RenderStates m_rendererstates;
     PPGE::SceneData m_scenedata;
+    PPGE::TextureHandle m_textures[2];
+    PPGE::SamplerHandle m_sampler;
 
     CameraController m_camera_controller;
 
     float m_mouse_x, m_mouse_y;
     float m_sping_angle;
+
+    const char *m_texture_list[2] = {"PPGE", "Brick"};
+    int m_current_texture = 0;
 
   public:
     TestLayer()
@@ -184,17 +197,30 @@ class TestLayer : public PPGE::Widget
             float m_x;
             float m_y;
             float m_z;
+            int16_t u;
+            int16_t v;
             uint32_t m_abgr;
         };
 
-        PosColorVertex tri_vertices[] = {{-1.0f, 1.0f, 1.0f, 0xffaaffff},   {1.0f, 1.0f, 1.0f, 0xffaaff66},
-                                         {-1.0f, -1.0f, 1.0f, 0xffffaaff},  {1.0f, -1.0f, 1.0f, 0xffffffaa},
-                                         {-1.0f, 1.0f, -1.0f, 0xffffffaa},  {1.0f, 1.0f, -1.0f, 0xffffaaff},
-                                         {-1.0f, -1.0f, -1.0f, 0xffaaff66}, {1.0f, -1.0f, -1.0f, 0xffaaffff}};
+        PosColorVertex tri_vertices[] = {
+            {-1.0f, 1.0f, 1.0f, 0, 0, 0xffaaffff},        {1.0f, 1.0f, 1.0f, 0x7fff, 0, 0xffffaaff},
+            {-1.0f, -1.0f, 1.0f, 0, 0x7fff, 0xffffffaa},  {1.0f, -1.0f, 1.0f, 0x7fff, 0x7fff, 0xffaaff66},
+            {-1.0f, 1.0f, -1.0f, 0, 0, 0xffaaffff},       {1.0f, 1.0f, -1.0f, 0x7fff, 0, 0xffffaaff},
+            {-1.0f, -1.0f, -1.0f, 0, 0x7fff, 0xffffffaa}, {1.0f, -1.0f, -1.0f, 0x7fff, 0x7fff, 0xffaaff66},
+            {-1.0f, 1.0f, 1.0f, 0, 0, 0xffaaffff},        {1.0f, 1.0f, 1.0f, 0x7fff, 0, 0xffffaaff},
+            {-1.0f, 1.0f, -1.0f, 0, 0x7fff, 0xffffffaa},  {1.0f, 1.0f, -1.0f, 0x7fff, 0x7fff, 0xffaaff66},
+            {-1.0f, -1.0f, 1.0f, 0, 0, 0xffaaffff},       {1.0f, -1.0f, 1.0f, 0x7fff, 0, 0xffffaaff},
+            {-1.0f, -1.0f, -1.0f, 0, 0x7fff, 0xffffffaa}, {1.0f, -1.0f, -1.0f, 0x7fff, 0x7fff, 0xffaaff66},
+            {1.0f, -1.0f, 1.0f, 0, 0, 0xffaaffff},        {1.0f, 1.0f, 1.0f, 0x7fff, 0, 0xffffaaff},
+            {1.0f, -1.0f, -1.0f, 0, 0x7fff, 0xffffffaa},  {1.0f, 1.0f, -1.0f, 0x7fff, 0x7fff, 0xffaaff66},
+            {-1.0f, -1.0f, 1.0f, 0, 0, 0xffaaffff},       {-1.0f, 1.0f, 1.0f, 0x7fff, 0, 0xffffaaff},
+            {-1.0f, -1.0f, -1.0f, 0, 0x7fff, 0xffffffaa}, {-1.0f, 1.0f, -1.0f, 0x7fff, 0x7fff, 0xffaaff66},
+        };
 
         PPGE::VertexBufferDesc vb_desc;
         vb_desc.m_layout =
             PPGE::VertexLayout{{PPGE::VertexLayout::Attribute::Position, PPGE::VertexLayout::Type::Float, 3},
+                               {PPGE::VertexLayout::Attribute::TexCoord0, PPGE::VertexLayout::Type::Int16, 2},
                                {PPGE::VertexLayout::Attribute::Color0, PPGE::VertexLayout::Type::Uint8, 4}};
 
         vb_desc.m_resource.m_pData = &tri_vertices;
@@ -202,13 +228,11 @@ class TestLayer : public PPGE::Widget
         m_vertexbuffer = PPGE::Renderer::CreateVertexBuffer(vb_desc);
 
         uint16_t tri_indices[] = {
-            0, 1, 2,          // 0
-            1, 3, 2, 4, 6, 5, // 2
-            5, 6, 7, 0, 2, 4, // 4
-            4, 2, 6, 1, 5, 3, // 6
-            5, 7, 3, 0, 4, 1, // 8
-            4, 5, 1, 2, 3, 6, // 10
-            6, 3, 7,
+            0,  1,  2,  1,  3,  2,  4,  6,  5,  5,  6,  7,
+
+            8,  10, 9,  9,  10, 11, 12, 13, 14, 13, 15, 14,
+
+            16, 17, 18, 17, 19, 18, 20, 22, 21, 21, 22, 23,
         };
 
         PPGE::IndexBufferDesc ib_desc;
@@ -239,12 +263,25 @@ class TestLayer : public PPGE::Widget
         un_desc.m_type = PPGE::UniformDesc::UniformType::Mat4;
         un_desc.m_num = 1;
         m_model = PPGE::Renderer::CreateUniform(un_desc);
+
+        PPGE::TextureResurceDesc tex_desc;
+        tex_desc.m_format = PPGE::TextureResurceDesc::FileFormat::PNG;
+        tex_desc.m_path = "D:/Workspace/PPGEngine/Sandbox/assets/textures/PPGE_logo.png";
+        m_textures[0] = PPGE::Renderer::CreateTexture(tex_desc);
+        tex_desc.m_path = "D:/Workspace/PPGEngine/Sandbox/assets/textures/darkbrick.bmp";
+        m_textures[1] = PPGE::Renderer::CreateTexture(tex_desc);
+
+        PPGE::SamplerDesc sp_desc;
+        m_sampler = PPGE::Renderer::CreateSampler(sp_desc);
     }
 
     void OnDetach() override
     {
         PPGE::Renderer::ReleaseVertexBuffer(m_vertexbuffer);
         PPGE::Renderer::ReleaseIndexBuffer(m_indexbuffer);
+        PPGE::Renderer::ReleaseUniform(m_model);
+        PPGE::Renderer::ReleaseTexture(m_textures[0]);
+        PPGE::Renderer::ReleaseTexture(m_textures[1]);
     }
 
     void OnUpdate(float delta_time) override
@@ -275,7 +312,7 @@ class TestLayer : public PPGE::Widget
             m_camera_controller.MoveLeft(delta_time);
         }
 
-        if (PPGE::Input::IsMouseButtonPressed(PPGE_MOUSE_BUTTON_0))
+        if (PPGE::Input::IsMouseButtonPressed(PPGE_MOUSE_BUTTON_0) && !ImGui::IsAnyItemActive())
         {
             m_camera_controller.RotatePitch(delta_time * delta_y);
             m_camera_controller.RotateYaw(delta_time * delta_x);
@@ -314,13 +351,41 @@ class TestLayer : public PPGE::Widget
                     subresource.m_pData = &modelData;
                     subresource.m_size = sizeof(modelData);
                     PPGE::Renderer::UpdateUniform(m_model, subresource);
-                    PPGE::Renderer::SetUniform(m_model, PPGE::UniformDesc::Target::VS, 1);
+                    PPGE::Renderer::SetUniform(m_model, PPGE::ShaderResourceTarget::VS, 1);
+
+                    PPGE::Renderer::SetTexture(m_textures[m_current_texture], PPGE::ShaderResourceTarget::PS, 0);
+                    PPGE::Renderer::SetSampler(m_sampler, PPGE::ShaderResourceTarget::PS, 0);
 
                     PPGE::Renderer::Submit(m_program);
                 }
             }
         }
         PPGE::Renderer::EndScene();
+    }
+
+    virtual void OnImGui()
+    {
+        static const char *current_texture = nullptr;
+
+        ImGui::Begin("An example window");
+        if (ImGui::BeginCombo("##Textures", current_texture))
+        {
+            for (int n = 0; n < 2; n++)
+            {
+                bool is_selected = (current_texture == m_texture_list[n]);
+                if (ImGui::Selectable(m_texture_list[n], is_selected))
+                {
+                    current_texture = m_texture_list[n];
+                    m_current_texture = n;
+                    if (m_current_texture > 1)
+                        m_current_texture = 0;
+                }
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::End();
     }
 
     void OnInputEvent(PPGE::InputEvent &inputEvent) override

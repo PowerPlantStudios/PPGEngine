@@ -84,7 +84,7 @@ DXGI_FORMAT GetLayoutFormat(VertexLayout::Type type, unsigned int noe)
         if (noe == 1)
             return DXGI_FORMAT_R16_UNORM;
         else if (noe == 2)
-            return DXGI_FORMAT_R16G16_UNORM;
+            return DXGI_FORMAT_R16G16_SNORM;
         else if (noe == 3 || noe == 4)
             return DXGI_FORMAT_R16G16B16A16_UNORM;
         else

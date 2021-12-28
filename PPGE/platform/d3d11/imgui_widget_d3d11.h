@@ -5,6 +5,8 @@
 
 namespace PPGE
 {
+class RendererSystemD3D11;
+
 class PPGE_API ImGuiWidgetD3D11 : public ImGuiWidget
 {
   public:
@@ -23,5 +25,8 @@ class PPGE_API ImGuiWidgetD3D11 : public ImGuiWidget
     void OnInputEvent(InputEvent &event) override;
 
     void OnApplicationEvent(ApplicationEvent &event) override;
+
+   private:
+    RendererSystemD3D11 *m_renderer;
 };
 } // namespace PPGE

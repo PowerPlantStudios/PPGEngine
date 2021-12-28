@@ -40,10 +40,18 @@ struct IndexBufferDesc : public BufferDesc
     unsigned int m_index_cout;
 };
 
-
 struct VertexBufferDesc : public BufferDesc
 {
     VertexLayout m_layout;
+};
+
+enum class ShaderResourceTarget
+{
+    VS,
+    HS,
+    DS,
+    GS,
+    PS
 };
 
 struct TextureDesc
@@ -74,24 +82,41 @@ struct TextureDesc
         D32F
     };
 
-    enum class Sampler
-    {
-        None = 0
-    };
-
     TextureFormat m_format;
+    void *m_data;
+    size_t m_width;
 };
 
 struct Texture2DDesc : public TextureDesc
 {
-    size_t m_width;
     size_t m_height;
-    void *m_data;
 };
 
 struct Texture3DDesc : public Texture2DDesc
 {
     size_t m_depth;
+};
+
+struct TextureResurceDesc
+{
+    enum class FileFormat
+    {
+        DDS = 0,
+        TGA,
+        HDR,
+        BMP,
+        JPEG,
+        PNG,
+        TIFF
+    };
+
+    FileFormat m_format;
+    std::filesystem::path m_path;
+};
+
+struct SamplerDesc
+{
+
 };
 
 struct ShaderDesc
@@ -111,17 +136,14 @@ struct ShaderDesc
     size_t m_size;
 };
 
+struct ProgramDesc
+{
+    ShaderHandle m_vertex_shader_handle;
+    ShaderHandle m_pixel_shader_handle;
+};
+
 struct UniformDesc
 {
-    enum class Target
-    {
-        VS,
-        HS,
-        DS,
-        GS,
-        PS
-    };
-
     enum class UniformType
     {
         Scalar,
@@ -135,11 +157,5 @@ struct UniformDesc
     const char *m_name;
     UniformType m_type;
     uint16_t m_num;
-};
-
-struct ProgramDesc
-{
-    ShaderHandle m_vertex_shader_handle;
-    ShaderHandle m_pixel_shader_handle;
 };
 } // namespace PPGE

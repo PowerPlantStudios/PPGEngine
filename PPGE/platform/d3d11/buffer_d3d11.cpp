@@ -50,26 +50,26 @@ void BufferD3D11::Update(const Subresource &res)
     m_renderer->m_immediate_context->Unmap(m_buffer, 0);
 }
 
-void BufferD3D11::Set(UniformDesc::Target target, uint8_t slot)
+void BufferD3D11::Set(ShaderResourceTarget target, uint8_t slot)
 {
     PPGE_ASSERT(m_renderer, "Binding D3D11 buffer to the pipeline has failed. RendererSystemD3D11 is inaccessible.");
 
     UINT number_of_buffer = 1;
     switch (target)
     {
-    case UniformDesc::Target::VS:
+    case ShaderResourceTarget::VS:
         m_renderer->m_immediate_context->VSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case UniformDesc::Target::HS:
+    case ShaderResourceTarget::HS:
         m_renderer->m_immediate_context->HSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case UniformDesc::Target::DS:
+    case ShaderResourceTarget::DS:
         m_renderer->m_immediate_context->DSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case UniformDesc::Target::GS:
+    case ShaderResourceTarget::GS:
         m_renderer->m_immediate_context->GSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
-    case UniformDesc::Target::PS:
+    case ShaderResourceTarget::PS:
         m_renderer->m_immediate_context->PSSetConstantBuffers(slot, number_of_buffer, &m_buffer);
         break;
     default:

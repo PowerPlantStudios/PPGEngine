@@ -26,22 +26,29 @@ class Renderer
 
     static VertexBufferHandle CreateVertexBuffer(const VertexBufferDesc &desc);
     static void SetVertexBuffer(VertexBufferHandle handle);
-    static void ReleaseVertexBuffer(VertexBufferHandle &handle);
+    static void ReleaseVertexBuffer(VertexBufferHandle handle);
 
     static IndexBufferHandle CreateIndexBuffer(const IndexBufferDesc &desc);
     static void SetIndexBuffer(IndexBufferHandle handle);
-    static void ReleaseIndexBuffer(IndexBufferHandle &handle);
+    static void ReleaseIndexBuffer(IndexBufferHandle handle);
 
     static TextureHandle CreateTexture(const TextureDesc &desc);
-    static void SetTexture(TextureHandle handle, TextureDesc::Sampler sampler);
-    static void ReleaseTexture(TextureHandle &handle);
+    static TextureHandle CreateTexture(const Texture2DDesc &desc);
+    static TextureHandle CreateTexture(const Texture3DDesc &desc);
+    static TextureHandle CreateTexture(const TextureResurceDesc &desc);
+    static void SetTexture(TextureHandle handle, ShaderResourceTarget target, uint8_t slot);
+    static void ReleaseTexture(TextureHandle handle);
+
+    static SamplerHandle CreateSampler(const SamplerDesc &desc);
+    static void SetSampler(SamplerHandle handle, ShaderResourceTarget target, uint8_t slot);
+    static void ReleaseSampler(SamplerHandle handle);
 
     static ShaderHandle CreateShader(const ShaderDesc &desc);
     static ProgramHandle CreateProgram(const ProgramDesc &desc);
 
     static UniformHandle CreateUniform(const UniformDesc &desc);
     static void UpdateUniform(UniformHandle handle, const Subresource &subresource);
-    static void SetUniform(UniformHandle handle, UniformDesc::Target target, uint8_t slot);
+    static void SetUniform(UniformHandle handle, ShaderResourceTarget target, uint8_t slot);
     static void ReleaseUniform(UniformHandle handle);
 
     static void SetRenderStates(const RenderStates &states);
@@ -64,6 +71,7 @@ class Renderer
     static HandleAllocator<VertexLayoutHandle> s_layout_handle_alloc;
     static HandleAllocator<IndexBufferHandle> s_ib_handle_alloc;
     static HandleAllocator<TextureHandle> s_texture_handle_alloc;
+    static HandleAllocator<SamplerHandle> s_sampler_handle_alloc;
     static HandleAllocator<ShaderHandle> s_shader_handle_alloc;
     static HandleAllocator<ProgramHandle> s_program_handle_alloc;
     static HandleAllocator<UniformHandle> s_uniform_handle_alloc;

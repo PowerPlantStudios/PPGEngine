@@ -19,7 +19,7 @@ class PPGE_API BufferD3D11
     void Destroy();
     bool Create(const BufferDesc &desc);
     void Update(const Subresource &res);
-    void Set(UniformDesc::Target target, uint8_t slot);
+    void Set(ShaderResourceTarget target, uint8_t slot);
 
     inline UINT GetBufferSize() const
     {

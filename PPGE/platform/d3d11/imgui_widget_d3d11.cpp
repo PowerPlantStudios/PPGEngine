@@ -11,58 +11,58 @@ namespace PPGE
 {
 void ImGuiWidgetD3D11::OnAttach()
 {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // Enable Multi-Viewport / Platform Windows
+    //IMGUI_CHECKVERSION();
+    //ImGui::CreateContext();
+    //ImGuiIO &io = ImGui::GetIO();
+    //(void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // Enable Multi-Viewport / Platform Windows
 
-    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsDark();
 
-    ImGuiStyle &style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
+    //ImGuiStyle &style = ImGui::GetStyle();
+    //if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    //{
+    //    style.WindowRounding = 0.0f;
+    //    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    //}
 
-    HWND window_handle = static_cast<HWND>(DisplaySystem::Get().GetNativeDisplayPtr());
-    ImGui_ImplWin32_Init(window_handle);
+    //HWND window_handle = static_cast<HWND>(DisplaySystem::Get().GetNativeDisplayPtr());
+    //ImGui_ImplWin32_Init(window_handle);
 
-    m_renderer = RendererSystem::GetRendererSystem<RendererSystemD3D11>();
-    ImGui_ImplDX11_Init(m_renderer->m_device, m_renderer->m_immediate_context);
+    //m_renderer = RendererSystem::GetRendererSystem<RendererSystemD3D11>();
+    //ImGui_ImplDX11_Init(m_renderer->m_device, m_renderer->m_immediate_context);
 }
 
 void ImGuiWidgetD3D11::OnDetach()
 {
-    ImGui_ImplDX11_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
+    //ImGui_ImplDX11_Shutdown();
+    //ImGui_ImplWin32_Shutdown();
+    //ImGui::DestroyContext();
 }
 
 void ImGuiWidgetD3D11::ImGuiBegin()
 {
-    ImGui_ImplDX11_NewFrame();
-    ImGui_ImplWin32_NewFrame();
-    ImGui::NewFrame();
+    //ImGui_ImplDX11_NewFrame();
+    //ImGui_ImplWin32_NewFrame();
+    //ImGui::NewFrame();
 }
 
 void ImGuiWidgetD3D11::ImGuiEnd()
 {
-    ImGui::Render();
-    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
-    }
+    //ImGui::Render();
+    //ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+    //ImGuiIO &io = ImGui::GetIO();
+    //(void)io;
+    //if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    //{
+    //    ImGui::UpdatePlatformWindows();
+    //    ImGui::RenderPlatformWindowsDefault();
+    //}
 
-    m_renderer->m_immediate_context->OMSetRenderTargets(1, &(m_renderer->m_render_target_view),
-                                                        m_renderer->m_depth_stencil_view);
+    //m_renderer->m_immediate_context->OMSetRenderTargets(1, &(m_renderer->m_render_target_view),
+    //                                                    m_renderer->m_depth_stencil_view);
 }
 
 void ImGuiWidgetD3D11::OnInputEvent(InputEvent &event)

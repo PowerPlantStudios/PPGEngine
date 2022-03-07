@@ -25,7 +25,8 @@
 #include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
 #include <Windows.h>
-#include <d3d11.h>
+#include <d3d11_4.h>
+#include <atlbase.h>
 #elif defined(PPGE_PLATFORM_UNIX)
 // Linux libraries
 #include <signal.h>

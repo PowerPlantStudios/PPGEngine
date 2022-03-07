@@ -12,7 +12,7 @@ namespace PPGE
 class PPGE_API RendererSystemGL : public RendererSystem
 {
   public:
-    RendererSystemGL() : m_window_ptr(nullptr)
+    RendererSystemGL()
     {
     }
     ~RendererSystemGL()
@@ -30,42 +30,10 @@ class PPGE_API RendererSystemGL : public RendererSystem
         return RendererAPI::OpenGL;
     }
 
-    bool ClearColor(float r, float g, float b) override;
-    bool ClearDepthStencilBuffer(float depth, uint8_t stencil) override;
+    PPGEDevice *GetDevice() override final;
 
-    bool CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle) override;
-    bool ReleaseVertexBuffer(VertexBufferHandle handle) override;
-
-    bool CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle) override;
-    bool ReleaseVertexLayout(VertexLayoutHandle handle) override;
-
-    bool CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle) override;
-    bool ReleaseIndexBuffer(IndexBufferHandle handle) override;
-
-    bool CreateTexture(const TextureDesc &desc, TextureHandle handle) override;
-    bool CreateTexture(const Texture2DDesc &desc, TextureHandle handle) override;
-    bool CreateTexture(const Texture3DDesc &desc, TextureHandle handle) override;
-    bool CreateTexture(const TextureResurceDesc &desc, TextureHandle handle) override;
-    bool ReleaseTexture(TextureHandle handle) override;
-
-    bool CreateSampler(const SamplerDesc &desc, SamplerHandle handle) override;
-    bool ReleaseSampler(SamplerHandle handle) override;
-
-    bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) override;
-    bool ReleaseProgram(ProgramHandle handle) override;
-
-    bool CreateShader(const ShaderDesc &desc, ShaderHandle handle) override;
-    bool ReleaseShader(ShaderHandle handle) override;
-
-    bool CreateUniform(const UniformDesc &desc, UniformHandle handle) override;
-    bool ReleaseUniform(UniformHandle handle) override;
-
-    bool SetPredefinedUniform(const PredefinedUniform &uniform) override;
-    bool SetRenderStates(const RenderStates &states) override;
-
-    bool Submit(const Frame &frame) override;
+    PPGEDeviceContext *GetImmediateContext() override final;
 
   private:
-    GLFWwindow *m_window_ptr;
 };
 } // namespace PPGE

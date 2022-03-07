@@ -2,10 +2,8 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/descriptors.h"
-#include "renderer/frame.h"
-#include "renderer/render_states.h"
-#include "renderer/renderer_handles.h"
+#include "renderer/device.h"
+#include "renderer/device_context.h"
 #include "system/isystem.h"
 #include "system/logger_system.h"
 
@@ -35,30 +33,6 @@ struct RendererSystemProps
     MSAAQuality msaa_quality = MSAAQuality::MSAA_4X;
 };
 
-struct PredefinedUniform
-{
-    enum Handle
-    {
-        Transform0 = 0,
-        Transform1,
-        Transform2,
-        Transform3,
-        Light0,
-        Light1,
-        Light2,
-        Light3,
-
-        // Reserved
-
-        Count = PPGE_RENDERER_PREDEFINED_UNIFORMS
-    };
-
-    UniformHandle handle;
-    Subresource subresource;
-    ShaderResourceTarget target;
-    uint8_t slot;
-};
-
 class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
 {
   public:
@@ -68,40 +42,9 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
 
     virtual RendererAPI GetRendererAPI() = 0;
 
-    virtual bool ClearColor(float r, float g, float b) = 0;
-    virtual bool ClearDepthStencilBuffer(float depth, uint8_t stencil) = 0;
+    virtual PPGEDevice *GetDevice() = 0;
 
-    virtual bool CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle) = 0;
-    virtual bool ReleaseVertexBuffer(VertexBufferHandle handle) = 0;
-
-    virtual bool CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle) = 0;
-    virtual bool ReleaseVertexLayout(VertexLayoutHandle handle) = 0;
-
-    virtual bool CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle) = 0;
-    virtual bool ReleaseIndexBuffer(IndexBufferHandle handle) = 0;
-
-    virtual bool CreateTexture(const TextureDesc &desc, TextureHandle handle) = 0;
-    virtual bool CreateTexture(const Texture2DDesc &desc, TextureHandle handle) = 0;
-    virtual bool CreateTexture(const Texture3DDesc &desc, TextureHandle handle) = 0;
-    virtual bool CreateTexture(const TextureResurceDesc &desc, TextureHandle handle) = 0;
-    virtual bool ReleaseTexture(TextureHandle handle) = 0;
-
-    virtual bool CreateSampler(const SamplerDesc &desc, SamplerHandle handle) = 0;
-    virtual bool ReleaseSampler(SamplerHandle handle) = 0;
-
-    virtual bool CreateProgram(const ProgramDesc &desc, ProgramHandle handle) = 0;
-    virtual bool ReleaseProgram(ProgramHandle handle) = 0;
-
-    virtual bool CreateShader(const ShaderDesc &desc, ShaderHandle handle) = 0;
-    virtual bool ReleaseShader(ShaderHandle handle) = 0;
-
-    virtual bool CreateUniform(const UniformDesc &desc, UniformHandle handle) = 0;
-    virtual bool ReleaseUniform(UniformHandle handle) = 0;
-
-    virtual bool SetPredefinedUniform(const PredefinedUniform &uniform) = 0;
-    virtual bool SetRenderStates(const RenderStates &states) = 0;
-
-    virtual bool Submit(const Frame &frame) = 0;
+    virtual PPGEDeviceContext *GetImmediateContext() = 0;
 
   public:
     static void Initialize(RendererAPI api);
@@ -114,13 +57,6 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
     inline static RendererSystem &Get()
     {
         return *s_instance;
-    }
-
-    template <typename RenderSystemImpl> static RenderSystemImpl *GetRendererSystem()
-    {
-        if (s_instance)
-            return static_cast<RenderSystemImpl *>(s_instance);
-        return nullptr;
     }
 
   private:

@@ -5,7 +5,7 @@
 
 namespace PPGE
 {
-struct RenderStates
+class PPGE_API PPGEObject
 {
 };
-} // namespace PPGE
+}

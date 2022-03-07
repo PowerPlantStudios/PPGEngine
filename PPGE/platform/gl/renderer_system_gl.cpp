@@ -9,10 +9,10 @@ namespace PPGE
 {
 void RendererSystemGL::StartUp(const RendererSystemProps &props)
 {
-    m_window_ptr = static_cast<GLFWwindow *>(DisplaySystem::Get().GetNativeDisplayPtr());
-    PPGE_ASSERT(m_window_ptr, "Handle to the GLFW window is empty.");
+    auto window_ptr = static_cast<GLFWwindow *>(DisplaySystem::Get().GetNativeDisplayPtr());
+    PPGE_ASSERT(window_ptr, "Handle to the GLFW window is empty.");
 
-    glfwMakeContextCurrent(m_window_ptr);
+    glfwMakeContextCurrent(window_ptr);
     int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     PPGE_ASSERT(success, "Failed to initialize GLAD!");
     if (DisplaySystem::Get().IsVsyncEnabled())
@@ -28,7 +28,8 @@ void RendererSystemGL::StartUp(const RendererSystemProps &props)
 
 void RendererSystemGL::Update()
 {
-    glfwSwapBuffers(m_window_ptr);
+    auto window_ptr = static_cast<GLFWwindow *>(DisplaySystem::Get().GetNativeDisplayPtr());
+    glfwSwapBuffers(window_ptr);
 }
 
 void RendererSystemGL::ShutDown()
@@ -39,124 +40,13 @@ void RendererSystemGL::OnResize()
 {
 }
 
-bool RendererSystemGL::ClearColor(float r, float g, float b)
+PPGEDevice *RendererSystemGL::GetDevice()
 {
-    return false;
+    return nullptr;
 }
 
-bool RendererSystemGL::ClearDepthStencilBuffer(float depth, uint8_t stencil)
+PPGEDeviceContext *RendererSystemGL::GetImmediateContext()
 {
-    return false;
+    return nullptr;
 }
-
-bool RendererSystemGL::CreateVertexBuffer(const VertexBufferDesc &desc, VertexBufferHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::ReleaseVertexBuffer(VertexBufferHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateVertexLayout(const VertexLayout &layout, VertexLayoutHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::ReleaseVertexLayout(VertexLayoutHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateIndexBuffer(const IndexBufferDesc &desc, IndexBufferHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::ReleaseIndexBuffer(IndexBufferHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateTexture(const TextureDesc &desc, TextureHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateTexture(const Texture2DDesc &desc, TextureHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateTexture(const Texture3DDesc &desc, TextureHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateTexture(const TextureResurceDesc &desc, TextureHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::ReleaseTexture(TextureHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateSampler(const SamplerDesc &desc, SamplerHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::ReleaseSampler(SamplerHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateProgram(const ProgramDesc &desc, ProgramHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::ReleaseProgram(ProgramHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateShader(const ShaderDesc &desc, ShaderHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::ReleaseShader(ShaderHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::CreateUniform(const UniformDesc &desc, UniformHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::ReleaseUniform(UniformHandle handle)
-{
-    return false;
-}
-
-bool RendererSystemGL::SetPredefinedUniform(const PredefinedUniform &uniform)
-{
-    return false;
-}
-
-bool RendererSystemGL::SetRenderStates(const RenderStates &states)
-{
-    return false;
-}
-
-bool RendererSystemGL::Submit(const Frame &frame)
-{
-    return false;
-}
-
 } // namespace PPGE

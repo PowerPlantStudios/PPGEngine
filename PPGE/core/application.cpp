@@ -38,7 +38,7 @@ void Application::StartUp()
     RendererSystem::Get().StartUp(rs_props);
 
     WidgetSystemProps ws_props;
-    ws_props.enable_imgui_debug_layer = true;
+    ws_props.enable_imgui_debug_layer = false;
     WidgetSystem::Get().StartUp(ws_props);
 }
 
@@ -62,8 +62,8 @@ void Application::Run()
         DisplaySystem::Get().Update();
         WidgetSystem::Get().Update(delta_time);
         RendererSystem::Get().Update();
-        RendererSystem::Get().ClearColor(0.15, 0.15, 0.25);
-        RendererSystem::Get().ClearDepthStencilBuffer(1.0, 0);
+        //RendererSystem::Get().ClearColor(0.15, 0.15, 0.25);
+        //RendererSystem::Get().ClearDepthStencilBuffer(1.0, 0);
     }
 }
 

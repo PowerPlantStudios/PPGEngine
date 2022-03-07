@@ -2,35 +2,13 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/descriptors.h"
-#include "system/logger_system.h"
+#include "renderer/texture.h"
 
 namespace PPGE
 {
-class RendererSystemD3D11;
-
-class PPGE_API TextureD3D11
+class PPGE_API PPGETextureD3D11 : public PPGETexture
 {
   public:
-    TextureD3D11();
-
-    ~TextureD3D11();
-
-    void Destroy();
-    bool Create(const TextureDesc &desc);
-    bool Create(const Texture2DDesc &desc);
-    bool Create(const Texture3DDesc &desc);
-    bool Create(const TextureResurceDesc &desc);
-    void Set(ShaderResourceTarget target, uint8_t slot);
-
-  private:
-    RendererSystemD3D11 *m_renderer;
-    union {
-        ID3D11Texture1D *m_texture1D;
-        ID3D11Texture2D *m_texture2D;
-        ID3D11Texture3D *m_texture3D;
-        ID3D11Resource *m_texture;
-    };
-    ID3D11ShaderResourceView *m_srv;
+    virtual ID3D11Resource *GetD3D11Resource() const = 0;
 };
 } // namespace PPGE

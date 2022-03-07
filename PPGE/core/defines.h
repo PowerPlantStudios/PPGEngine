@@ -20,38 +20,6 @@
 #error Other Platforms Not Ready Yet
 #endif
 
-#define PPGE_RENDERER_MAX_VERTEX_BUFFERS (1 << 12)
-#define PPGE_RENDERER_MAX_VERTEX_LAYOUTS (1 << 7)
-#define PPGE_RENDERER_MAX_INDEX_BUFFERS (1 << 12)
-#define PPGE_RENDERER_MAX_TEXTURES (1 << 12)
-#define PPGE_RENDERER_MAX_SAMPLER (1 << 5)
-#define PPGE_RENDERER_MAX_SHADERS (1 << 9)
-#define PPGE_RENDERER_MAX_PROGRAMS (1 << 9)
-#define PPGE_RENDERER_MAX_UNIFORMS (1 << 12)
-#define PPGE_RENDERER_MAX_DRAWCALLS (1 << 12)
-#define PPGE_RENDERER_PREDEFINED_UNIFORMS (1 << 4)
-#define PPGE_HANDLE(handle_name, max_value)                                                                            \
-    struct handle_name                                                                                                 \
-    {                                                                                                                  \
-        using Idx_t = uint16_t;                                                                                        \
-        Idx_t idx = GetMaxIdx();                                                                                       \
-                                                                                                                       \
-        inline bool IsValid()                                                                                          \
-        {                                                                                                              \
-            return idx < GetMaxIdx();                                                                                  \
-        }                                                                                                              \
-                                                                                                                       \
-        bool operator==(handle_name rhs)                                                                               \
-        {                                                                                                              \
-            return idx == rhs.idx;                                                                                     \
-        }                                                                                                              \
-                                                                                                                       \
-        static inline Idx_t GetMaxIdx()                                                                                \
-        {                                                                                                              \
-            return max_value;                                                                                          \
-        }                                                                                                              \
-    };
-
 #define PPGE_ITERABLE_CLASS(type, object)                                                                              \
     type::iterator begin()                                                                                             \
     {                                                                                                                  \

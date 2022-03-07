@@ -151,7 +151,7 @@ void DisplaySystemWin32::StartUp(const DisplaySystemProps &props)
         return;
     }
 
-    PPGE_INFO("Creating Display '{0}' ({1} x {1}) | Platform : Windows", m_props.title, m_props.width, m_props.height);
+    PPGE_INFO("Creating Display '{0}' ({1} x {2}) | Platform : Windows", m_props.title, m_props.width, m_props.height);
 
     m_hwnd = CreateWindowEx(        // Create our Extended Window
         NULL,                       // Extended style

@@ -22,6 +22,20 @@ inline UINT PPGEBindFlagsToD3D11BindFlags(BindFlags bf)
     return d3d11_bf;
 }
 
+inline BindFlags D3D11BindFlagsToPPGEBindFlags(UINT d3d11_bf)
+{
+    BindFlags bf = BindFlags::BIND_NONE;
+    bf |= (d3d11_bf & D3D11_BIND_VERTEX_BUFFER ? BindFlags::BIND_VERTEX_BUFFER : BindFlags::BIND_NONE);
+    bf |= (d3d11_bf & D3D11_BIND_INDEX_BUFFER ? BindFlags::BIND_INDEX_BUFFER : BindFlags::BIND_NONE);
+    bf |= (d3d11_bf & D3D11_BIND_CONSTANT_BUFFER ? BindFlags::BIND_CONSTANT_BUFFER : BindFlags::BIND_NONE);
+    bf |= (d3d11_bf & D3D11_BIND_SHADER_RESOURCE ? BindFlags::BIND_SHADER_RESOURCE : BindFlags::BIND_NONE);
+    bf |= (d3d11_bf & D3D11_BIND_STREAM_OUTPUT ? BindFlags::BIND_STREAM_OUTPUT : BindFlags::BIND_NONE);
+    bf |= (d3d11_bf & D3D11_BIND_RENDER_TARGET ? BindFlags::BIND_RENDER_TARGET : BindFlags::BIND_NONE);
+    bf |= (d3d11_bf & D3D11_BIND_DEPTH_STENCIL ? BindFlags::BIND_DEPTH_STENCIL : BindFlags::BIND_NONE);
+    bf |= (d3d11_bf & D3D11_BIND_UNORDERED_ACCESS ? BindFlags::BIND_UNORDERED_ACCESS : BindFlags::BIND_NONE);
+    return bf;
+}
+
 inline D3D11_USAGE PPGEUsageTypeToD3D11UsageType(UsageType usage)
 {
     switch (usage)
@@ -40,12 +54,40 @@ inline D3D11_USAGE PPGEUsageTypeToD3D11UsageType(UsageType usage)
     return D3D11_USAGE_DEFAULT;
 }
 
+inline UsageType D3D11UsageTypeToPPGEUsageType(D3D11_USAGE d3d11_usage)
+{
+    switch (d3d11_usage)
+    {
+    case D3D11_USAGE_IMMUTABLE:
+        return UsageType::USAGE_IMMUTABLE;
+    case D3D11_USAGE_DYNAMIC:
+        return UsageType::USAGE_DYNAMIC;
+    case D3D11_USAGE_STAGING:
+        return UsageType::USAGE_STAGING;
+    case D3D11_USAGE_DEFAULT:
+        return UsageType::USAGE_DEFAULT;
+    default:
+        PPGE_WARN("D3D11 Usage type is unknown");
+    }
+    return UsageType::USAGE_DEFAULT;
+}
+
 inline UINT PPGECPUAccessFlagsToD3D11CPUAccessFlags(CPUAccessFlags cpu_af)
 {
     UINT d3d11_cpu_af = 0;
     d3d11_cpu_af |= (Enum::ToBoolean(cpu_af & CPUAccessFlags::CPU_ACCESS_READ) ? D3D11_CPU_ACCESS_READ : 0);
     d3d11_cpu_af |= (Enum::ToBoolean(cpu_af & CPUAccessFlags::CPU_ACCESS_WRITE) ? D3D11_CPU_ACCESS_WRITE : 0);
     return d3d11_cpu_af;
+}
+
+inline CPUAccessFlags D3D11CPUAccessFlagsToPPGECPUAccessFlags(UINT d3d11_cpu_af)
+{
+    CPUAccessFlags cpu_af = CPUAccessFlags::CPU_ACCESS_NONE;
+    cpu_af |=
+        (d3d11_cpu_af & D3D11_CPU_ACCESS_READ ? CPUAccessFlags::CPU_ACCESS_READ : CPUAccessFlags::CPU_ACCESS_NONE);
+    cpu_af |=
+        (d3d11_cpu_af & D3D11_CPU_ACCESS_WRITE ? CPUAccessFlags::CPU_ACCESS_WRITE : CPUAccessFlags::CPU_ACCESS_NONE);
+    return cpu_af;
 }
 
 inline D3D11_MAP PPGEMapTypeToD3D11MapType(MapType map_type, MapFlags map_flags)
@@ -256,7 +298,7 @@ inline DXGI_FORMAT PPGETextureFormatToD3D11TextureFormat(TextureFormatType textu
     case TextureFormatType::TEXTURE_FORMAT_B8G8R8A8_UNORM:
         return DXGI_FORMAT_B8G8R8A8_UNORM;
     case TextureFormatType::TEXTURE_FORMAT_B8G8R8X8_UNORM:
-        return DXGI_FORMAT_B8G8R8A8_UNORM;
+        return DXGI_FORMAT_B8G8R8X8_UNORM;
     case TextureFormatType::TEXTURE_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
         return DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM;
     case TextureFormatType::TEXTURE_FORMAT_B8G8R8A8_TYPELESS:
@@ -323,18 +365,265 @@ inline DXGI_FORMAT PPGETextureFormatToD3D11TextureFormat(TextureFormatType textu
     }
 }
 
+inline TextureFormatType D3D11TextureFormatToPPGETextureFormat(DXGI_FORMAT d3d11_texture_format_type)
+{
+    switch (d3d11_texture_format_type)
+    {
+    case DXGI_FORMAT_UNKNOWN:
+        return TextureFormatType::TEXTURE_FORMAT_UNKNOWN;
+    case DXGI_FORMAT_R32G32B32A32_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32B32A32_TYPELESS;
+    case DXGI_FORMAT_R32G32B32A32_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32B32A32_FLOAT;
+    case DXGI_FORMAT_R32G32B32A32_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32B32A32_UINT;
+    case DXGI_FORMAT_R32G32B32A32_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32B32A32_SINT;
+    case DXGI_FORMAT_R32G32B32_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32B32_TYPELESS;
+    case DXGI_FORMAT_R32G32B32_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32B32_FLOAT;
+    case DXGI_FORMAT_R32G32B32_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32B32_UINT;
+    case DXGI_FORMAT_R32G32B32_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32B32_SINT;
+    case DXGI_FORMAT_R16G16B16A16_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16B16A16_TYPELESS;
+    case DXGI_FORMAT_R16G16B16A16_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16B16A16_FLOAT;
+    case DXGI_FORMAT_R16G16B16A16_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16B16A16_UNORM;
+    case DXGI_FORMAT_R16G16B16A16_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16B16A16_UINT;
+    case DXGI_FORMAT_R16G16B16A16_SNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16B16A16_SNORM;
+    case DXGI_FORMAT_R16G16B16A16_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16B16A16_SINT;
+    case DXGI_FORMAT_R32G32_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32_TYPELESS;
+    case DXGI_FORMAT_R32G32_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32_FLOAT;
+    case DXGI_FORMAT_R32G32_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32_UINT;
+    case DXGI_FORMAT_R32G32_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R32G32_SINT;
+    case DXGI_FORMAT_R32G8X24_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R32G8X24_TYPELESS;
+    case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_D32_FLOAT_S8X24_UINT;
+    case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+    case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_X32_TYPELESS_G8X24_UINT;
+    case DXGI_FORMAT_R10G10B10A2_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R10G10B10A2_TYPELESS;
+    case DXGI_FORMAT_R10G10B10A2_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R10G10B10A2_UNORM;
+    case DXGI_FORMAT_R10G10B10A2_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R10G10B10A2_UINT;
+    case DXGI_FORMAT_R11G11B10_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_R11G11B10_FLOAT;
+    case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8B8A8_TYPELESS;
+    case DXGI_FORMAT_R8G8B8A8_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8B8A8_UNORM;
+    case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8B8A8_UNORM_SRGB;
+    case DXGI_FORMAT_R8G8B8A8_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8B8A8_UINT;
+    case DXGI_FORMAT_R8G8B8A8_SNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8B8A8_SNORM;
+    case DXGI_FORMAT_R8G8B8A8_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8B8A8_SINT;
+    case DXGI_FORMAT_R16G16_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16_TYPELESS;
+    case DXGI_FORMAT_R16G16_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16_FLOAT;
+    case DXGI_FORMAT_R16G16_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16_UNORM;
+    case DXGI_FORMAT_R16G16_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16_UINT;
+    case DXGI_FORMAT_R16G16_SNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16_SNORM;
+    case DXGI_FORMAT_R16G16_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R16G16_SINT;
+    case DXGI_FORMAT_R32_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R32_TYPELESS;
+    case DXGI_FORMAT_D32_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_D32_FLOAT;
+    case DXGI_FORMAT_R32_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_R32_FLOAT;
+    case DXGI_FORMAT_R32_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R32_UINT;
+    case DXGI_FORMAT_R32_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R32_SINT;
+    case DXGI_FORMAT_R24G8_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R24G8_TYPELESS;
+    case DXGI_FORMAT_D24_UNORM_S8_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_D24_UNORM_S8_UINT;
+    case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R24_UNORM_X8_TYPELESS;
+    case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_X24_TYPELESS_G8_UINT;
+    case DXGI_FORMAT_R8G8_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8_TYPELESS;
+    case DXGI_FORMAT_R8G8_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8_UNORM;
+    case DXGI_FORMAT_R8G8_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8_UINT;
+    case DXGI_FORMAT_R8G8_SNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8_SNORM;
+    case DXGI_FORMAT_R8G8_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8_SINT;
+    case DXGI_FORMAT_R16_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R16_TYPELESS;
+    case DXGI_FORMAT_R16_FLOAT:
+        return TextureFormatType::TEXTURE_FORMAT_R16_FLOAT;
+    case DXGI_FORMAT_D16_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_D16_UNORM;
+    case DXGI_FORMAT_R16_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R16_UNORM;
+    case DXGI_FORMAT_R16_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R16_UINT;
+    case DXGI_FORMAT_R16_SNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R16_SNORM;
+    case DXGI_FORMAT_R16_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R16_SINT;
+    case DXGI_FORMAT_R8_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_R8_TYPELESS;
+    case DXGI_FORMAT_R8_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R8_UNORM;
+    case DXGI_FORMAT_R8_UINT:
+        return TextureFormatType::TEXTURE_FORMAT_R8_UINT;
+    case DXGI_FORMAT_R8_SNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R8_SNORM;
+    case DXGI_FORMAT_R8_SINT:
+        return TextureFormatType::TEXTURE_FORMAT_R8_SINT;
+    case DXGI_FORMAT_A8_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_A8_UNORM;
+    case DXGI_FORMAT_R1_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R1_UNORM;
+    case DXGI_FORMAT_R9G9B9E5_SHAREDEXP:
+        return TextureFormatType::TEXTURE_FORMAT_R9G9B9E5_SHAREDEXP;
+    case DXGI_FORMAT_R8G8_B8G8_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R8G8_B8G8_UNORM;
+    case DXGI_FORMAT_G8R8_G8B8_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_G8R8_G8B8_UNORM;
+    case DXGI_FORMAT_BC1_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_BC1_TYPELESS;
+    case DXGI_FORMAT_BC1_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_BC1_UNORM;
+    case DXGI_FORMAT_BC1_UNORM_SRGB:
+        return TextureFormatType::TEXTURE_FORMAT_BC1_UNORM_SRGB;
+    case DXGI_FORMAT_BC2_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_BC2_TYPELESS;
+    case DXGI_FORMAT_BC2_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_BC2_UNORM;
+    case DXGI_FORMAT_BC2_UNORM_SRGB:
+        return TextureFormatType::TEXTURE_FORMAT_BC2_UNORM_SRGB;
+    case DXGI_FORMAT_BC3_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_BC3_TYPELESS;
+    case DXGI_FORMAT_BC3_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_BC3_UNORM;
+    case DXGI_FORMAT_BC3_UNORM_SRGB:
+        return TextureFormatType::TEXTURE_FORMAT_BC3_UNORM_SRGB;
+    case DXGI_FORMAT_BC4_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_BC4_TYPELESS;
+    case DXGI_FORMAT_BC4_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_BC4_UNORM;
+    case DXGI_FORMAT_BC4_SNORM:
+        return TextureFormatType::TEXTURE_FORMAT_BC4_SNORM;
+    case DXGI_FORMAT_BC5_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_BC5_TYPELESS;
+    case DXGI_FORMAT_BC5_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_BC5_UNORM;
+    case DXGI_FORMAT_BC5_SNORM:
+        return TextureFormatType::TEXTURE_FORMAT_BC5_SNORM;
+    case DXGI_FORMAT_B5G6R5_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_B5G6R5_UNORM;
+    case DXGI_FORMAT_B5G5R5A1_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_B5G5R5A1_UNORM;
+    case DXGI_FORMAT_B8G8R8A8_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_B8G8R8A8_UNORM;
+    case DXGI_FORMAT_B8G8R8X8_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_B8G8R8X8_UNORM;
+    case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_R10G10B10_XR_BIAS_A2_UNORM;
+    case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_B8G8R8A8_TYPELESS;
+    case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+        return TextureFormatType::TEXTURE_FORMAT_B8G8R8A8_UNORM_SRGB;
+    case DXGI_FORMAT_B8G8R8X8_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_B8G8R8X8_TYPELESS;
+    case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+        return TextureFormatType::TEXTURE_FORMAT_B8G8R8X8_UNORM_SRGB;
+    case DXGI_FORMAT_BC6H_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_BC6H_TYPELESS;
+    case DXGI_FORMAT_BC6H_UF16:
+        return TextureFormatType::TEXTURE_FORMAT_BC6H_UF16;
+    case DXGI_FORMAT_BC6H_SF16:
+        return TextureFormatType::TEXTURE_FORMAT_BC6H_SF16;
+    case DXGI_FORMAT_BC7_TYPELESS:
+        return TextureFormatType::TEXTURE_FORMAT_BC7_TYPELESS;
+    case DXGI_FORMAT_BC7_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_BC7_UNORM;
+    case DXGI_FORMAT_BC7_UNORM_SRGB:
+        return TextureFormatType::TEXTURE_FORMAT_BC7_UNORM_SRGB;
+    case DXGI_FORMAT_AYUV:
+        return TextureFormatType::TEXTURE_FORMAT_AYUV;
+    case DXGI_FORMAT_Y410:
+        return TextureFormatType::TEXTURE_FORMAT_Y410;
+    case DXGI_FORMAT_Y416:
+        return TextureFormatType::TEXTURE_FORMAT_Y416;
+    case DXGI_FORMAT_NV12:
+        return TextureFormatType::TEXTURE_FORMAT_NV12;
+    case DXGI_FORMAT_P010:
+        return TextureFormatType::TEXTURE_FORMAT_P010;
+    case DXGI_FORMAT_P016:
+        return TextureFormatType::TEXTURE_FORMAT_P016;
+    case DXGI_FORMAT_420_OPAQUE:
+        return TextureFormatType::TEXTURE_FORMAT_420_OPAQUE;
+    case DXGI_FORMAT_YUY2:
+        return TextureFormatType::TEXTURE_FORMAT_YUY2;
+    case DXGI_FORMAT_Y210:
+        return TextureFormatType::TEXTURE_FORMAT_Y210;
+    case DXGI_FORMAT_Y216:
+        return TextureFormatType::TEXTURE_FORMAT_Y216;
+    case DXGI_FORMAT_NV11:
+        return TextureFormatType::TEXTURE_FORMAT_NV11;
+    case DXGI_FORMAT_AI44:
+        return TextureFormatType::TEXTURE_FORMAT_AI44;
+    case DXGI_FORMAT_IA44:
+        return TextureFormatType::TEXTURE_FORMAT_IA44;
+    case DXGI_FORMAT_P8:
+        return TextureFormatType::TEXTURE_FORMAT_P8;
+    case DXGI_FORMAT_A8P8:
+        return TextureFormatType::TEXTURE_FORMAT_A8P8;
+    case DXGI_FORMAT_B4G4R4A4_UNORM:
+        return TextureFormatType::TEXTURE_FORMAT_B4G4R4A4_UNORM;
+    case DXGI_FORMAT_P208:
+        return TextureFormatType::TEXTURE_FORMAT_P208;
+    case DXGI_FORMAT_V208:
+        return TextureFormatType::TEXTURE_FORMAT_V208;
+    case DXGI_FORMAT_V408:
+        return TextureFormatType::TEXTURE_FORMAT_V408;
+    default:
+        PPGE_ASSERT(false, "Cannot convert DXGI Format to PPGE Texture Format. DXGI Format is unknown.");
+        return TextureFormatType::TEXTURE_FORMAT_UNKNOWN;
+    }
+}
+
 inline UINT PPGESwapChainUsageFlagsToD3D11SwapChainUsageFlags(SwapChainUsageFlags usage_flags)
 {
     UINT d3d11_usage_flags = 0;
     d3d11_usage_flags |= (Enum::ToBoolean(usage_flags & SwapChainUsageFlags::SWAP_CHAIN_USAGE_RENDER_TARGET_OUTPUT)
                               ? DXGI_USAGE_RENDER_TARGET_OUTPUT
                               : 0);
-    d3d11_usage_flags |= (Enum::ToBoolean(usage_flags & SwapChainUsageFlags::SWAP_CHAIN_USAGE_SHADER_INPUT)
-                              ? DXGI_USAGE_SHADER_INPUT
-                              : 0);
-    d3d11_usage_flags |= (Enum::ToBoolean(usage_flags & SwapChainUsageFlags::SWAP_CHAIN_USAGE_BACK_BUFFER)
-                              ? DXGI_USAGE_BACK_BUFFER
-                              : 0);
+    d3d11_usage_flags |=
+        (Enum::ToBoolean(usage_flags & SwapChainUsageFlags::SWAP_CHAIN_USAGE_SHADER_INPUT) ? DXGI_USAGE_SHADER_INPUT
+                                                                                           : 0);
+    d3d11_usage_flags |=
+        (Enum::ToBoolean(usage_flags & SwapChainUsageFlags::SWAP_CHAIN_USAGE_BACK_BUFFER) ? DXGI_USAGE_BACK_BUFFER : 0);
     return d3d11_usage_flags;
 }
 } // namespace PPGE

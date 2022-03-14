@@ -17,6 +17,18 @@ class TextureDescFromD3D11Texture
         d3d11_texture1D_ptr->GetDesc(&desc);
 
         TextureDesc texture_desc;
+        texture_desc.resource_dimension = desc.ArraySize > 1 ? ResourceDimensionType::RESOURCE_DIMENSION_1D_ARRAY
+                                                             : ResourceDimensionType::RESOURCE_DIMENSION_1D;
+        texture_desc.width = static_cast<uint32_t>(desc.Width);
+        texture_desc.height = 1;
+        texture_desc.array_size = static_cast<uint32_t>(desc.ArraySize);
+        texture_desc.format_type = D3D11TextureFormatToPPGETextureFormat(desc.Format);
+        texture_desc.mip_levels = static_cast<uint32_t>(desc.MipLevels);
+        texture_desc.sample_count = 1;
+        texture_desc.usage = D3D11UsageTypeToPPGEUsageType(desc.Usage);
+        texture_desc.bind_flags = D3D11BindFlagsToPPGEBindFlags(desc.BindFlags);
+        texture_desc.cpu_access_flags = D3D11CPUAccessFlagsToPPGECPUAccessFlags(desc.CPUAccessFlags);
+        texture_desc.misc_flags = 0;
 
         return texture_desc;
     }
@@ -32,13 +44,12 @@ class TextureDescFromD3D11Texture
         texture_desc.width = static_cast<uint32_t>(desc.Width);
         texture_desc.height = static_cast<uint32_t>(desc.Height);
         texture_desc.array_size = static_cast<uint32_t>(desc.ArraySize);
-        texture_desc.format_type =
-            TextureFormatType::TEXTURE_FORMAT_B8G8R8A8_UNORM; /* TODO : Write a converter here. */
+        texture_desc.format_type = D3D11TextureFormatToPPGETextureFormat(desc.Format);
         texture_desc.mip_levels = static_cast<uint32_t>(desc.MipLevels);
         texture_desc.sample_count = static_cast<uint32_t>(desc.SampleDesc.Count);
-        texture_desc.usage = UsageType::USAGE_DEFAULT;                   /* TODO: Write a converter here. */
-        texture_desc.bind_flags = BindFlags::BIND_RENDER_TARGET;         /* TODO: Write a converter here. */
-        texture_desc.cpu_access_flags = CPUAccessFlags::CPU_ACCESS_NONE; /* TODO: Write a converter here. */
+        texture_desc.usage = D3D11UsageTypeToPPGEUsageType(desc.Usage);
+        texture_desc.bind_flags = D3D11BindFlagsToPPGEBindFlags(desc.BindFlags);
+        texture_desc.cpu_access_flags = D3D11CPUAccessFlagsToPPGECPUAccessFlags(desc.CPUAccessFlags);
         texture_desc.misc_flags = 0;
 
         return texture_desc;
@@ -50,6 +61,17 @@ class TextureDescFromD3D11Texture
         d3d11_texture3D_ptr->GetDesc(&desc);
 
         TextureDesc texture_desc;
+        texture_desc.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_3D;
+        texture_desc.width = static_cast<uint32_t>(desc.Width);
+        texture_desc.height = static_cast<uint32_t>(desc.Height);
+        texture_desc.depth = static_cast<uint32_t>(desc.Depth);
+        texture_desc.format_type = D3D11TextureFormatToPPGETextureFormat(desc.Format);
+        texture_desc.mip_levels = static_cast<uint32_t>(desc.MipLevels);
+        texture_desc.sample_count = 1;
+        texture_desc.usage = D3D11UsageTypeToPPGEUsageType(desc.Usage);
+        texture_desc.bind_flags = D3D11BindFlagsToPPGEBindFlags(desc.BindFlags);
+        texture_desc.cpu_access_flags = D3D11CPUAccessFlagsToPPGECPUAccessFlags(desc.CPUAccessFlags);
+        texture_desc.misc_flags = 0;
 
         return texture_desc;
     }
@@ -128,19 +150,19 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
 TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, ID3D11Texture1D *texture)
     : TextureBaseType(std::move(device_sp), TextureDescFromD3D11Texture{}(texture))
 {
-    m_d311_texture_ptr.Attach(texture);
+    m_d311_texture_ptr = texture;
 }
 
 TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, ID3D11Texture2D *texture)
     : TextureBaseType(std::move(device_sp), TextureDescFromD3D11Texture{}(texture))
 {
-    m_d311_texture_ptr.Attach(texture);
+    m_d311_texture_ptr = texture;
 }
 
 TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, ID3D11Texture3D *texture)
     : TextureBaseType(std::move(device_sp), TextureDescFromD3D11Texture{}(texture))
 {
-    m_d311_texture_ptr.Attach(texture);
+    m_d311_texture_ptr = texture;
 }
 
 TextureD3D11Impl::~TextureD3D11Impl()
@@ -222,7 +244,7 @@ void TextureD3D11Impl::CreateTexture1D(const TextureCreateDesc &create_desc)
     auto d3d11_device = m_device_sp->GetD3D11Device();
     ID3D11Texture1D *d3d11_texture1D_ptr;
     PPGE_HR(d3d11_device->CreateTexture1D(&desc, init_data.empty() ? nullptr : init_data.data(), &d3d11_texture1D_ptr));
-    m_d311_texture_ptr.Attach(d3d11_texture1D_ptr);
+    m_d311_texture_ptr = d3d11_texture1D_ptr;
 }
 
 void TextureD3D11Impl::CreateTexture2D(const TextureCreateDesc &create_desc)
@@ -247,7 +269,7 @@ void TextureD3D11Impl::CreateTexture2D(const TextureCreateDesc &create_desc)
     auto d3d11_device = m_device_sp->GetD3D11Device();
     ID3D11Texture2D *d3d11_texture2D_ptr;
     PPGE_HR(d3d11_device->CreateTexture2D(&desc, init_data.empty() ? nullptr : init_data.data(), &d3d11_texture2D_ptr));
-    m_d311_texture_ptr.Attach(d3d11_texture2D_ptr);
+    m_d311_texture_ptr = d3d11_texture2D_ptr;
 }
 
 void TextureD3D11Impl::CreateTexture3D(const TextureCreateDesc &create_desc)
@@ -270,7 +292,7 @@ void TextureD3D11Impl::CreateTexture3D(const TextureCreateDesc &create_desc)
     auto d3d11_device = m_device_sp->GetD3D11Device();
     ID3D11Texture3D *d3d11_texture3D_ptr;
     PPGE_HR(d3d11_device->CreateTexture3D(&desc, init_data.empty() ? nullptr : init_data.data(), &d3d11_texture3D_ptr));
-    m_d311_texture_ptr.Attach(d3d11_texture3D_ptr);
+    m_d311_texture_ptr = d3d11_texture3D_ptr;
 }
 
 std::vector<D3D11_SUBRESOURCE_DATA> TextureD3D11Impl::CreateInitData(const TextureCreateDesc &create_desc)

@@ -12,10 +12,101 @@ SwapChainD3D11Impl::SwapChainD3D11Impl(std::weak_ptr<DeviceD3D11Impl> device_wp,
                                        const SwapChainDesc &desc)
     : SwapChainBaseType(std::move(device_wp), std::move(immediate_context_wp), desc)
 {
+    CreateDXGISwapChain();
+    CreateRTVandDSV();
 }
 
 SwapChainD3D11Impl::~SwapChainD3D11Impl()
 {
+}
+
+void SwapChainD3D11Impl::Present(uint32_t sync_interval)
+{
+    m_swap_chain_ptr->Present(sync_interval, 0);
+}
+
+ID3D11RenderTargetView *SwapChainD3D11Impl::GetD3D11RenderTargetView() const
+{
+    ID3D11View *d3d11_view = m_rtv_sp->GetD3D11View();
+
+    if (!d3d11_view)
+    {
+        return nullptr;
+    }
+
+    ID3D11RenderTargetView *d3d11_rtv = nullptr;
+    d3d11_view->QueryInterface(__uuidof(ID3D11RenderTargetView), (void **)&d3d11_rtv);
+
+    if (!d3d11_rtv)
+    {
+        return nullptr;
+    }
+
+    return d3d11_rtv;
+}
+
+ID3D11DepthStencilView *SwapChainD3D11Impl::GetD3D11DepthStencilView() const
+{
+    ID3D11View *d3d11_view = m_dsv_sp->GetD3D11View();
+
+    if (!d3d11_view)
+    {
+        return nullptr;
+    }
+
+    ID3D11DepthStencilView *d3d11_dsv = nullptr;
+    d3d11_view->QueryInterface(__uuidof(ID3D11DepthStencilView), (void **)&d3d11_dsv);
+
+    if (!d3d11_dsv)
+    {
+        return nullptr;
+    }
+
+    return d3d11_dsv;
+}
+
+void SwapChainD3D11Impl::UpdateSwapChain(bool recreate)
+{
+    if (!m_swap_chain_ptr)
+        return;
+
+    auto d3d11_device_context_impl = m_immediate_context_wp.lock();
+    if (!d3d11_device_context_impl)
+        return;
+
+    auto d3d11_device_context = d3d11_device_context_impl->GetD3D11DeviceContext();
+    ID3D11RenderTargetView *nullViews[] = {nullptr};
+    d3d11_device_context->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
+
+    m_rtv_sp.reset();
+    m_dsv_sp.reset();
+
+    auto d3d11_device = m_device_wp.lock()->GetD3D11Device();
+    ID3D11Debug *pDebug;
+    d3d11_device->QueryInterface(IID_ID3D11Debug, (VOID **)(&pDebug));
+    if (pDebug)
+    {
+        pDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+        pDebug->Release();
+    }
+
+    if (recreate)
+    {
+        m_swap_chain_ptr.Release();
+        d3d11_device_context->Flush();
+
+        CreateDXGISwapChain();
+    }
+    else
+    {
+        DXGI_SWAP_CHAIN_DESC sc_desc{};
+        m_swap_chain_ptr->GetDesc(&sc_desc);
+        PPGE_HR(m_swap_chain_ptr->ResizeBuffers(sc_desc.BufferCount, m_desc.width, m_desc.height,
+                                                sc_desc.BufferDesc.Format, sc_desc.Flags));
+        d3d11_device_context->Flush();
+    }
+
+    CreateRTVandDSV();
 }
 
 void SwapChainD3D11Impl::CreateDXGISwapChain()
@@ -42,7 +133,7 @@ void SwapChainD3D11Impl::CreateDXGISwapChain()
 
     swap_chain_desc.OutputWindow = static_cast<HWND>(DisplaySystem::Get().GetNativeDisplayPtr());
     swap_chain_desc.Windowed = true;
-    swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     swap_chain_desc.Flags = 0;
 
     CComPtr<IDXGIDevice> dxgi_device = NULL;
@@ -58,80 +149,59 @@ void SwapChainD3D11Impl::CreateDXGISwapChain()
 void SwapChainD3D11Impl::CreateRTVandDSV()
 {
     auto d3d11_device_impl = m_device_wp.lock();
-    auto d3d11_device_context_impl = m_immediate_context_wp.lock();
-
-    if (!d3d11_device_impl || !d3d11_device_context_impl)
-        return;
-
+    PPGE_ASSERT(d3d11_device_impl, "Creating RTV and DSV have failed: Cannot get device reference.");
     auto d3d11_device = d3d11_device_impl->GetD3D11Device();
-    auto d3d11_device_context = d3d11_device_context_impl->GetD3D11DeviceContext();
 
-    //m_RTV.Release();
-    //m_DSV.Release();
-    //m_DS_buffer.Release();
-
-    //PPGE_HR(m_swap_chain_ptr->ResizeBuffers(1, DisplaySystem::Get().GetWidth(), DisplaySystem::Get().GetHeight(),
-    //                                    DXGI_FORMAT_R8G8B8A8_UNORM, 0));
-    
     CComPtr<ID3D11Texture2D> d3d11_back_buffer;
     PPGE_HR(m_swap_chain_ptr->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(&d3d11_back_buffer)));
 
     std::shared_ptr<PPGETexture> back_buffer_sp;
-    std::shared_ptr<PPGETextureView> rtv_sp;
+    d3d11_device_impl->CreateTextureFromD3D11Resource(d3d11_back_buffer, back_buffer_sp);
+
     TextureViewDesc rtv_desc;
     rtv_desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_RENDER_TARGET;
-    rtv_desc.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D;
+    rtv_desc.resource_dimension = back_buffer_sp->GetDesc().resource_dimension;
     rtv_desc.format = m_desc.color_buffer_format;
+    rtv_desc.mip_levels_num = 1;
+    rtv_desc.most_detailed_mip = 0;
+    rtv_desc.array_slices_num = back_buffer_sp->GetDesc().array_size;
+    rtv_desc.first_array_slice = 0;
 
-    /*
-            ResourceViewType texture_view_type = ResourceViewType::RESOURCE_VIEW_UNDEFINED;
-            ResourceDimensionType resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_UNDEFINED;
-            TextureFormatType format = TextureFormatType::TEXTURE_FORMAT_UNKNOWN;
-            uint32_t most_detailed_mip = 0;
-            uint32_t mip_levels_num = 0;
-            union {
-                uint32_t first_array_slice = 0;
-                uint32_t first_depth_slice;
-            };
-            union {
-                uint32_t array_slices_num = 0;
-                uint32_t depth_slices_num;
-            };
-    */
-
-    d3d11_device_impl->CreateTextureFromD3D11Resource(d3d11_back_buffer.p, back_buffer_sp);
+    std::shared_ptr<PPGETextureView> rtv_sp;
     back_buffer_sp->CreateView(rtv_desc, rtv_sp);
+    m_rtv_sp = std::static_pointer_cast<PPGETextureViewD3D11>(std::move(rtv_sp));
 
-    //PPGE_HR(d3d11_device->CreateRenderTargetView(back_buffer, 0, &m_RTV));
+    if (m_desc.depth_buffer_format != TextureFormatType::TEXTURE_FORMAT_UNKNOWN)
+    {
+        TextureCreateDesc ds_create_desc;
+        ds_create_desc.desc.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D;
+        ds_create_desc.desc.width = m_desc.width;
+        ds_create_desc.desc.height = m_desc.height;
+        ds_create_desc.desc.array_size = 1;
+        ds_create_desc.desc.mip_levels = 1;
+        ds_create_desc.desc.sample_count = 1;
+        ds_create_desc.desc.format_type = m_desc.depth_buffer_format;
+        ds_create_desc.desc.usage = UsageType::USAGE_DEFAULT;
+        ds_create_desc.desc.bind_flags = BindFlags::BIND_DEPTH_STENCIL;
+        ds_create_desc.desc.cpu_access_flags = CPUAccessFlags::CPU_ACCESS_NONE;
+        ds_create_desc.desc.misc_flags = 0;
 
-    //D3D11_TEXTURE2D_DESC depthStencilDesc;
-    //depthStencilDesc.Width = DisplaySystem::Get().GetWidth();
-    //depthStencilDesc.Height = DisplaySystem::Get().GetHeight();
-    //depthStencilDesc.MipLevels = 1;
-    //depthStencilDesc.ArraySize = 1;
-    //depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        std::shared_ptr<PPGETexture> ds_buffer;
+        d3d11_device_impl->CreateTexture(ds_create_desc, ds_buffer);
 
-    //depthStencilDesc.SampleDesc.Count = 1;
-    //depthStencilDesc.SampleDesc.Quality = 0;
+        TextureViewDesc dsv_desc;
+        dsv_desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_DEPTH_STENCIL;
+        dsv_desc.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D;
+        dsv_desc.format = m_desc.depth_buffer_format;
+        dsv_desc.mip_levels_num = 1;
+        dsv_desc.most_detailed_mip = 0;
+        dsv_desc.array_slices_num = 0;
+        dsv_desc.first_array_slice = 0;
 
-    //depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-    //depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-    //depthStencilDesc.CPUAccessFlags = 0;
-    //depthStencilDesc.MiscFlags = 0;
-
-    //PPGE_HR(d3d11_device->CreateTexture2D(&depthStencilDesc, 0, &m_DS_buffer));
-    //PPGE_HR(d3d11_device->CreateDepthStencilView(m_DS_buffer, 0, &m_DSV));
-
-    //d3d11_immediate_context->OMSetRenderTargets(1, &m_RTV.p, m_DSV);
-
-    //m_viewport.TopLeftX = 0;
-    //m_viewport.TopLeftY = 0;
-    //m_viewport.Width = DisplaySystem::Get().GetWidth();
-    //m_viewport.Height = DisplaySystem::Get().GetHeight();
-    //m_viewport.MinDepth = 0.0f;
-    //m_viewport.MaxDepth = 1.0f;
-
-    //d3d11_immediate_context->RSSetViewports(1, &m_viewport);
+        std::shared_ptr<PPGETextureView> dsv_sp;
+        ds_buffer->CreateView(dsv_desc, dsv_sp);
+        m_dsv_sp = std::static_pointer_cast<PPGETextureViewD3D11>(std::move(dsv_sp));
+    }
 }
 
 } // namespace PPGE

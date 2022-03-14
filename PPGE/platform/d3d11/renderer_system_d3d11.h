@@ -10,6 +10,7 @@ namespace PPGE
 class ImGuiWidgetD3D11;
 class DeviceD3D11Impl;
 class DeviceContextD3D11Impl;
+class SwapChainD3D11Impl;
 
 class PPGE_API RendererSystemD3D11 final : public RendererSystem
 {
@@ -39,15 +40,9 @@ class PPGE_API RendererSystemD3D11 final : public RendererSystem
   private:
     std::shared_ptr<DeviceD3D11Impl> m_device_sp;
     std::shared_ptr<DeviceContextD3D11Impl> m_device_context_sp;
+    std::shared_ptr<SwapChainD3D11Impl> m_swap_chain_sp;
 
-    /* TEMPO CODE */
-    CComPtr<IDXGISwapChain> m_swap_chain;
-    CComPtr<ID3D11RenderTargetView> m_RTV;
-    CComPtr<ID3D11Texture2D> m_DS_buffer;
-    CComPtr<ID3D11DepthStencilView> m_DSV;
     D3D11_VIEWPORT m_viewport;
-
-    void DoTempoTask();
 
     friend ImGuiWidgetD3D11;
 };

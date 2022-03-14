@@ -27,6 +27,7 @@
 #include <Windows.h>
 #include <d3d11_4.h>
 #include <atlbase.h>
+#include <d3d11sdklayers.h>
 #elif defined(PPGE_PLATFORM_UNIX)
 // Linux libraries
 #include <signal.h>

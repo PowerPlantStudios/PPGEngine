@@ -35,11 +35,11 @@ class PPGE_API TextureBase
                 resurce_view_type == ResourceViewType::RESOURCE_VIEW_DEPTH_STENCIL,
             "Resource view type for texture resource can be either shader resource, render target or depth stencil.");
         PPGE_ASSERT((resurce_view_type == ResourceViewType::RESOURCE_VIEW_SHADER_RESOURCE &&
-                     Enum::ToBoolean(m_desc.bind_flags & BindFlags::BIND_SHADER_RESOURCE)) ||
+                     Enum::ToBoolean(DeviceObjectBaseType::m_desc.bind_flags & BindFlags::BIND_SHADER_RESOURCE)) ||
                         (resurce_view_type == ResourceViewType::RESOURCE_VIEW_RENDER_TARGET &&
-                         Enum::ToBoolean(m_desc.bind_flags & BindFlags::BIND_RENDER_TARGET)) ||
+                         Enum::ToBoolean(DeviceObjectBaseType::m_desc.bind_flags & BindFlags::BIND_RENDER_TARGET)) ||
                         (resurce_view_type == ResourceViewType::RESOURCE_VIEW_DEPTH_STENCIL &&
-                         Enum::ToBoolean(m_desc.bind_flags & BindFlags::BIND_DEPTH_STENCIL)),
+                         Enum::ToBoolean(DeviceObjectBaseType::m_desc.bind_flags & BindFlags::BIND_DEPTH_STENCIL)),
                     "Resource view type and resource bind flag doesn't match.");
     }
 };

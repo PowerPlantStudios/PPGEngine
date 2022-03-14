@@ -122,9 +122,10 @@ class TestLayer : public PPGE::Widget
                 float r, g, b;
             };
             PosColorVertex tri_vertices[] = {
-                {-200.0f, -100.0f, 0.0f, 0.8f, 0.5f, 0.3f},
-                {   0.0f,  100.0f, 0.0f, 0.4f, 0.8f, 0.1f},
-                { 200.0f, -100.0f, 0.0f, 0.1f, 0.6f, 0.8f},
+                {-100.0f, -100.0f, 0.0f, 0.8f, 0.5f, 0.3f},
+                {+100.0f, -100.0f, 0.0f, 0.2f, 0.5f, 0.8f},
+                {-100.0f, +100.0f, 0.0f, 0.4f, 0.1f, 0.7f},
+                {+100.0f, +100.0f, 0.0f, 0.1f, 0.8f, 0.1f}
             };
 
             PPGE::BufferDesc vb_desc;
@@ -140,7 +141,7 @@ class TestLayer : public PPGE::Widget
 
         // Create index buffer
         {
-            uint16_t tri_indices[] = {0, 1, 2};
+            uint16_t tri_indices[] = {0, 2, 1, 1, 2, 3};
 
             PPGE::BufferDesc ib_desc;
             ib_desc.byte_width = sizeof(tri_indices);
@@ -241,7 +242,7 @@ class TestLayer : public PPGE::Widget
             *map_data = m_camera_controller.GetViewProj().Transpose();
             PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb.get());
         }
-        PPGE::RendererSystem::Get().GetImmediateContext()->DrawIndexed(3);
+        PPGE::RendererSystem::Get().GetImmediateContext()->DrawIndexed(6);
     }
 
     virtual void OnImGui()

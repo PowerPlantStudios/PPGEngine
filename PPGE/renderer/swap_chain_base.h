@@ -29,7 +29,19 @@ template <typename RendererTraits, typename SwapChainInterface> class PPGE_API S
         return m_desc;
     }
 
+    void Resize(uint32_t width, uint32_t height) override final
+    {
+        if (width != 0 && height != 0 && (m_desc.width != width || m_desc.height != height))
+        {
+            m_desc.width = width;
+            m_desc.height = height;
+            UpdateSwapChain(true);
+        }
+    }
+
   protected:
+    virtual void UpdateSwapChain(bool recreate) = 0;
+
     std::weak_ptr<DeviceImplType> m_device_wp;
     std::weak_ptr<DeviceContextImplType> m_immediate_context_wp;
 

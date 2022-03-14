@@ -25,9 +25,9 @@ class PPGE_API PPGESwapChain : public PPGEObject
   public:
     virtual const SwapChainDesc &GetDesc() const = 0;
 
-    virtual void Present(uint32_t sync_interval) = 0;
-
     virtual void Resize(uint32_t width, uint32_t height) = 0;
+
+    virtual void Present(uint32_t sync_interval) = 0;
 
     virtual PPGETextureView *GetBackBufferRTV() = 0;
 

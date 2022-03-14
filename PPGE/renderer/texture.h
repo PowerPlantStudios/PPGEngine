@@ -26,7 +26,7 @@ struct TextureDesc : public DeviceObjectDesc
     UsageType usage = UsageType::USAGE_DEFAULT;
     BindFlags bind_flags = BindFlags::BIND_NONE;
     CPUAccessFlags cpu_access_flags = CPUAccessFlags::CPU_ACCESS_NONE;
-    uint32_t misc_flags;
+    uint32_t misc_flags = 0;
 };
 
 enum class TextureFileFormat : uint8_t

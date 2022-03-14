@@ -3,6 +3,7 @@
 #include "platform/d3d11/device_context_d3d11_impl.h"
 #include "platform/d3d11/device_d3d11_impl.h"
 #include "platform/d3d11/imgui_widget_d3d11.h"
+#include "platform/d3d11/swap_chain_d3d11_impl.h"
 #include "system/display_system.h"
 
 namespace PPGE
@@ -66,56 +67,37 @@ void RendererSystemD3D11::StartUp(const RendererSystemProps &props)
         std::make_shared<DeviceContextD3D11Impl>(m_device_sp, d3d11_device_context1_ptr, DeviceContextDesc{});
     m_device_sp->SetDeviceContext(m_device_context_sp);
 
-    /* TEMPO CODE */
-    DoTempoTask();
-}
-
-void RendererSystemD3D11::DoTempoTask()
-{
-    auto d3d11_device = m_device_sp->GetD3D11Device();
-
-    DXGI_SWAP_CHAIN_DESC sd;
-    sd.BufferDesc.Width = DisplaySystem::Get().GetWidth();
-    sd.BufferDesc.Height = DisplaySystem::Get().GetHeight();
-    sd.BufferDesc.RefreshRate.Numerator = 60;
-    sd.BufferDesc.RefreshRate.Denominator = 1;
-    sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-    sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-
-    sd.SampleDesc.Count = 1;
-    sd.SampleDesc.Quality = 0;
-
-    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.BufferCount = 1;
-    sd.OutputWindow = static_cast<HWND>(DisplaySystem::Get().GetNativeDisplayPtr());
-    sd.Windowed = true;
-    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    sd.Flags = 0;
-
-    CComPtr<IDXGIDevice> dxgi_device = NULL;
-    PPGE_HR(d3d11_device->QueryInterface(__uuidof(IDXGIDevice), (void **)&dxgi_device));
-    CComPtr<IDXGIAdapter> dxgi_adapter = NULL;
-    PPGE_HR(dxgi_device->GetParent(__uuidof(IDXGIAdapter), (void **)&dxgi_adapter));
-    CComPtr<IDXGIFactory> dxgi_factory = NULL;
-    PPGE_HR(dxgi_adapter->GetParent(__uuidof(IDXGIFactory), (void **)&dxgi_factory));
-
-    PPGE_HR(dxgi_factory->CreateSwapChain(d3d11_device, &sd, &m_swap_chain));
+    SwapChainDesc sc_desc;
+    sc_desc.width = DisplaySystem::Get().GetWidth();
+    sc_desc.height = DisplaySystem::Get().GetHeight();
+    sc_desc.refresh_rate_num = 60;
+    sc_desc.refresh_rate_denum = 1;
+    sc_desc.color_buffer_format = TextureFormatType::TEXTURE_FORMAT_R8G8B8A8_UNORM;
+    sc_desc.depth_buffer_format = TextureFormatType::TEXTURE_FORMAT_D24_UNORM_S8_UINT;
+    sc_desc.swap_chain_usages = SwapChainUsageFlags::SWAP_CHAIN_USAGE_RENDER_TARGET_OUTPUT;
+    sc_desc.buffer_count = 2;
+    m_swap_chain_sp = std::make_shared<SwapChainD3D11Impl>(m_device_sp, m_device_context_sp, sc_desc);
 
     OnResize();
 }
 
 void RendererSystemD3D11::Update()
 {
-    m_swap_chain->Present(1, 0);
+    m_swap_chain_sp->Present(1);
 
     auto d3d11_immediate_context = m_device_context_sp->GetD3D11DeviceContext();
-
-    UINT clear_flag = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;
-    d3d11_immediate_context->ClearDepthStencilView(m_DSV.p, clear_flag, 1.0f, 1);
+    auto d3d11_rtv = m_swap_chain_sp->GetD3D11RenderTargetView();
+    auto d3d11_dsv = m_swap_chain_sp->GetD3D11DepthStencilView();
 
     float clear_color[] = {0.8, 0.8, 0.8, 1.0f};
-    d3d11_immediate_context->ClearRenderTargetView(m_RTV.p, clear_color);
+    d3d11_immediate_context->ClearRenderTargetView(d3d11_rtv, clear_color);
+
+    UINT clear_flag = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;
+    d3d11_immediate_context->ClearDepthStencilView(d3d11_dsv, clear_flag, 1.0f, 1);
+
+    d3d11_immediate_context->OMSetRenderTargets(1, &d3d11_rtv, d3d11_dsv);
+    d3d11_rtv->Release();
+    d3d11_dsv->Release();
 }
 
 void RendererSystemD3D11::ShutDown()
@@ -124,40 +106,18 @@ void RendererSystemD3D11::ShutDown()
 
 void RendererSystemD3D11::OnResize()
 {
-    if (!m_device_sp || !m_device_context_sp)
+    if (!m_swap_chain_sp)
         return;
-    auto d3d11_device = m_device_sp->GetD3D11Device();
+
+    m_swap_chain_sp->Resize(DisplaySystem::Get().GetWidth(), DisplaySystem::Get().GetHeight());
+
     auto d3d11_immediate_context = m_device_context_sp->GetD3D11DeviceContext();
 
-    m_RTV.Release();
-    m_DSV.Release();
-    m_DS_buffer.Release();
-
-    PPGE_HR(m_swap_chain->ResizeBuffers(1, DisplaySystem::Get().GetWidth(), DisplaySystem::Get().GetHeight(),
-                                        DXGI_FORMAT_R8G8B8A8_UNORM, 0));
-    CComPtr<ID3D11Texture2D> back_buffer;
-    PPGE_HR(m_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(&back_buffer)));
-    PPGE_HR(d3d11_device->CreateRenderTargetView(back_buffer, 0, &m_RTV));
-
-    D3D11_TEXTURE2D_DESC depthStencilDesc;
-    depthStencilDesc.Width = DisplaySystem::Get().GetWidth();
-    depthStencilDesc.Height = DisplaySystem::Get().GetHeight();
-    depthStencilDesc.MipLevels = 1;
-    depthStencilDesc.ArraySize = 1;
-    depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-    depthStencilDesc.SampleDesc.Count = 1;
-    depthStencilDesc.SampleDesc.Quality = 0;
-
-    depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-    depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-    depthStencilDesc.CPUAccessFlags = 0;
-    depthStencilDesc.MiscFlags = 0;
-
-    PPGE_HR(d3d11_device->CreateTexture2D(&depthStencilDesc, 0, &m_DS_buffer));
-    PPGE_HR(d3d11_device->CreateDepthStencilView(m_DS_buffer, 0, &m_DSV));
-
-    d3d11_immediate_context->OMSetRenderTargets(1, &m_RTV.p, m_DSV);
+    auto d3d11_rtv = m_swap_chain_sp->GetD3D11RenderTargetView();
+    auto d3d11_dsv = m_swap_chain_sp->GetD3D11DepthStencilView();
+    d3d11_immediate_context->OMSetRenderTargets(1, &d3d11_rtv, d3d11_dsv);
+    d3d11_rtv->Release();
+    d3d11_dsv->Release();
 
     m_viewport.TopLeftX = 0;
     m_viewport.TopLeftY = 0;
@@ -165,7 +125,6 @@ void RendererSystemD3D11::OnResize()
     m_viewport.Height = DisplaySystem::Get().GetHeight();
     m_viewport.MinDepth = 0.0f;
     m_viewport.MaxDepth = 1.0f;
-
     d3d11_immediate_context->RSSetViewports(1, &m_viewport);
 }
 

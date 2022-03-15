@@ -95,9 +95,9 @@ void RendererSystemD3D11::Update()
     UINT clear_flag = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;
     d3d11_immediate_context->ClearDepthStencilView(d3d11_dsv, clear_flag, 1.0f, 1);
 
-    d3d11_immediate_context->OMSetRenderTargets(1, &d3d11_rtv, d3d11_dsv);
-    d3d11_rtv->Release();
-    d3d11_dsv->Release();
+    ID3D11RenderTargetView *d3d11_rtvs[] = {d3d11_rtv.p};
+
+    d3d11_immediate_context->OMSetRenderTargets(1, d3d11_rtvs, d3d11_dsv);
 }
 
 void RendererSystemD3D11::ShutDown()
@@ -114,10 +114,11 @@ void RendererSystemD3D11::OnResize()
     auto d3d11_immediate_context = m_device_context_sp->GetD3D11DeviceContext();
 
     auto d3d11_rtv = m_swap_chain_sp->GetD3D11RenderTargetView();
+    ID3D11RenderTargetView* d3d11_rtvs[] = {d3d11_rtv.p};
+
     auto d3d11_dsv = m_swap_chain_sp->GetD3D11DepthStencilView();
-    d3d11_immediate_context->OMSetRenderTargets(1, &d3d11_rtv, d3d11_dsv);
-    d3d11_rtv->Release();
-    d3d11_dsv->Release();
+
+    d3d11_immediate_context->OMSetRenderTargets(1, d3d11_rtvs, d3d11_dsv);
 
     m_viewport.TopLeftX = 0;
     m_viewport.TopLeftY = 0;

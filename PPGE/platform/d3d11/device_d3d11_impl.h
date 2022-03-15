@@ -36,12 +36,14 @@ class DeviceD3D11Impl final : public DeviceBase<RendererTraitsD3D11>
 
     void CreateTextureFromD3D11Resource(ID3D11Texture3D *texture_ptr, std::shared_ptr<PPGETexture> &texture_sp);
 
-    ID3D11Device *GetD3D11Device() const override final
+    void CreateSampler(const SamplerDesc &desc, std::shared_ptr<PPGESampler> &sampler_sp) override final;
+
+    CComPtr<ID3D11Device> GetD3D11Device() const override final
     {
         return m_d3d11_device_ptr;
     }
 
   private:
-    CComPtr<ID3D11Device1> m_d3d11_device_ptr;
+    CComPtr<ID3D11Device> m_d3d11_device_ptr;
 };
 } // namespace PPGE

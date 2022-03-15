@@ -22,11 +22,11 @@ class TextureD3D11Impl final : public TextureBase<RendererTraitsD3D11>
 
     ~TextureD3D11Impl();
 
-    void CreateView(const TextureViewDesc &desc, std::shared_ptr<PPGETextureView> &texture_view_sp) override final;
+    std::shared_ptr<PPGETextureView> CreateView(const TextureViewDesc &desc) override final;
 
-    void GetDefaultView(std::shared_ptr<PPGETextureView> &texture_view_sp) override final;
+    std::shared_ptr<PPGETextureView> GetDefaultView() override final;
 
-    ID3D11Resource *GetD3D11Resource() const override final
+    CComPtr<ID3D11Resource> GetD3D11Resource() const override final
     {
         return m_d311_texture_ptr;
     }
@@ -47,10 +47,6 @@ class TextureD3D11Impl final : public TextureBase<RendererTraitsD3D11>
     void CreateDepthStencilView(const TextureViewDesc &view_desc, ID3D11DepthStencilView **d3d11_dsv_pp);
 
     CComPtr<ID3D11Resource> m_d311_texture_ptr;
-    union {
-        CComPtr<ID3D11ShaderResourceView> m_default_srv;
-        CComPtr<ID3D11RenderTargetView> m_default_rtv;
-        CComPtr<ID3D11DepthStencilView> m_default_dsv;
-    };
+    CComPtr<ID3D11View> m_default_view;
 };
 } // namespace PPGE

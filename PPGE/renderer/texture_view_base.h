@@ -26,11 +26,6 @@ class PPGE_API TextureViewBase : public DeviceObjectBase<typename RendererTraits
     {
     }
 
-    PPGETexture *GetTexture() const override final
-    {
-        return m_texture_sp.get();
-    }
-
   protected:
     std::shared_ptr<TextureImplType> m_texture_sp;
 };

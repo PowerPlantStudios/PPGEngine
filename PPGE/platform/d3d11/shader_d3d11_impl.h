@@ -17,12 +17,12 @@ class ShaderD3D11Impl final : public ShaderBase<RendererTraitsD3D11>
 
     ~ShaderD3D11Impl();
 
-    ID3DBlob *GetByteCode() const override final
+    CComPtr<ID3DBlob> GetByteCode() const override final
     {
         return m_shader_byte_code_ptr;
     }
 
-    ID3D11DeviceChild *GetD3D11Shader() const override final
+    CComPtr<ID3D11DeviceChild> GetD3D11Shader() const override final
     {
         return m_d3d11_shader_ptr;
     }

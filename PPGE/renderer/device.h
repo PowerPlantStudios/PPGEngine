@@ -5,6 +5,7 @@
 #include "core/ppge_object.h"
 #include "renderer/buffer.h"
 #include "renderer/pipeline_state.h"
+#include "renderer/sampler.h"
 #include "renderer/shader.h"
 #include "renderer/texture.h"
 
@@ -22,5 +23,7 @@ class PPGE_API PPGEDevice : public PPGEObject
     virtual void CreateShader(const ShaderCreateDesc &desc, std::shared_ptr<PPGEShader> &shader_sp) = 0;
 
     virtual void CreateTexture(const TextureCreateDesc &desc, std::shared_ptr<PPGETexture> &texture_sp) = 0;
+
+    virtual void CreateSampler(const SamplerDesc &desc, std::shared_ptr<PPGESampler> &sampler_sp) = 0;
 };
 } // namespace PPGE

@@ -27,6 +27,6 @@ class PPGE_API PPGEShaderResourceVariable : public PPGEObject
 
     virtual void Set(std::shared_ptr<PPGEDeviceObject> device_object_sp) = 0;
 
-    virtual PPGEDeviceObject *Get() const = 0;
+    virtual std::shared_ptr<PPGEDeviceObject> Get() const = 0;
 };
 } // namespace PPGE

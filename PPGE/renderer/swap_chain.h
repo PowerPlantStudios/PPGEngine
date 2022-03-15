@@ -29,8 +29,8 @@ class PPGE_API PPGESwapChain : public PPGEObject
 
     virtual void Present(uint32_t sync_interval) = 0;
 
-    virtual PPGETextureView *GetBackBufferRTV() = 0;
+    virtual std::shared_ptr<PPGETextureView> GetBackBufferRTV() = 0;
 
-    virtual PPGETextureView *GetDepthBufferDSV() = 0;
+    virtual std::shared_ptr<PPGETextureView> GetDepthBufferDSV() = 0;
 };
 } // namespace PPGE

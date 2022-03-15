@@ -14,4 +14,9 @@ TextureViewD3D11Impl::TextureViewD3D11Impl(std::shared_ptr<DeviceD3D11Impl> devi
 TextureViewD3D11Impl::~TextureViewD3D11Impl()
 {
 }
+
+std::shared_ptr<PPGETexture> TextureViewD3D11Impl::GetTexture() const
+{
+    return std::static_pointer_cast<PPGETexture>(m_texture_sp);
+}
 } // namespace PPGE

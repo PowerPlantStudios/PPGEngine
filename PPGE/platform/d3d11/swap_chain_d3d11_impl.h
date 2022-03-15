@@ -20,24 +20,18 @@ class SwapChainD3D11Impl final : public SwapChainBase<RendererTraitsD3D11, PPGES
 
     void Present(uint32_t sync_interval) override final;
 
-    PPGETextureViewD3D11 *GetBackBufferRTV() override final
-    {
-        return m_rtv_sp.get();
-    }
+    std::shared_ptr<PPGETextureView> GetBackBufferRTV() override final;
 
-    PPGETextureViewD3D11 *GetDepthBufferDSV() override final
-    {
-        return m_dsv_sp.get();
-    }
+    std::shared_ptr<PPGETextureView> GetDepthBufferDSV() override final;
 
-    IDXGISwapChain *GetDXGISwapChain() const override final
+    CComPtr<IDXGISwapChain> GetDXGISwapChain() const override final
     {
         return m_swap_chain_ptr;
     }
 
-    ID3D11RenderTargetView *GetD3D11RenderTargetView() const override final;
+    CComPtr<ID3D11RenderTargetView> GetD3D11RenderTargetView() const override final;
 
-    ID3D11DepthStencilView *GetD3D11DepthStencilView() const override final;
+    CComPtr<ID3D11DepthStencilView> GetD3D11DepthStencilView() const override final;
 
   private:
     void UpdateSwapChain(bool recreate) override final;

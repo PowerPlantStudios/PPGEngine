@@ -39,8 +39,9 @@ PipelineStateD3D11Impl::PipelineStateD3D11Impl(std::shared_ptr<DeviceD3D11Impl> 
             /* TEMPORARY */
             D3D11_INPUT_ELEMENT_DESC vertexDesc[] = {
                 {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-                {"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}};
-            PPGE_HR(d3d11_device->CreateInputLayout(vertexDesc, 2, vs_code->GetBufferPointer(),
+                {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"TEXTURE",  0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0}};
+            PPGE_HR(d3d11_device->CreateInputLayout(vertexDesc, 3, vs_code->GetBufferPointer(),
                                                     vs_code->GetBufferSize(), &m_input_layout_ptr));
         }
     }

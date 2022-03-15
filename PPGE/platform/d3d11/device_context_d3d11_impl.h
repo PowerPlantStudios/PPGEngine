@@ -42,13 +42,13 @@ class DeviceContextD3D11Impl final : public DeviceContextBase<RendererTraitsD3D1
     
     void Unmap(PPGEBuffer *p_buffer) override final;
 
-    ID3D11DeviceContext *GetD3D11DeviceContext() const override final
+    CComPtr<ID3D11DeviceContext> GetD3D11DeviceContext() const override final
     {
         return m_d3d11_device_context_ptr;
     }
 
   private:
     std::array<bool, D3D11_Num_of_Shaders> b_is_shader_bound = {false, false, false, false, false, false};
-    CComPtr<ID3D11DeviceContext1> m_d3d11_device_context_ptr;
+    CComPtr<ID3D11DeviceContext> m_d3d11_device_context_ptr;
 };
 } // namespace PPGE

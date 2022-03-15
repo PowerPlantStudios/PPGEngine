@@ -11,7 +11,7 @@ namespace PPGE
 class TextureDescFromD3D11Texture
 {
   public:
-    TextureDesc operator()(ID3D11Texture1D *d3d11_texture1D_ptr)
+    TextureDesc operator()(CComPtr<ID3D11Texture1D> d3d11_texture1D_ptr)
     {
         D3D11_TEXTURE1D_DESC desc;
         d3d11_texture1D_ptr->GetDesc(&desc);
@@ -33,7 +33,7 @@ class TextureDescFromD3D11Texture
         return texture_desc;
     }
 
-    TextureDesc operator()(ID3D11Texture2D *d3d11_texture2D_ptr)
+    TextureDesc operator()(CComPtr<ID3D11Texture2D> d3d11_texture2D_ptr)
     {
         D3D11_TEXTURE2D_DESC desc;
         d3d11_texture2D_ptr->GetDesc(&desc);
@@ -55,7 +55,7 @@ class TextureDescFromD3D11Texture
         return texture_desc;
     }
 
-    TextureDesc operator()(ID3D11Texture3D *d3d11_texture3D_ptr)
+    TextureDesc operator()(CComPtr<ID3D11Texture3D> d3d11_texture3D_ptr)
     {
         D3D11_TEXTURE3D_DESC desc;
         d3d11_texture3D_ptr->GetDesc(&desc);
@@ -94,12 +94,13 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
         UINT cpu_access_flags = PPGECPUAccessFlagsToD3D11CPUAccessFlags(m_desc.cpu_access_flags);
         UINT misc_flags = 0;
 
+        CComPtr<ID3D11ShaderResourceView> default_srv;
         switch (create_desc.file_format)
         {
         case PPGE::TextureFileFormat::DDS:
             DirectX::CreateDDSTextureFromFileEx(
                 d3d11_device, d3d11_device_context, std::filesystem::path(create_desc.resource_path).c_str(), 0, usage,
-                bind_flags, cpu_access_flags, misc_flags, false, &m_d311_texture_ptr, &m_default_srv);
+                bind_flags, cpu_access_flags, misc_flags, false, &m_d311_texture_ptr, &default_srv);
             break;
         case PPGE::TextureFileFormat::JPEG:
         case PPGE::TextureFileFormat::PNG:
@@ -107,7 +108,7 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
             DirectX::CreateWICTextureFromFileEx(
                 d3d11_device, d3d11_device_context, std::filesystem::path(create_desc.resource_path).c_str(), 0, usage,
                 bind_flags, cpu_access_flags, misc_flags, DirectX::WIC_LOADER_FLAGS::WIC_LOADER_DEFAULT,
-                &m_d311_texture_ptr, &m_default_srv);
+                &m_d311_texture_ptr, &default_srv);
             break;
         case PPGE::TextureFileFormat::UNKNOWN:
             PPGE_ASSERT(false, "Creating texture has failed: Texture file format is not defined.");
@@ -116,6 +117,7 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
             PPGE_ASSERT(false, "Creating texture has failed: Texture file format is not unknown.");
             break;
         }
+        PPGE_HR(default_srv.QueryInterface<ID3D11View>(&m_default_view));
     }
     else
     {
@@ -169,16 +171,16 @@ TextureD3D11Impl::~TextureD3D11Impl()
 {
 }
 
-void TextureD3D11Impl::CreateView(const TextureViewDesc &desc, std::shared_ptr<PPGETextureView> &texture_view_sp)
+std::shared_ptr<PPGETextureView> TextureD3D11Impl::CreateView(const TextureViewDesc &desc)
 {
     ValidateResourceView(desc.texture_view_type);
 
-    ID3D11View *d3d11_view_ptr;
+    CComPtr<ID3D11View> d3d11_view_ptr;
 #define CREATE_RESOURCE_VIEW(VIEW_TYPE, VIEW_NAME)                                                                     \
     {                                                                                                                  \
-        ID3D11##VIEW_TYPE##*d3d11_##VIEW_NAME##_ptr;                                                                   \
+        CComPtr<ID3D11##VIEW_TYPE##> d3d11_##VIEW_NAME##_ptr;                                                          \
         Create##VIEW_TYPE##(desc, &d3d11_##VIEW_NAME##_ptr);                                                           \
-        d3d11_##VIEW_NAME##_ptr->QueryInterface(__uuidof(ID3D11View), reinterpret_cast<void **>(&d3d11_view_ptr));     \
+        PPGE_HR(d3d11_##VIEW_NAME##_ptr.QueryInterface<ID3D11View>(&d3d11_view_ptr));                                  \
     }
     switch (desc.texture_view_type)
     {
@@ -199,30 +201,18 @@ void TextureD3D11Impl::CreateView(const TextureViewDesc &desc, std::shared_ptr<P
         break;
     }
 
-    texture_view_sp = std::make_shared<TextureViewD3D11Impl>(m_device_sp->shared_from_this(), this->shared_from_this(),
-                                                             d3d11_view_ptr, desc);
+    return std::make_shared<TextureViewD3D11Impl>(m_device_sp->shared_from_this(), this->shared_from_this(),
+                                                  d3d11_view_ptr, desc);
 }
 
-void TextureD3D11Impl::GetDefaultView(std::shared_ptr<PPGETextureView> &texture_view_sp)
+std::shared_ptr<PPGETextureView> TextureD3D11Impl::GetDefaultView()
 {
     ID3D11View *d3d11_view_ptr = nullptr;
     TextureViewDesc desc;
+    /* TODO: Fill desc */
 
-    if (Enum::ToBoolean(m_desc.bind_flags & BindFlags::BIND_SHADER_RESOURCE))
-    {
-        m_default_srv->QueryInterface(__uuidof(ID3D11View), reinterpret_cast<void **>(&d3d11_view_ptr));
-    }
-    else if (Enum::ToBoolean(m_desc.bind_flags & BindFlags::BIND_RENDER_TARGET))
-    {
-        m_default_rtv->QueryInterface(__uuidof(ID3D11View), reinterpret_cast<void **>(&d3d11_view_ptr));
-    }
-    else if (Enum::ToBoolean(m_desc.bind_flags & BindFlags::BIND_DEPTH_STENCIL))
-    {
-        m_default_dsv->QueryInterface(__uuidof(ID3D11View), reinterpret_cast<void **>(&d3d11_view_ptr));
-    }
-
-    texture_view_sp = std::make_shared<TextureViewD3D11Impl>(m_device_sp->shared_from_this(), this->shared_from_this(),
-                                                             d3d11_view_ptr, desc);
+    return std::make_shared<TextureViewD3D11Impl>(m_device_sp->shared_from_this(), this->shared_from_this(),
+                                                             m_default_view, desc);
 }
 
 void TextureD3D11Impl::CreateTexture1D(const TextureCreateDesc &create_desc)
@@ -381,6 +371,7 @@ void TextureD3D11Impl::CreateShaderResourceView(const TextureViewDesc &view_desc
         break;
     case PPGE::ResourceDimensionType::RESOURCE_DIMENSION_UNDEFINED:
         PPGE_ASSERT(false, "Creating shader resource view has failed: Resource dimension is undefined.");
+        break;
     default:
         PPGE_ASSERT(false, "Creating shader resource view has failed: Resource dimension is unknown.");
         break;

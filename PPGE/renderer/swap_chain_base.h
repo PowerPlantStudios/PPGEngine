@@ -35,7 +35,7 @@ template <typename RendererTraits, typename SwapChainInterface> class PPGE_API S
         {
             m_desc.width = width;
             m_desc.height = height;
-            UpdateSwapChain(true);
+            UpdateSwapChain(false);
         }
     }
 

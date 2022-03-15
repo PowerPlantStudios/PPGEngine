@@ -9,6 +9,6 @@ namespace PPGE
 class PPGE_API PPGETextureViewD3D11 : public PPGETextureView
 {
   public:
-    virtual ID3D11View *GetD3D11View() const = 0;
+    virtual CComPtr<ID3D11View> GetD3D11View() const = 0;
 };
 } // namespace PPGE

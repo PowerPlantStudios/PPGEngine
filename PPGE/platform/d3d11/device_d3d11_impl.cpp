@@ -2,6 +2,7 @@
 
 #include "platform/d3d11/buffer_d3d11_impl.h"
 #include "platform/d3d11/pipeline_state_d3d11_impl.h"
+#include "platform/d3d11/sampler_d3d11_impl.h"
 #include "platform/d3d11/shader_d3d11_impl.h"
 #include "platform/d3d11/texture_d3d11_impl.h"
 
@@ -71,5 +72,10 @@ void DeviceD3D11Impl::CreateTextureFromD3D11Resource(ID3D11Texture3D *texture_pt
             PPGE_ERROR("Creating shader has failed.");
 #endif
     });
+}
+
+void DeviceD3D11Impl::CreateSampler(const SamplerDesc &desc, std::shared_ptr<PPGESampler> &sampler_sp)
+{
+    CreateSamplerImpl(desc, sampler_sp);
 }
 } // namespace PPGE

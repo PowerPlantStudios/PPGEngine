@@ -17,7 +17,9 @@ class TextureViewD3D11Impl final : public TextureViewBase<RendererTraitsD3D11>
 
     ~TextureViewD3D11Impl();
 
-    ID3D11View *GetD3D11View() const override final
+    std::shared_ptr<PPGETexture> GetTexture() const override final;
+
+    CComPtr<ID3D11View> GetD3D11View() const override final
     {
         return m_d3d11_view_ptr;
     }

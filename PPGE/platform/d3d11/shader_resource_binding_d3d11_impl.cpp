@@ -30,8 +30,10 @@ ShaderResourceBindingD3D11Impl::ShaderResourceBindingD3D11Impl(
             SRV_up = std::make_unique<ConstantBufferBindingD3D11>(desc);
             break;
         case PPGE::ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV:
+            SRV_up = std::make_unique<TextureSRVBindingD3D11>(desc);
             break;
         case PPGE::ShaderResourceType::SHADER_RESOURCE_SAMPLER:
+            SRV_up = std::make_unique<SamplerBindingD3D11>(desc);
             break;
         case PPGE::ShaderResourceType::SHADER_RESOURCE_UNKNOWN:
             PPGE_ASSERT(false, "Creating shader resource variable has failed: Reource type is not set.");

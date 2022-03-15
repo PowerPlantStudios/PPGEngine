@@ -26,13 +26,15 @@ class PPGE_API ShaderResourceVariableBase : public ShaderResourceVariableInterfa
         static_cast<ShaderResourceVariableImplType *>(this)->BindResource(std::move(device_object_sp));
     }
 
-    PPGEDeviceObject *Get() const override final
+    std::shared_ptr<PPGEDeviceObject> Get() const override final
     {
-        return reinterpret_cast<PPGEDeviceObject *>(m_device_resource_sp.get());
+        return static_cast<const ShaderResourceVariableImplType *>(this)->GetResource();
     }
 
   protected:
     virtual void BindResource(std::shared_ptr<PPGEDeviceObject> device_object_sp) = 0;
+
+    virtual std::shared_ptr<PPGEDeviceObject> GetResource() const = 0;
 
     ShaderResourceDesc m_desc;
 

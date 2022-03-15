@@ -6,6 +6,7 @@
 #include "renderer/device.h"
 #include "renderer/device_context.h"
 #include "renderer/pipeline_state.h"
+#include "renderer/sampler.h"
 #include "renderer/shader.h"
 #include "system/logger_system.h"
 
@@ -24,6 +25,7 @@ class PPGE_API DeviceBase : public RendererTraits::IDevice,
     using ShaderImplType = typename RendererTraits::ShaderImpl;
     using PipelineStateImplType = typename RendererTraits::PipelineStateImpl;
     using TextureImplType = typename RendererTraits::TextureImpl;
+    using SamplerImplType = typename RendererTraits::SamplerImpl;
 
     DeviceBase()
     {
@@ -109,6 +111,19 @@ class PPGE_API DeviceBase : public RendererTraits::IDevice,
                                                            desc, std::forward<Args>(args)...);
 #ifdef PPGE_DEBUG
             if (!texture_sp)
+                PPGE_ERROR("Creating shader has failed.");
+#endif
+        });
+    }
+
+    template <typename... Args>
+    void CreateSamplerImpl(const SamplerDesc &desc, std::shared_ptr<PPGESampler> &sampler_sp, const Args &...args)
+    {
+        CreateDeviceObject(desc, sampler_sp, [&]() {
+            sampler_sp = std::make_shared<SamplerImplType>(static_cast<DeviceImplType *>(this)->shared_from_this(),
+                                                           desc, std::forward<Args>(args)...);
+#ifdef PPGE_DEBUG
+            if (!sampler_sp)
                 PPGE_ERROR("Creating shader has failed.");
 #endif
         });

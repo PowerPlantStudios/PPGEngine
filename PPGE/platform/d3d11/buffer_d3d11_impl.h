@@ -18,7 +18,7 @@ class BufferD3D11Impl final : public BufferBase<RendererTraitsD3D11>
 
     ~BufferD3D11Impl();
 
-    ID3D11Buffer *GetD3D11Buffer() const override final
+    CComPtr<ID3D11Buffer> GetD3D11Buffer() const override final
     {
         return m_d3d11_buffer_ptr;
     }

@@ -25,43 +25,37 @@ void SwapChainD3D11Impl::Present(uint32_t sync_interval)
     m_swap_chain_ptr->Present(sync_interval, 0);
 }
 
-ID3D11RenderTargetView *SwapChainD3D11Impl::GetD3D11RenderTargetView() const
+std::shared_ptr<PPGETextureView> SwapChainD3D11Impl::GetBackBufferRTV()
 {
-    ID3D11View *d3d11_view = m_rtv_sp->GetD3D11View();
+    return std::static_pointer_cast<PPGETextureView>(m_rtv_sp);
+}
 
+std::shared_ptr<PPGETextureView> SwapChainD3D11Impl::GetDepthBufferDSV()
+{
+    return std::static_pointer_cast<PPGETextureView>(m_rtv_sp);
+}
+
+CComPtr<ID3D11RenderTargetView> SwapChainD3D11Impl::GetD3D11RenderTargetView() const
+{
+    CComPtr<ID3D11View> d3d11_view = m_rtv_sp->GetD3D11View();
     if (!d3d11_view)
-    {
         return nullptr;
-    }
-
-    ID3D11RenderTargetView *d3d11_rtv = nullptr;
-    d3d11_view->QueryInterface(__uuidof(ID3D11RenderTargetView), (void **)&d3d11_rtv);
-
+    CComPtr<ID3D11RenderTargetView> d3d11_rtv;
+    PPGE_HR(d3d11_view.QueryInterface<ID3D11RenderTargetView>(&d3d11_rtv));
     if (!d3d11_rtv)
-    {
         return nullptr;
-    }
-
     return d3d11_rtv;
 }
 
-ID3D11DepthStencilView *SwapChainD3D11Impl::GetD3D11DepthStencilView() const
+CComPtr<ID3D11DepthStencilView> SwapChainD3D11Impl::GetD3D11DepthStencilView() const
 {
-    ID3D11View *d3d11_view = m_dsv_sp->GetD3D11View();
-
+    CComPtr<ID3D11View> d3d11_view = m_dsv_sp->GetD3D11View();
     if (!d3d11_view)
-    {
         return nullptr;
-    }
-
-    ID3D11DepthStencilView *d3d11_dsv = nullptr;
-    d3d11_view->QueryInterface(__uuidof(ID3D11DepthStencilView), (void **)&d3d11_dsv);
-
+    CComPtr<ID3D11DepthStencilView> d3d11_dsv;
+    PPGE_HR(d3d11_view.QueryInterface<ID3D11DepthStencilView>(&d3d11_dsv));
     if (!d3d11_dsv)
-    {
         return nullptr;
-    }
-
     return d3d11_dsv;
 }
 
@@ -75,8 +69,6 @@ void SwapChainD3D11Impl::UpdateSwapChain(bool recreate)
         return;
 
     auto d3d11_device_context = d3d11_device_context_impl->GetD3D11DeviceContext();
-    ID3D11RenderTargetView *nullViews[] = {nullptr};
-    d3d11_device_context->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
 
     m_rtv_sp.reset();
     m_dsv_sp.reset();
@@ -167,8 +159,7 @@ void SwapChainD3D11Impl::CreateRTVandDSV()
     rtv_desc.array_slices_num = back_buffer_sp->GetDesc().array_size;
     rtv_desc.first_array_slice = 0;
 
-    std::shared_ptr<PPGETextureView> rtv_sp;
-    back_buffer_sp->CreateView(rtv_desc, rtv_sp);
+    std::shared_ptr<PPGETextureView> rtv_sp = back_buffer_sp->CreateView(rtv_desc);
     m_rtv_sp = std::static_pointer_cast<PPGETextureViewD3D11>(std::move(rtv_sp));
 
     if (m_desc.depth_buffer_format != TextureFormatType::TEXTURE_FORMAT_UNKNOWN)
@@ -198,8 +189,7 @@ void SwapChainD3D11Impl::CreateRTVandDSV()
         dsv_desc.array_slices_num = 0;
         dsv_desc.first_array_slice = 0;
 
-        std::shared_ptr<PPGETextureView> dsv_sp;
-        ds_buffer->CreateView(dsv_desc, dsv_sp);
+        std::shared_ptr<PPGETextureView> dsv_sp = ds_buffer->CreateView(dsv_desc);
         m_dsv_sp = std::static_pointer_cast<PPGETextureViewD3D11>(std::move(dsv_sp));
     }
 }

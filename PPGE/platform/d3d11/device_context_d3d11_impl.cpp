@@ -14,7 +14,7 @@ void DeviceContextD3D11Impl::SetVertexBuffers(uint32_t num_buffers, PPGEBuffer *
         auto d3d11_buffer = reinterpret_cast<PPGEBufferD3D11 *>(p_buffer + i);
         vertex_buffers.push_back(d3d11_buffer->GetD3D11Buffer());
     }
-    UINT stride = 24;
+    UINT stride = 32;
     UINT offset = 0;
     m_d3d11_device_context_ptr->IASetVertexBuffers(0, num_buffers, vertex_buffers.data(), &stride, &offset);
 }

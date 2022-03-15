@@ -86,7 +86,7 @@ ShaderD3D11Impl::ShaderD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, con
     PPGE_ASSERT(m_shader_byte_code_ptr->GetBufferSize() > 0,
                 "D3D11 Shader creation failed: Shader byte code is empty.");
 
-    auto *d3d11_device = m_device_sp->GetD3D11Device();
+    auto d3d11_device = m_device_sp->GetD3D11Device();
     switch (m_desc.shader_type_flags)
     {
     case PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX: {

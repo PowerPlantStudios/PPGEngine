@@ -9,6 +9,6 @@ namespace PPGE
 class PPGE_API PPGEBufferD3D11 : public PPGEBuffer
 {
   public:
-    virtual ID3D11Buffer *GetD3D11Buffer() const = 0;
+    virtual CComPtr<ID3D11Buffer> GetD3D11Buffer() const = 0;
 };
 } // namespace PPGE

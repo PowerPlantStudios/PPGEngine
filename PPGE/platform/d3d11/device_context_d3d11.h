@@ -9,6 +9,6 @@ namespace PPGE
 class PPGE_API PPGEDeviceContexD3D11 : public PPGEDeviceContext
 {
   public:
-    virtual ID3D11DeviceContext *GetD3D11DeviceContext() const = 0;
+    virtual CComPtr<ID3D11DeviceContext> GetD3D11DeviceContext() const = 0;
 };
 } // namespace PPGE

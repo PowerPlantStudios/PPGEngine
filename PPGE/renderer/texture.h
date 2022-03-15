@@ -62,8 +62,8 @@ class PPGE_API PPGETexture : public PPGEDeviceObject
   public:
     virtual const TextureDesc &GetDesc() const = 0;
 
-    virtual void CreateView(const TextureViewDesc &desc, std::shared_ptr<PPGETextureView> &texture_view_sp) = 0;
+    virtual std::shared_ptr<PPGETextureView> CreateView(const TextureViewDesc &desc) = 0;
 
-    virtual void GetDefaultView(std::shared_ptr<PPGETextureView> &texture_view_sp) = 0;
+    virtual std::shared_ptr<PPGETextureView> GetDefaultView() = 0;
 };
 } // namespace PPGE

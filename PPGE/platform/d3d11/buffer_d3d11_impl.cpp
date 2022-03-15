@@ -20,7 +20,7 @@ BufferD3D11Impl::BufferD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, con
     d3d11_init_data.SysMemPitch = 0;
     d3d11_init_data.SysMemSlicePitch = 0;
 
-    auto *d3d11_device = m_device_sp->GetD3D11Device();
+    auto d3d11_device = m_device_sp->GetD3D11Device();
     PPGE_HR(d3d11_device->CreateBuffer(&d3d11_buffer_desc, d3d11_init_data.pSysMem ? &d3d11_init_data : nullptr,
                                        &m_d3d11_buffer_ptr));
 

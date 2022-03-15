@@ -23,3 +23,7 @@ set_target_properties(simplemath PROPERTIES FOLDER "Dependencies")
 
 add_subdirectory(directxtk)
 set_target_properties(simpletexture PROPERTIES FOLDER "Dependencies")
+
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+add_subdirectory(assimp)
+set_target_properties(assimp PROPERTIES FOLDER "Dependencies")

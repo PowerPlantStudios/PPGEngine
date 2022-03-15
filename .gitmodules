@@ -18,3 +18,7 @@
 	path = Thirdparty/directxtk/src
 	url = https://github.com/microsoft/DirectXTK.git
 	branch = sept2021
+[submodule "Thirdparty/assimp"]
+	path = Thirdparty/assimp
+	url = https://github.com/assimp/assimp.git
+	branch = v5.2.2 

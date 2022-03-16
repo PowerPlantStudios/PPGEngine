@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 3.20)
 project(Sandbox VERSION 0.0.1 LANGUAGES CXX)
 
 include_directories(
-    ${DEPENDENCIES_DIR}/imgui/src
-    ${DEPENDENCIES_DIR}/spdlog/include
-    ${DEPENDENCIES_DIR}/math/simplemath/include)
+    ${DEPENDENCIES_SRC_DIR}/spdlog/include
+    ${DEPENDENCIES_SRC_DIR}/imgui/src
+    ${DEPENDENCIES_SRC_DIR}/math/simplemath/include
+    ${DEPENDENCIES_SRC_DIR}/assimp/include
+    ${DEPENDENCIES_BIN_DIR}/assimp/include)
 if(WIN32)
     include_directories(
-        ${DEPENDENCIES_DIR}/directxtk/src/Inc)
+        ${DEPENDENCIES_SRC_DIR}/directxtk/src/Inc)
 endif()
 
 if(WIN32)

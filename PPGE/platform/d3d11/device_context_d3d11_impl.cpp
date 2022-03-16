@@ -22,7 +22,7 @@ void DeviceContextD3D11Impl::SetVertexBuffers(uint32_t num_buffers, PPGEBuffer *
 void DeviceContextD3D11Impl::SetIndexBuffer(PPGEBuffer *p_buffer)
 {
     auto d3d11_buffer = reinterpret_cast<PPGEBufferD3D11 *>(p_buffer);
-    m_d3d11_device_context_ptr->IASetIndexBuffer(d3d11_buffer->GetD3D11Buffer(), DXGI_FORMAT_R16_UINT, 0);
+    m_d3d11_device_context_ptr->IASetIndexBuffer(d3d11_buffer->GetD3D11Buffer(), DXGI_FORMAT_R32_UINT, 0);
 }
 
 void DeviceContextD3D11Impl::SetPipelineObject(PPGEPipelineState *p_PSO)
@@ -64,6 +64,8 @@ void DeviceContextD3D11Impl::SetPipelineObject(PPGEPipelineState *p_PSO)
 
     if (auto d3d11_layout = d3d11_pso->GetD3D11InputLayout())
         m_d3d11_device_context_ptr->IASetInputLayout(d3d11_layout);
+
+
 }
 
 void DeviceContextD3D11Impl::SetShaderResourceBinding(PPGEShaderResourceBinding *p_SRB)

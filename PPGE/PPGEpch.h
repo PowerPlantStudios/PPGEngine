@@ -54,3 +54,8 @@ namespace PPGE
 {
 namespace Math = ::DirectX::SimpleMath;
 }
+
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/cimport.h>
+#include <assimp/version.h>

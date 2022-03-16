@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(SIMPLEMATH LANGUAGES CXX)
 
 include_directories(
-    ${DEPENDENCIES_DIR}/math/dxmath/Inc
+    ${DEPENDENCIES_SRC_DIR}/math/dxmath/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(SIMPLEMATH_HDRS 

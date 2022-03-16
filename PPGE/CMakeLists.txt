@@ -2,15 +2,17 @@ cmake_minimum_required(VERSION 3.20)
 project(Engine VERSION 0.0.1 LANGUAGES CXX)
 
 include_directories(
-    ${DEPENDENCIES_DIR}/glfw/include
-    ${DEPENDENCIES_DIR}/glad/include
-    ${DEPENDENCIES_DIR}/spdlog/include
-    ${DEPENDENCIES_DIR}/imgui
-    ${DEPENDENCIES_DIR}/math/simplemath/include
+    ${DEPENDENCIES_SRC_DIR}/glfw/include
+    ${DEPENDENCIES_SRC_DIR}/glad/include
+    ${DEPENDENCIES_SRC_DIR}/spdlog/include
+    ${DEPENDENCIES_SRC_DIR}/imgui/src
+    ${DEPENDENCIES_SRC_DIR}/math/simplemath/include
+    ${DEPENDENCIES_SRC_DIR}/assimp/include
+    ${DEPENDENCIES_BIN_DIR}/assimp/include
     ${CMAKE_CURRENT_SOURCE_DIR})
 if(WIN32)
     include_directories(
-        ${DEPENDENCIES_DIR}/directxtk/src/Inc)
+        ${DEPENDENCIES_SRC_DIR}/directxtk/src/Inc)
 endif()
 
 file(GLOB PPGE_HDRS 
@@ -127,12 +129,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glfw
     glad
     imgui 
-    simplemath)
+    simplemath
+    assimp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 
 if (WIN32)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC PPGE_PLATFORM_WIN)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC PPGE_PLATFORM_WIN NOMINMAX)
     target_link_libraries(${PROJECT_NAME} PRIVATE simpletexture d3dcompiler.lib dxgi.lib d3d11.lib d3d12.lib)
 elseif(APPLE)
     target_compile_definitions(${PROJECT_NAME} PUBLIC PPGE_PLATFORM_APPLE)

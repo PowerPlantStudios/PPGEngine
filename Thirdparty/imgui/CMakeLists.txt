@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(IMGUI LANGUAGES CXX)
 
-include_directories(${DEPENDENCIES_DIR}/glad/include)
-include_directories(${DEPENDENCIES_DIR}/glfw/include)
+include_directories(${DEPENDENCIES_SRC_DIR}/glad/include)
+include_directories(${DEPENDENCIES_SRC_DIR}/glfw/include)
 
 set(IMGUI_SRCS 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/imgui.cpp

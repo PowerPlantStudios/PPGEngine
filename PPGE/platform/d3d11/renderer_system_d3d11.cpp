@@ -89,7 +89,7 @@ void RendererSystemD3D11::Update()
     auto d3d11_rtv = m_swap_chain_sp->GetD3D11RenderTargetView();
     auto d3d11_dsv = m_swap_chain_sp->GetD3D11DepthStencilView();
 
-    float clear_color[] = {0.8, 0.8, 0.8, 1.0f};
+    float clear_color[] = {0.6, 0.8, 0.9, 1.0f};
     d3d11_immediate_context->ClearRenderTargetView(d3d11_rtv, clear_color);
 
     UINT clear_flag = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;

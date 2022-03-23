@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <deque>
 #include <filesystem>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -25,8 +26,8 @@
 #include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
 #include <Windows.h>
-#include <d3d11_4.h>
 #include <atlbase.h>
+#include <d3d11_4.h>
 #include <d3d11sdklayers.h>
 #elif defined(PPGE_PLATFORM_UNIX)
 // Linux libraries
@@ -55,7 +56,7 @@ namespace PPGE
 namespace Math = ::DirectX::SimpleMath;
 }
 
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include <assimp/cimport.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <assimp/version.h>

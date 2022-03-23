@@ -19,7 +19,7 @@ std::shared_ptr<PPGEDeviceObject> ConstantBufferBindingD3D11::GetResource() cons
 CComPtr<ID3D11DeviceChild> ConstantBufferBindingD3D11::GetD3D11Resource() const
 {
     CComPtr<ID3D11DeviceChild> resource_ptr;
-    CComPtr<ID3D11Buffer> buffer_ptr = m_device_resource_sp->GetD3D11Buffer();
+    CComPtr<ID3D11Buffer> buffer_ptr = m_device_resource_sp->GetD3D11BufferShared();
     PPGE_HR(buffer_ptr.QueryInterface<ID3D11DeviceChild>(&resource_ptr));
     return resource_ptr;
 }

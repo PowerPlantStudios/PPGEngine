@@ -10,6 +10,7 @@
 #include "core/input.h"
 #include "event/application_event.h"
 #include "event/input_event.h"
+#include "io/resource_manager.h"
 #include "renderer/buffer.h"
 #include "renderer/pipeline_state.h"
 #include "renderer/renderer_types.h"

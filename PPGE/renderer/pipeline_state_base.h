@@ -2,9 +2,9 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "system/logger_system.h"
 #include "renderer/device_object_base.h"
 #include "renderer/pipeline_state.h"
+#include "system/logger_system.h"
 
 namespace PPGE
 {
@@ -21,27 +21,47 @@ class PPGE_API PipelineStateBase : public DeviceObjectBase<typename RendererTrai
     using DeviceObjectBaseType = DeviceObjectBase<DeviceImplType, PipelineStateDesc, PipelineStateInterface>;
 
     PipelineStateBase(std::shared_ptr<DeviceImplType> device_sp, const GfxPipelineStateCreateDesc &desc)
-        : DeviceObjectBaseType(std::move(device_sp), desc.desc), m_pso_type(desc.desc.type)
+        : DeviceObjectBaseType(std::move(device_sp), desc.desc)
     {
-        if (m_pso_type == PipelineType::PIPELINE_GRAPHICS)
-            gfx_pso_desc_up = std::make_unique<GfxPipelineStateDesc>(desc.desc);
+        m_gfx_ps_desc = desc.desc;
+    }
+
+    PipelineStateBase(std::shared_ptr<DeviceImplType> device_sp, const RtxPipelineStateCreateDesc &desc)
+        : DeviceObjectBaseType(std::move(device_sp), desc.desc)
+    {
+        m_rtx_ps_desc = desc.desc;
     }
 
     const GfxPipelineStateDesc &GetGraphicsPipelineStateDesc() const override final
     {
-        PPGE_ASSERT(m_pso_type == PipelineType::PIPELINE_GRAPHICS,
+        PPGE_ASSERT(DeviceObjectBaseType::m_desc.type == PipelineType::PIPELINE_GRAPHICS,
                     "Gfx pipeline state description is requested from a non gfx pipeline state object.");
-        return *gfx_pso_desc_up;
+        return m_gfx_ps_desc;
+    }
+
+    const RtxPipelineStateDesc &GetRayTracingPipelineStateDesc() const override final
+    {
+        PPGE_ASSERT(DeviceObjectBaseType::m_desc.type == PipelineType::PIPELINE_RAYTRACING,
+                    "Gfx pipeline state description is requested from a non gfx pipeline state object.");
+        return m_rtx_ps_desc;
     }
 
     PipelineType GetPipelineType() const override final
     {
-        return m_pso_type;
+        return DeviceObjectBaseType::m_desc.type;
+    }
+
+    uint16_t GetStride(uint16_t buffer_slot) const
+    {
+        PPGE_ASSERT(buffer_slot < Num_Of_Buffer_Slots, "Buffer slot cannot exceeds the limit.")
+        return DeviceObjectBaseType::m_desc.type == PipelineType::PIPELINE_GRAPHICS ? m_layout_strides[buffer_slot] : 0;
     }
 
   protected:
-    PipelineType m_pso_type;
+    GfxPipelineStateDesc m_gfx_ps_desc;
 
-    std::unique_ptr<GfxPipelineStateDesc> gfx_pso_desc_up;
+    RtxPipelineStateDesc m_rtx_ps_desc;
+
+    std::array<uint16_t, Num_Of_Buffer_Slots> m_layout_strides;
 };
 } // namespace PPGE

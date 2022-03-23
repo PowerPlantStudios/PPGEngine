@@ -1,98 +1,5 @@
 #include <PPGE.h>
 
-static std::string_view vs_code =
-    R"(
-cbuffer g_PerFrame  : register(b0)
-{
-    float4x4 view;
-    float4x4 proj;
-    float4x4 viewProj;
-    float3  cameraPosition;
-    float   padding;
-};
-
-cbuffer g_PerObject : register(b1)
-{
-	float4x4 model;
-    float4x4 modelInvTran;
-};
-
-struct VertexIn
-{
-	float3 PosL    : POSITION;
-    float3 Normal  : NORMAL; 
-    float2 Texture : TEXTURE;
-};
-
-struct VertexOut
-{
-	float4 PosH    : SV_POSITION;
-	float3 PosL    : POSITION;
-    float3 Normal  : NORMAL; 
-    float2 Texture : TEXTURE;
-    float3 EyePos  : VECTOR0;
-};
-
-VertexOut main(VertexIn vin)
-{
-	VertexOut vout;
-
-    // Homogenous device position
-    vout.PosH    = mul(float4(vin.PosL, 1.0), viewProj);
-    
-    // World position
-    vout.PosL = mul(float4(vin.PosL, 1.0), model).xyz;
-
-    // World normals    
-    vout.Normal = mul(vin.Normal, model).xyz;
-    vout.Normal = normalize(vout.Normal);
-
-	vout.Texture.x = vin.Texture.x; 
-	vout.Texture.y = 1 - vin.Texture.y;
-
-    vout.EyePos = cameraPosition.xyz;
-
-    return vout;
-}
-)";
-
-static std::string_view ps_code =
-    R"(
-Texture2D g_diffuse : register(t0);
-
-SamplerState g_sampler : register(s0);
-
-struct FragmentIn
-{
-	float4 PosH    : SV_POSITION;
-	float3 PosL    : POSITION;
-    float3 Normal  : NORMAL; 
-    float2 Texture : TEXTURE;
-    float3 EyePos  : VECTOR0;
-};
-
-float4 main(FragmentIn pin) : SV_Target
-{
-    float3 l_lightColor    = float3(0.85f, 0.8f, 1.0f);
-    float  l_ambient       = 0.45;
-    float3 l_lightPos      = float3(1.0f, 1.0f, 1.0f);
-    float  l_specularPower = 24.0f;
-
-    
-    float3 lightDir = normalize(l_lightPos - pin.PosL);
-
-    float ambient = l_ambient;
-    float diff    = saturate(dot(pin.Normal, -lightDir));
-    float spec    = pow(saturate(dot(reflect(lightDir, pin.Normal), 
-                        normalize(pin.EyePos - pin.PosL))), l_specularPower);
-    
-    float3 lightColor = saturate(spec + diff + ambient) * l_lightColor;
-    float3 texColor   = g_diffuse.Sample(g_sampler, pin.Texture).rgb;
-    
-    return float4(lightColor  * texColor, 1.0f);
-}
-)";
-
 constexpr float pi = 3.14159265359f;
 
 class SceneLoader
@@ -332,6 +239,8 @@ class Camera3D
 
 class TestLayer : public PPGE::Widget
 {
+    PPGE::ResourceManager resource_mgr;
+
     std::shared_ptr<PPGE::PPGEBuffer> m_vb_model;
     std::shared_ptr<PPGE::PPGEBuffer> m_vb_ground;
 
@@ -378,17 +287,30 @@ class TestLayer : public PPGE::Widget
     {
         m_mouse_pos.x = PPGE::Input::GetMouseX();
         m_mouse_pos.y = PPGE::Input::GetMouseY();
+
+        resource_mgr.RegisterLoaderMultiple<PPGE::TextResource, PPGE::TextLoader>({".hlsl", ".glsl"});
+        resource_mgr.RegisterLoaderMultiple<PPGE::ByteResource, PPGE::ByteLoader>({".bin"});
+        resource_mgr.RegisterLoaderMultiple<PPGE::LazyResource, PPGE::LazyLoader>(
+            {".gltf", ".obj", ".mtl", ".bmp", ".png", ".jpg", ".dds"});
     }
 
     void OnAttach() override
     {
+        // Load resources
+        resource_mgr.WalkRoot("D:/Workspace/PPGEngine/Sandbox/assets");
+
         // Create vertex buffer and index buffer
         {
             std::vector<SceneLoader::Vertex> vertices;
             std::vector<unsigned int> indices;
 
-            SceneLoader::LoadScene("D:/Workspace/PPGEngine/Sandbox/assets/scenes/rubber_duck/scene.gltf",
-                                   vertices, indices);
+            if (auto resource = resource_mgr.GetCachedResource("models/rubber_duck/rubber_duck.gltf"))
+            {
+                auto lazy_resource = std::static_pointer_cast<PPGE::LazyResource>(std::move(resource));
+                SceneLoader::LoadScene(lazy_resource->data, vertices,
+                                       indices);
+            }
+
 
             PPGE::BufferDesc vb_desc;
             vb_desc.byte_width = vertices.size() * sizeof(SceneLoader::Vertex);
@@ -454,20 +376,27 @@ class TestLayer : public PPGE::Widget
         }
 
         // Create Texture View
+        if (auto resource = resource_mgr.GetCachedResource("models/rubber_duck/textures/Duck_baseColor.png"))
         {
+            auto lazy_resource = std::static_pointer_cast<PPGE::LazyResource>(std::move(resource));
+            std::string path_to_resource = lazy_resource->data.string();
+
             std::shared_ptr<PPGE::PPGETexture> texture;
             PPGE::TextureCreateDesc tex_cd;
-            tex_cd.resource_path =
-                "D:/Workspace/PPGEngine/Sandbox/assets/scenes/rubber_duck/textures/Duck_baseColor.png";
+            tex_cd.resource_path = path_to_resource.c_str();
             tex_cd.file_format = PPGE::TextureFileFormat::PNG;
             tex_cd.desc.bind_flags = PPGE::BindFlags::BIND_SHADER_RESOURCE;
             PPGE::RendererSystem::Get().GetDevice()->CreateTexture(tex_cd, texture);
             m_diffuse_srv_model = texture->GetDefaultView();
         }
+        if (auto resource = resource_mgr.GetCachedResource("textures/grass.jpg"))
         {
+            auto lazy_resource = std::static_pointer_cast<PPGE::LazyResource>(std::move(resource));
+            std::string path_to_resource = lazy_resource->data.string();
+
             std::shared_ptr<PPGE::PPGETexture> texture;
             PPGE::TextureCreateDesc tex_cd;
-            tex_cd.resource_path = "D:/Workspace/PPGEngine/Sandbox/assets/textures/grass-autumn.jpg";
+            tex_cd.resource_path = path_to_resource.c_str();
             tex_cd.file_format = PPGE::TextureFileFormat::JPEG;
             tex_cd.desc.bind_flags = PPGE::BindFlags::BIND_SHADER_RESOURCE;
             PPGE::RendererSystem::Get().GetDevice()->CreateTexture(tex_cd, texture);
@@ -482,26 +411,41 @@ class TestLayer : public PPGE::Widget
 
         {
             std::shared_ptr<PPGE::PPGEShader> vs;
+            if (auto resource = resource_mgr.GetCachedResource("shaders/simple_vs.hlsl"))
             {
+                auto text_resource = std::static_pointer_cast<PPGE::TextResource>(std::move(resource));
                 PPGE::ShaderCreateDesc cd;
                 cd.desc.shader_type_flags = PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX;
                 cd.compiler = PPGE::ShaderCompilerType::SHADER_COMPILER_FXC;
-                cd.source_code = vs_code.data();
-                cd.source_code_size = vs_code.size();
+                cd.source_code = text_resource->data.data();
+                cd.source_code_size = text_resource->data.size();
                 PPGE::RendererSystem::Get().GetDevice()->CreateShader(cd, vs);
             }
 
             std::shared_ptr<PPGE::PPGEShader> ps;
+            if (auto resource = resource_mgr.GetCachedResource("shaders/simple_ps.hlsl"))
             {
+                auto text_resource = std::static_pointer_cast<PPGE::TextResource>(std::move(resource));
                 PPGE::ShaderCreateDesc cd;
                 cd.desc.shader_type_flags = PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL;
                 cd.compiler = PPGE::ShaderCompilerType::SHADER_COMPILER_FXC;
-                cd.source_code = ps_code.data();
-                cd.source_code_size = ps_code.size();
+                cd.source_code = text_resource->data.data();
+                cd.source_code_size = text_resource->data.size();
                 PPGE::RendererSystem::Get().GetDevice()->CreateShader(cd, ps);
             }
 
             PPGE::GfxPipelineStateCreateDesc ps_cd;
+            {
+                PPGE::InputLayoutDesc ly_desc;
+                PPGE::InputElementDesc elements[] = {
+                    {"POSITION", 0, PPGE::ElementValueType::ELEMENT_VALUE_FLOAT32, 3, 0},
+                    {"NORMAL", 0, PPGE::ElementValueType::ELEMENT_VALUE_FLOAT32, 3, 0},
+                    {"TEXTURE", 0, PPGE::ElementValueType::ELEMENT_VALUE_FLOAT32, 2, 0}};
+                ly_desc.elements = elements;
+                ly_desc.elements_num = (sizeof(elements) / sizeof(PPGE::InputElementDesc));
+
+                ps_cd.desc.input_layout_desc = ly_desc;
+            }
             ps_cd.commited_vs = vs;
             ps_cd.commited_ps = ps;
 
@@ -522,14 +466,14 @@ class TestLayer : public PPGE::Widget
             PPGE::RendererSystem::Get().GetDevice()->CreatePipelineState(ps_cd, m_PSO);
         }
 
-        m_PSO->CreateShaderResourceBinding(m_SRB_model);
+        m_SRB_model = m_PSO->CreateShaderResourceBinding();
         m_SRB_model->GetVariableByName("cb_per_frame", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_frame);
         m_SRB_model->GetVariableByName("cb_per_object", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)
             ->Set(m_cb_per_object);
         m_SRB_model->GetVariableByName("g_diffuse", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_diffuse_srv_model);
         m_SRB_model->GetVariableByName("g_sampler", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_sampler_state);
 
-        m_PSO->CreateShaderResourceBinding(m_SRB_ground);
+        m_SRB_ground = m_PSO->CreateShaderResourceBinding();
         m_SRB_ground->GetVariableByName("cb_per_frame", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_frame);
         m_SRB_ground->GetVariableByName("cb_per_object", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)
             ->Set(m_cb_per_object);
@@ -537,7 +481,7 @@ class TestLayer : public PPGE::Widget
             ->Set(m_diffuse_srv_ground);
         m_SRB_ground->GetVariableByName("g_sampler", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_sampler_state);
 
-        PPGE::RendererSystem::Get().GetImmediateContext()->SetPipelineObject(m_PSO.get());
+        PPGE::RendererSystem::Get().GetImmediateContext()->SetPipelineStateObject(m_PSO);
     }
 
     void OnDetach() override
@@ -606,9 +550,13 @@ class TestLayer : public PPGE::Widget
             PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_frame.get());
         }
 
-        PPGE::RendererSystem::Get().GetImmediateContext()->SetVertexBuffers(1, m_vb_model.get());
-        PPGE::RendererSystem::Get().GetImmediateContext()->SetIndexBuffer(m_ib_model.get());
-        PPGE::RendererSystem::Get().GetImmediateContext()->SetShaderResourceBinding(m_SRB_model.get());
+        {
+            std::shared_ptr<PPGE::PPGEBuffer> vbs[] = {m_vb_model};
+            uint64_t offsets[] = {0};
+            PPGE::RendererSystem::Get().GetImmediateContext()->SetVertexBuffers(1, vbs, offsets);
+        }
+        PPGE::RendererSystem::Get().GetImmediateContext()->SetIndexBuffer(m_ib_model);
+        PPGE::RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB_model);
         {
             cbPerObject *map_data;
             PPGE::RendererSystem::Get().GetImmediateContext()->Map(m_cb_per_object.get(), PPGE::MapType::MAP_WRITE,
@@ -620,9 +568,13 @@ class TestLayer : public PPGE::Widget
         }
         PPGE::RendererSystem::Get().GetImmediateContext()->DrawIndexed(m_num_indicies_model);
 
-        PPGE::RendererSystem::Get().GetImmediateContext()->SetVertexBuffers(1, m_vb_ground.get());
-        PPGE::RendererSystem::Get().GetImmediateContext()->SetIndexBuffer(m_ib_ground.get());
-        PPGE::RendererSystem::Get().GetImmediateContext()->SetShaderResourceBinding(m_SRB_ground.get());
+        {
+            std::shared_ptr<PPGE::PPGEBuffer> vbs[] = {m_vb_ground};
+            uint64_t offsets[] = {0};
+            PPGE::RendererSystem::Get().GetImmediateContext()->SetVertexBuffers(1, vbs, offsets);
+        }
+        PPGE::RendererSystem::Get().GetImmediateContext()->SetIndexBuffer(m_ib_ground);
+        PPGE::RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB_ground);
         {
             cbPerObject *map_data;
             PPGE::RendererSystem::Get().GetImmediateContext()->Map(m_cb_per_object.get(), PPGE::MapType::MAP_WRITE,

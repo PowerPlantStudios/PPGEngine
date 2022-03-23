@@ -6,7 +6,8 @@ include_directories(
     ${DEPENDENCIES_SRC_DIR}/imgui/src
     ${DEPENDENCIES_SRC_DIR}/math/simplemath/include
     ${DEPENDENCIES_SRC_DIR}/assimp/include
-    ${DEPENDENCIES_BIN_DIR}/assimp/include)
+    ${DEPENDENCIES_BIN_DIR}/assimp/include
+    ${DEPENDENCIES_SRC_DIR}/entt/src)
 if(WIN32)
     include_directories(
         ${DEPENDENCIES_SRC_DIR}/directxtk/src/Inc)

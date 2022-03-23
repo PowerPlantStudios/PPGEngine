@@ -17,6 +17,8 @@ endif()
 
 file(GLOB PPGE_HDRS 
     ${PPGE_CORE_DIR}/core/*.h
+    ${PPGE_CORE_DIR}/ecs/*.h
+    ${PPGE_CORE_DIR}/ecs/components/*.h
     ${PPGE_CORE_DIR}/event/*.h
     ${PPGE_CORE_DIR}/io/*.h
     ${PPGE_CORE_DIR}/renderer/*.h
@@ -27,6 +29,8 @@ set(PPGE_HDRS ${PPGE_HDRS}
 
 file(GLOB PPGE_SRCS 
     ${PPGE_CORE_DIR}/core/*.cpp
+    ${PPGE_CORE_DIR}/ecs/*.cpp
+    ${PPGE_CORE_DIR}/ecs/components/*.cpp
     ${PPGE_CORE_DIR}/event/*.cpp
     ${PPGE_CORE_DIR}/io/*.cpp
     ${PPGE_CORE_DIR}/renderer/*.cpp
@@ -132,7 +136,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glad
     imgui 
     simplemath
-    assimp)
+    assimp
+    EnTT)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 

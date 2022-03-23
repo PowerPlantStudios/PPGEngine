@@ -22,3 +22,7 @@
 	path = Thirdparty/assimp
 	url = https://github.com/assimp/assimp.git
 	branch = v5.2.2 
+[submodule "Thirdparty/entt"]
+	path = Thirdparty/entt
+	url = https://github.com/skypjack/entt.git
+    branch = v3.9.0

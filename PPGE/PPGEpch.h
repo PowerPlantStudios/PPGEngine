@@ -60,3 +60,5 @@ namespace Math = ::DirectX::SimpleMath;
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/version.h>
+
+#include <entt/entt.hpp>

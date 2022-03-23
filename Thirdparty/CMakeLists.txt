@@ -33,3 +33,6 @@ set_target_properties(zlibstatic PROPERTIES FOLDER "Dependencies")
 if(MSVC12 OR MSVC14 OR MSVC15)
     set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "Dependencies")
 endif()
+
+add_subdirectory(entt)
+set_target_properties(aob PROPERTIES FOLDER "Dependencies")

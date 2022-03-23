@@ -267,6 +267,8 @@ class TestLayer : public PPGE::Widget
 
     PPGE::Math::Vector2 m_mouse_pos;
 
+    PPGE::Scene m_scene;
+
     struct cbPerFrame
     {
         PPGE::Math::Matrix view;
@@ -296,6 +298,12 @@ class TestLayer : public PPGE::Widget
 
     void OnAttach() override
     {
+        auto camera_entity = m_scene.CreateEntity();
+        auto &camera_component = camera_entity.AddComponent<PPGE::CameraComponent>();
+
+        auto light_entity = m_scene.CreateEntity();
+        auto &dir_light_component = light_entity.AddComponent<PPGE::DirectionalLightComponent>();
+
         // Load resources
         resource_mgr.WalkRoot("D:/Workspace/PPGEngine/Sandbox/assets");
 

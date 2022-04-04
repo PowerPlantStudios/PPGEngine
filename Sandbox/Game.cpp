@@ -42,201 +42,6 @@ class SceneLoader
     }
 };
 
-class Camera2D
-{
-  public:
-    Camera2D()
-    {
-        m_view = PPGE::Math::Matrix::Identity;
-        m_proj = PPGE::Math::Matrix::CreateOrthographic(PPGE::DisplaySystem::Get().GetWidth(),
-                                                        PPGE::DisplaySystem::Get().GetHeight(), -1000.0f, 1000.0f);
-    }
-
-    void MoveLeft(float delta)
-    {
-        m_pos -= PPGE::Math::Vector3(speed * delta, 0, 0);
-        UpdateTranslation();
-    }
-
-    void MoveRight(float delta)
-    {
-        m_pos += PPGE::Math::Vector3(speed * delta, 0, 0);
-        UpdateTranslation();
-    }
-
-    void MoveUp(float delta)
-    {
-        m_pos += PPGE::Math::Vector3(0, speed * delta, 0);
-        UpdateTranslation();
-    }
-
-    void MoveDown(float delta)
-    {
-        m_pos -= PPGE::Math::Vector3(0, speed * delta, 0);
-        UpdateTranslation();
-    }
-
-    inline PPGE::Math::Matrix GetViewProj() const
-    {
-        return m_proj * m_view.Invert();
-    }
-
-  private:
-    void UpdateTranslation()
-    {
-        m_view.Translation(m_pos);
-    }
-
-    PPGE::Math::Matrix m_view;
-    PPGE::Math::Matrix m_proj;
-
-    PPGE::Math::Vector3 m_pos;
-
-    float speed = 1.0f;
-};
-
-class Camera3D
-{
-  public:
-    Camera3D() : m_walk_speed(1.0f), m_rotation_speed(5.0f), m_pitch(0.0f), m_yaw(0.0f)
-    {
-        float fov = pi * 0.333f;
-        float aspect_ratio =
-            (float)PPGE::DisplaySystem::Get().GetWidth() / (float)PPGE::DisplaySystem::Get().GetHeight();
-        m_proj = PPGE::Math::Matrix::CreatePerspectiveFieldOfView(fov, aspect_ratio, 0.1f, 1000.0f);
-
-        ResetCameraPosition();
-    }
-
-    inline PPGE::Math::Matrix GetView() const
-    {
-        return m_view.Invert();
-    }
-
-    inline PPGE::Math::Matrix GetProj() const
-    {
-        return m_proj;
-    }
-
-    inline PPGE::Math::Matrix GetViewProj() const
-    {
-        return GetView() * GetProj();
-    }
-
-    inline PPGE::Math::Vector3 GetPosition() const
-    {
-        return m_position;
-    }
-
-    void ResetCameraPosition()
-    {
-        SetPosition(PPGE::Math::Vector3(-1.5f, 1.75f, -1.5f));
-        m_pitch = -29.75f / 180.0f * pi;
-        m_yaw = 225.0f / 180.0f * pi;
-        auto rotator = PPGE::Math::Matrix::CreateFromYawPitchRoll(m_yaw, m_pitch, 0.0f);
-        auto target = PPGE::Math::Vector3::Transform(PPGE::Math::Vector3::Forward, rotator);
-        LookAt(m_position + target, PPGE::Math::Vector3(0.0f, 1.0f, 0.0f));
-    }
-
-    void SetPosition(const PPGE::Math::Vector3 &pos)
-    {
-        m_position = pos;
-    }
-
-    void LookAt(const PPGE::Math::Vector3 &target, const PPGE::Math::Vector3 &world_up)
-    {
-        auto F = target - m_position;
-        F.Normalize();
-        auto L = F.Cross(world_up);
-        L.Normalize();
-        auto U = L.Cross(F);
-
-        m_view.Forward(F);
-        m_view.Right(L);
-        m_view.Up(U);
-        m_view.Translation(m_position);
-    }
-
-    void MoveForward(float delta_time)
-    {
-        m_position = m_position + GetForward() * m_walk_speed * delta_time;
-        m_view.Translation(m_position);
-    }
-
-    void MoveBackward(float delta_time)
-    {
-        m_position = m_position - GetForward() * m_walk_speed * delta_time;
-        m_view.Translation(m_position);
-    }
-
-    void MoveLeft(float delta_time)
-    {
-        m_position = m_position + GetLeft() * m_walk_speed * delta_time;
-        m_view.Translation(m_position);
-    }
-
-    void MoveRight(float delta_time)
-    {
-        m_position = m_position - GetLeft() * m_walk_speed * delta_time;
-        m_view.Translation(m_position);
-    }
-
-    void MoveUp(float delta_time)
-    {
-        m_position = m_position + GetUp() * m_walk_speed * delta_time;
-        m_view.Translation(m_position);
-    }
-
-    void MoveDown(float delta_time)
-    {
-        m_position = m_position - GetUp() * m_walk_speed * delta_time;
-        m_view.Translation(m_position);
-    }
-
-    void Yaw(float angle)
-    {
-        m_yaw += m_rotation_speed * angle / 180.0f * pi;
-        auto rotator = PPGE::Math::Matrix::CreateFromYawPitchRoll(m_yaw, m_pitch, 0.0f);
-        auto target = PPGE::Math::Vector3::Transform(PPGE::Math::Vector3::Forward, rotator);
-        LookAt(m_position + target, PPGE::Math::Vector3(0.0f, 1.0f, 0.0f));
-    }
-
-    void Pitch(float angle)
-    {
-        m_pitch += m_rotation_speed * angle / 180.0f * pi;
-        auto rotator = PPGE::Math::Matrix::CreateFromYawPitchRoll(m_yaw, m_pitch, 0.0f);
-        auto target = PPGE::Math::Vector3::Transform(PPGE::Math::Vector3::Forward, rotator);
-        LookAt(m_position + target, PPGE::Math::Vector3(0.0f, 1.0f, 0.0f));
-    }
-
-  private:
-    PPGE::Math::Vector3 GetForward() const
-    {
-        return m_view.Forward();
-    }
-
-    PPGE::Math::Vector3 GetUp() const
-    {
-        return m_view.Up();
-    }
-
-    PPGE::Math::Vector3 GetLeft() const
-    {
-        return m_view.Left();
-    }
-
-    PPGE::Math::Vector3 m_position;
-
-    PPGE::Math::Matrix m_view;
-    PPGE::Math::Matrix m_proj;
-
-    float m_yaw;
-    float m_pitch;
-
-    float m_walk_speed;
-    float m_rotation_speed;
-};
-
 class TestLayer : public PPGE::Widget
 {
     PPGE::ResourceManager resource_mgr;
@@ -263,9 +68,7 @@ class TestLayer : public PPGE::Widget
 
     size_t m_num_indicies_model = 0;
 
-    Camera3D m_camera_controller;
-
-    PPGE::Math::Vector2 m_mouse_pos;
+    PPGE::FreeLookCamera m_camera_controller;
 
     PPGE::Scene m_scene;
 
@@ -287,9 +90,6 @@ class TestLayer : public PPGE::Widget
   public:
     TestLayer() : Widget("TestSubsystem"), m_camera_controller{}
     {
-        m_mouse_pos.x = PPGE::Input::GetMouseX();
-        m_mouse_pos.y = PPGE::Input::GetMouseY();
-
         resource_mgr.RegisterLoaderMultiple<PPGE::TextResource, PPGE::TextLoader>({".hlsl", ".glsl"});
         resource_mgr.RegisterLoaderMultiple<PPGE::ByteResource, PPGE::ByteLoader>({".bin"});
         resource_mgr.RegisterLoaderMultiple<PPGE::LazyResource, PPGE::LazyLoader>(
@@ -300,12 +100,22 @@ class TestLayer : public PPGE::Widget
     {
         auto camera_entity = m_scene.CreateEntity();
         auto &camera_component = camera_entity.AddComponent<PPGE::CameraComponent>();
+        {
+            float fov = pi * 0.333f;
+            float aspect_ratio =
+                (float)PPGE::DisplaySystem::Get().GetWidth() / (float)PPGE::DisplaySystem::Get().GetHeight();
+            camera_component.projection =
+                PPGE::Math::Matrix::CreatePerspectiveFieldOfView(fov, aspect_ratio, 0.1f, 1000.0f);
+        }
+        m_camera_controller.Possess(camera_entity);
+        m_camera_controller.Move(PPGE::Math::Vector3(-1.5f, 1.75f, -1.5f));
+        m_camera_controller.LookAt(PPGE::Math::Vector3::Zero, PPGE::Math::Vector3::Up);
 
         auto light_entity = m_scene.CreateEntity();
         auto &dir_light_component = light_entity.AddComponent<PPGE::DirectionalLightComponent>();
 
         // Load resources
-        resource_mgr.WalkRoot("D:/Workspace/PPGEngine/Sandbox/assets");
+        resource_mgr.WalkRoot("../../Sandbox/assets");
 
         // Create vertex buffer and index buffer
         {
@@ -498,49 +308,7 @@ class TestLayer : public PPGE::Widget
 
     void OnUpdate(float delta_time) override
     {
-        float x = PPGE::Input::GetMouseX();
-        float delta_x = m_mouse_pos.x - x;
-        m_mouse_pos.x = x;
-
-        float y = PPGE::Input::GetMouseY();
-        float delta_y = m_mouse_pos.y - y;
-        m_mouse_pos.y = y;
-
-        if (PPGE::Input::IsKeyPressed(PPGE_KEY_W))
-        {
-            m_camera_controller.MoveForward(delta_time);
-        }
-        else if (PPGE::Input::IsKeyPressed(PPGE_KEY_S))
-        {
-            m_camera_controller.MoveBackward(delta_time);
-        }
-
-        if (PPGE::Input::IsKeyPressed(PPGE_KEY_D))
-        {
-            m_camera_controller.MoveRight(delta_time);
-        }
-        else if (PPGE::Input::IsKeyPressed(PPGE_KEY_A))
-        {
-            m_camera_controller.MoveLeft(delta_time);
-        }
-
-        if (PPGE::Input::IsKeyPressed(PPGE_KEY_E))
-        {
-            m_camera_controller.MoveUp(delta_time);
-        }
-        else if (PPGE::Input::IsKeyPressed(PPGE_KEY_Q))
-        {
-            m_camera_controller.MoveDown(delta_time);
-        }
-
-        if (PPGE::Input::IsMouseButtonPressed(PPGE_MOUSE_BUTTON_0) /* && !ImGui::IsAnyItemActive() */)
-        {
-            APP_INFO("Delta X : {0}", delta_x);
-            APP_INFO("Delta Y : {0}", delta_y);
-
-            m_camera_controller.Pitch(delta_time * delta_y);
-            m_camera_controller.Yaw(delta_time * delta_x);
-        }
+        m_camera_controller.Update(delta_time);
     }
 
     void OnRender() override

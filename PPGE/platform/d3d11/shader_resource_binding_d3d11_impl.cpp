@@ -2,7 +2,7 @@
 
 #include "platform/d3d11/pipeline_state_d3d11_impl.h"
 #include "platform/d3d11/shader_resource_variable_d3d11_impl.h"
-#include "renderer/shader.h"
+#include "rhi/shader.h"
 #include "system/logger_system.h"
 
 namespace PPGE

@@ -3,7 +3,7 @@
 
 #include "core/defines.h"
 #include "core/ppge_enum.h"
-#include "renderer/renderer_types.h"
+#include "rhi/renderer_types.h"
 #include "system/logger_system.h"
 
 namespace PPGE

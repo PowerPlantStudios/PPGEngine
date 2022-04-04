@@ -2,9 +2,9 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/device_object.h"
-#include "renderer/renderer_types.h"
-#include "renderer/texture_view.h"
+#include "rhi/device_object.h"
+#include "rhi/renderer_types.h"
+#include "rhi/texture_view.h"
 
 namespace PPGE
 {

@@ -4,7 +4,7 @@
 #include "core/defines.h"
 #include "platform/d3d11/renderer_traits_d3d11.h"
 #include "platform/d3d11/renderer_types_d3d11_conversion.h"
-#include "renderer/sampler_base.h"
+#include "rhi/sampler_base.h"
 
 namespace PPGE
 {

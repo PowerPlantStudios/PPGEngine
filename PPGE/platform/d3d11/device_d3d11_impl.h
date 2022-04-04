@@ -3,7 +3,7 @@
 
 #include "core/defines.h"
 #include "platform/d3d11/renderer_traits_d3d11.h"
-#include "renderer/device_base.h"
+#include "rhi/device_base.h"
 
 namespace PPGE
 {

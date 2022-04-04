@@ -3,7 +3,7 @@
 
 #include "core/defines.h"
 #include "platform/d3d11/renderer_traits_d3d11.h"
-#include "renderer/pipeline_state_base.h"
+#include "rhi/pipeline_state_base.h"
 #include "system/logger_system.h"
 
 namespace PPGE

@@ -2,7 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/sampler.h"
+#include "rhi/sampler.h"
 
 namespace PPGE
 {

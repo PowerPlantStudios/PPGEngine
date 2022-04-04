@@ -11,33 +11,114 @@ class Scene;
 class Entity
 {
   public:
-    Entity() = delete;
-
-    Entity(Scene &scene_ref, entt::entity handle);
+    Entity() = default;
 
     Entity(const Entity &other) = default;
 
     Entity &operator=(const Entity &other) = default;
 
-    template <typename ComponentType, typename... Args> ComponentType &AddComponent(Args &&...args)
+    inline bool IsValid() const
+    {
+        return GetRegistry().valid(m_handle);
+    }
+
+    /**
+     * Attempting to add a component that already exists for the
+     * given entity results in underfined behaviour. If in doubt, it is
+     * recommended to use Has function to check before adding.
+     */
+    template <typename ComponentType, typename... Args> decltype(auto) AddComponent(Args &&...args)
     {
         auto &registry = GetRegistry();
         return registry.emplace<ComponentType>(m_handle, std::forward<Args>(args)...);
     }
 
-    template<typename ComponentType, typename... Other>
-    void RemoveComponents()
+    /**
+     * Patching a component that doesn't exist for the given entity
+     * results in undefined behaviour. If in doubt, it is recommended
+     * to use Has function to check before patching.
+     */
+    template <typename ComponentType, typename... Funcs> decltype(auto) PatchComponent(Funcs &&...funcs)
+    {
+        auto &registry = GetRegistry();
+        return registry.patch<ComponentType>(m_handle, std::forward<Funcs>(funcs)...);
+    }
+
+    /**
+     * Slightly slower than directly adding an un-existing component
+     * or replacing an existing one, however safer when the component type
+     * might or might not exist for the given entity.
+     */
+    template <typename ComponentType, typename... Args> decltype(auto) AddOrReplaceComponent(Args &&...args)
+    {
+        auto &registry = GetRegistry();
+        return registry.emplace_or_replace<ComponentType>(m_handle, std::forward<Args>(args)...);
+    }
+
+    /**
+     * Erases the given component type from the given entity if it exists.
+     * Otherwise it results in undefined behavior.
+     */
+    template <typename ComponentType, typename... Other> void EraseComponents()
     {
         auto &registry = GetRegistry();
         registry.erase<ComponentType, Other...>(m_handle);
     }
 
+    /**
+     * When the given componenty type is not available for the given entity,
+     * function returns safely and doesn't result in undefined behavior.
+     */
+    template <typename ComponentType, typename... Other> void RemoveComponents()
+    {
+        auto &registry = GetRegistry();
+        registry.remove<ComponentType, Other...>(m_handle);
+    }
+
+    template <typename... ComponentTypes> decltype(auto) GetComponents()
+    {
+        auto &registry = GetRegistry();
+        return registry.get<ComponentTypes...>(m_handle);
+    }
+
+    template <typename... ComponentTypes> decltype(auto) GetComponents() const
+    {
+        const auto &registry = GetRegistry();
+        return registry.get<ComponentTypes...>(m_handle);
+    }
+
+    template <typename ComponentType, typename... Args> decltype(auto) GetOrEmplaceComponent(Args &&...args)
+    {
+        auto &registry = GetRegistry();
+        return registry.get_or_emplace<ComponentType>(m_handle, std::forward<Args>(args)...);
+    }
+
+    template <typename ComponentType> bool Has()
+    {
+        auto &registry = GetRegistry();
+        return registry.all_of<ComponentType>(m_handle);
+    }
+
+    template <typename... ComponentTypes> bool HasAllOf()
+    {
+        auto &registry = GetRegistry();
+        return registry.all_of<ComponentTypes...>(m_handle);
+    }
+
+    template <typename... ComponentTypes> bool HasAnyOf()
+    {
+        auto &registry = GetRegistry();
+        return registry.any_of<ComponentTypes...>(m_handle);
+    }
+
   private:
     friend class Scene;
 
+    Entity(Scene *scene_ptr, entt::entity handle);
+
     entt::registry &GetRegistry() const;
 
-    Scene &m_scene_ref;
+    Scene *m_scene_ptr = nullptr;
 
     entt::entity m_handle = entt::null;
 };

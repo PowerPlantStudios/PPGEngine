@@ -2,8 +2,8 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/device_object_base.h"
-#include "renderer/shader.h"
+#include "rhi/device_object_base.h"
+#include "rhi/shader.h"
 
 namespace PPGE
 {

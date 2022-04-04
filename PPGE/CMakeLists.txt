@@ -22,6 +22,7 @@ file(GLOB PPGE_HDRS
     ${PPGE_CORE_DIR}/event/*.h
     ${PPGE_CORE_DIR}/io/*.h
     ${PPGE_CORE_DIR}/renderer/*.h
+    ${PPGE_CORE_DIR}/rhi/*.h
     ${PPGE_CORE_DIR}/system/*.h
     ${PPGE_CORE_DIR}/ui/*.h)
 set(PPGE_HDRS ${PPGE_HDRS} 
@@ -34,6 +35,7 @@ file(GLOB PPGE_SRCS
     ${PPGE_CORE_DIR}/event/*.cpp
     ${PPGE_CORE_DIR}/io/*.cpp
     ${PPGE_CORE_DIR}/renderer/*.cpp
+    ${PPGE_CORE_DIR}/rhi/*.cpp
     ${PPGE_CORE_DIR}/system/*.cpp
     ${PPGE_CORE_DIR}/ui/*.cpp)
 set(PPGE_SRCS ${PPGE_SRCS} 

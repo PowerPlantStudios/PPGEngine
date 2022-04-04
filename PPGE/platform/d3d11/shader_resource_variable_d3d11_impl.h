@@ -3,7 +3,7 @@
 
 #include "core/defines.h"
 #include "platform/d3d11/shader_resource_variable_d3d11.h"
-#include "renderer/shader_resource_variable_base.h"
+#include "rhi/shader_resource_variable_base.h"
 
 namespace PPGE
 {

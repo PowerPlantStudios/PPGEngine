@@ -2,7 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/device.h"
+#include "rhi/device.h"
 
 namespace PPGE
 {

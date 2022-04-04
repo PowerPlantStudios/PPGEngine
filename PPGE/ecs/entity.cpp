@@ -4,13 +4,15 @@
 
 namespace PPGE
 {
-Entity::Entity(Scene &scene_ref, entt::entity handle) : m_scene_ref(scene_ref), m_handle(handle)
+Entity::Entity(Scene *scene_ptr, entt::entity handle) : m_scene_ptr(scene_ptr), m_handle(handle)
 {
 }
 
 entt::registry &Entity::GetRegistry() const
 {
-    return m_scene_ref.m_registry;
+    PPGE_ASSERT(m_scene_ptr, "Entity doesn't have valid pointer to a scene. It is either not created by a scene or not "
+                             "assigned to a valid entity.");
+    return m_scene_ptr->m_registry;
 }
 
 } // namespace PPGE

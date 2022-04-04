@@ -2,7 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/shader.h"
+#include "rhi/shader.h"
 
 namespace PPGE
 {

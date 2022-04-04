@@ -3,11 +3,11 @@
 
 #include "core/defines.h"
 #include "core/ppge_object.h"
-#include "renderer/buffer.h"
-#include "renderer/pipeline_state.h"
-#include "renderer/sampler.h"
-#include "renderer/shader.h"
-#include "renderer/texture.h"
+#include "rhi/buffer.h"
+#include "rhi/pipeline_state.h"
+#include "rhi/sampler.h"
+#include "rhi/shader.h"
+#include "rhi/texture.h"
 
 namespace PPGE
 {

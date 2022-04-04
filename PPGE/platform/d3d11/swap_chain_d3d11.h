@@ -3,7 +3,7 @@
 
 #include "core/defines.h"
 #include "platform/d3d11/texture_view_d3d11.h"
-#include "renderer/swap_chain.h"
+#include "rhi/swap_chain.h"
 
 namespace PPGE
 {

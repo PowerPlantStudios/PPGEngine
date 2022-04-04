@@ -2,8 +2,8 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/device.h"
-#include "renderer/device_context.h"
+#include "rhi/device.h"
+#include "rhi/device_context.h"
 #include "system/isystem.h"
 #include "system/logger_system.h"
 

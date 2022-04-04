@@ -1,15 +1,17 @@
 #include "scene.h"
 
 #include "ecs/components/camera_component.h"
+#include "ecs/components/debug_component.h"
 #include "ecs/components/light_component.h"
-#include "ecs/components/other_components.h"
+#include "ecs/components/mesh_component.h"
+#include "ecs/components/transform_components.h"
 #include "ecs/entity.h"
 
 namespace PPGE
 {
 Entity Scene::CreateEntity()
 {
-    Entity entity(*this, m_registry.create());
+    Entity entity(this, m_registry.create());
     entity.AddComponent<TransformComponent>();
     return entity;
 }

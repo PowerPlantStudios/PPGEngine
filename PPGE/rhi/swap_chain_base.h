@@ -2,7 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/swap_chain.h"
+#include "rhi/swap_chain.h"
 #include "system/logger_system.h"
 
 namespace PPGE

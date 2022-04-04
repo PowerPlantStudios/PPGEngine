@@ -2,12 +2,12 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/buffer.h"
-#include "renderer/device.h"
-#include "renderer/device_context.h"
-#include "renderer/pipeline_state.h"
-#include "renderer/sampler.h"
-#include "renderer/shader.h"
+#include "rhi/buffer.h"
+#include "rhi/device.h"
+#include "rhi/device_context.h"
+#include "rhi/pipeline_state.h"
+#include "rhi/sampler.h"
+#include "rhi/shader.h"
 #include "system/logger_system.h"
 
 namespace PPGE

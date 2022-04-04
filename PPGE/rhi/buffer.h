@@ -2,8 +2,8 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/device_object.h"
-#include "renderer/renderer_types.h"
+#include "rhi/device_object.h"
+#include "rhi/renderer_types.h"
 
 namespace PPGE
 {

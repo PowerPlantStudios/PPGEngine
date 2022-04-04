@@ -2,7 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
-#include "renderer/texture.h"
+#include "rhi/texture.h"
 
 namespace PPGE
 {

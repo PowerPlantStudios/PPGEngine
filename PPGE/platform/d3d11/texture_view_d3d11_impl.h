@@ -3,7 +3,7 @@
 
 #include "core/defines.h"
 #include "platform/d3d11/renderer_traits_d3d11.h"
-#include "renderer/texture_view_base.h"
+#include "rhi/texture_view_base.h"
 
 namespace PPGE
 {

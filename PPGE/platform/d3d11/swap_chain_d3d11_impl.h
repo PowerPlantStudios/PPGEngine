@@ -4,7 +4,7 @@
 #include "core/defines.h"
 #include "platform/d3d11/renderer_traits_d3d11.h"
 #include "platform/d3d11/swap_chain_d3d11.h"
-#include "renderer/swap_chain_base.h"
+#include "rhi/swap_chain_base.h"
 
 namespace PPGE
 {

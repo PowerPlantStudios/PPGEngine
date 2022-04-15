@@ -10,8 +10,16 @@ namespace PPGE
 {
 struct TransformComponent
 {
-    PPGE::Math::Vector3 position = PPGE::Math::Vector3::Zero;
-    PPGE::Math::Quaternion rotation = PPGE::Math::Quaternion::Identity;
-    PPGE::Math::Vector3 scale = PPGE::Math::Vector3::One;
+    Math::Vector3 position = Math::Vector3::Zero;
+    Math::Quaternion rotation = Math::Quaternion::Identity;
+    Math::Vector3 scale = Math::Vector3::One;
+
+    Math::Matrix GetModelMatrix() const
+    {
+        Math::Matrix model = Math::Matrix::CreateScale(scale);
+        model *= Math::Matrix::CreateFromQuaternion(rotation);
+        model.Translation(position);
+        return model;
+    }
 };
 } // namespace PPGE

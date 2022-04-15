@@ -22,6 +22,7 @@ file(GLOB PPGE_HDRS
     ${PPGE_CORE_DIR}/event/*.h
     ${PPGE_CORE_DIR}/io/*.h
     ${PPGE_CORE_DIR}/renderer/*.h
+    ${PPGE_CORE_DIR}/renderer/passes/*.h
     ${PPGE_CORE_DIR}/rhi/*.h
     ${PPGE_CORE_DIR}/system/*.h
     ${PPGE_CORE_DIR}/ui/*.h)
@@ -35,6 +36,7 @@ file(GLOB PPGE_SRCS
     ${PPGE_CORE_DIR}/event/*.cpp
     ${PPGE_CORE_DIR}/io/*.cpp
     ${PPGE_CORE_DIR}/renderer/*.cpp
+    ${PPGE_CORE_DIR}/renderer/passes/*.cpp
     ${PPGE_CORE_DIR}/rhi/*.cpp
     ${PPGE_CORE_DIR}/system/*.cpp
     ${PPGE_CORE_DIR}/ui/*.cpp)
@@ -154,5 +156,13 @@ else()
     message(FATAL_ERROR "Current platform is not supported.")
 endif()
 
+file(GLOB PPGE_RSCS
+    ${PPGE_CORE_DIR}/renderer/shaders/*.hlsl)
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
+    set_source_files_properties(${PPGE_RSCS} PROPERTIES VS_TOOL_OVERRIDE "None")
+endif()
+target_sources(${PROJECT_NAME} PRIVATE ${PPGE_RSCS})
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PPGE_HDRS})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PPGE_SRCS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PPGE_RSCS})

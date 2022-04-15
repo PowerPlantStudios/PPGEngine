@@ -4,7 +4,7 @@
 #include "core/defines.h"
 #include "core/ppge_object.h"
 #include "rhi/device_object.h"
-#include "rhi/renderer_types.h"
+#include "rhi/rhi_types.h"
 
 namespace PPGE
 {

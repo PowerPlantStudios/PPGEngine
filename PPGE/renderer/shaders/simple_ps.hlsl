@@ -1,3 +1,11 @@
+cbuffer g_Color  : register(b0)
+{
+    float4 diffuse;
+    float4 specular;
+    bool is_textureless_diffuse;
+    bool is_textureless_speculer;
+};
+
 Texture2D g_diffuse : register(t0);
 
 SamplerState g_sampler : register(s0);

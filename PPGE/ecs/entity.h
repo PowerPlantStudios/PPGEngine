@@ -6,6 +6,11 @@
 
 namespace PPGE
 {
+namespace EntityTraits
+{
+using EntityHandle = entt::entity;
+} // namespace EntityTraits
+
 class Scene;
 
 class Entity
@@ -120,6 +125,6 @@ class Entity
 
     Scene *m_scene_ptr = nullptr;
 
-    entt::entity m_handle = entt::null;
+    EntityTraits::EntityHandle m_handle = entt::null;
 };
 } // namespace PPGE

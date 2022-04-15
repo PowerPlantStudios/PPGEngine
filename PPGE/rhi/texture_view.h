@@ -3,6 +3,7 @@
 
 #include "core/defines.h"
 #include "rhi/device_object.h"
+#include "rhi/rhi_types.h"
 
 namespace PPGE
 {

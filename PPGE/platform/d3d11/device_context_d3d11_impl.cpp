@@ -48,8 +48,10 @@ void DeviceContextD3D11Impl::SetIndexBuffer(std::shared_ptr<PPGEBuffer> p_buffer
 
 void DeviceContextD3D11Impl::SetPipelineStateObject(std::shared_ptr<PPGEPipelineState> p_PSO)
 {
-    b_is_shader_bound.fill(false);
+    if (m_bound_pipeline_state_sp.get() == p_PSO.get())
+        return;
 
+    b_is_shader_bound.fill(false);
     m_bound_pipeline_state_sp = std::static_pointer_cast<PipelineStateD3D11Impl>(std::move(p_PSO));
 
 #define BIND_SHADER(SHADER_NAME, SHADER_NAME_SHORT, SHADER_IDX)                                                        \

@@ -6,7 +6,7 @@
 #include "rhi/buffer.h"
 #include "rhi/device_object.h"
 #include "rhi/pipeline_state.h"
-#include "rhi/renderer_constants.h"
+#include "rhi/rhi_constants.h"
 #include "rhi/texture_view.h"
 
 namespace PPGE

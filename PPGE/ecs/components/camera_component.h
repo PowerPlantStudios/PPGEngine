@@ -8,6 +8,6 @@ namespace PPGE
 {
 struct CameraComponent
 {
-    PPGE::Math::Matrix projection;
+    Math::Matrix projection;
 };
 } // namespace PPGE

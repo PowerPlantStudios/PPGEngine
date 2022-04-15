@@ -3,7 +3,7 @@
 
 #include "core/defines.h"
 #include "rhi/device_object.h"
-#include "rhi/renderer_constants.h"
+#include "rhi/rhi_constants.h"
 #include "rhi/shader.h"
 #include "rhi/shader_resource_binding.h"
 #include "rhi/shader_resource_variable.h"
@@ -218,7 +218,7 @@ struct InputElementDesc
 
 struct InputLayoutDesc
 {
-    InputElementDesc *elements = nullptr;
+    const InputElementDesc *elements = nullptr;
     uint32_t elements_num = 0;
 };
 

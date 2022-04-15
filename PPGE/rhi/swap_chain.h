@@ -3,7 +3,7 @@
 
 #include "core/defines.h"
 #include "core/ppge_object.h"
-#include "rhi/renderer_types.h"
+#include "rhi/rhi_types.h"
 #include "rhi/texture_view.h"
 
 namespace PPGE

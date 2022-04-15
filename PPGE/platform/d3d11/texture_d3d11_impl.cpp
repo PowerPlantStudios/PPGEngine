@@ -217,16 +217,14 @@ std::shared_ptr<PPGETextureView> TextureD3D11Impl::GetDefaultView()
 
 void TextureD3D11Impl::CreateTexture1D(const TextureCreateDesc &create_desc)
 {
-    const auto &texture_desc = create_desc.desc;
-
     D3D11_TEXTURE1D_DESC desc;
-    desc.Width = texture_desc.width;
-    desc.MipLevels = texture_desc.mip_levels;
-    desc.ArraySize = texture_desc.array_size;
-    desc.Format = PPGETextureFormatToD3D11TextureFormat(texture_desc.format_type);
-    desc.Usage = PPGEUsageTypeToD3D11UsageType(texture_desc.usage);
-    desc.BindFlags = PPGEBindFlagsToD3D11BindFlags(texture_desc.bind_flags);
-    desc.CPUAccessFlags = PPGECPUAccessFlagsToD3D11CPUAccessFlags(texture_desc.cpu_access_flags);
+    desc.Width = m_desc.width;
+    desc.MipLevels = m_desc.mip_levels;
+    desc.ArraySize = m_desc.array_size;
+    desc.Format = PPGETextureFormatToD3D11TextureFormat(m_desc.format_type);
+    desc.Usage = PPGEUsageTypeToD3D11UsageType(m_desc.usage);
+    desc.BindFlags = PPGEBindFlagsToD3D11BindFlags(m_desc.bind_flags);
+    desc.CPUAccessFlags = PPGECPUAccessFlagsToD3D11CPUAccessFlags(m_desc.cpu_access_flags);
     desc.MiscFlags = 0;
 
     std::vector<D3D11_SUBRESOURCE_DATA> init_data = CreateInitData(create_desc);
@@ -239,19 +237,17 @@ void TextureD3D11Impl::CreateTexture1D(const TextureCreateDesc &create_desc)
 
 void TextureD3D11Impl::CreateTexture2D(const TextureCreateDesc &create_desc)
 {
-    const auto &texture_desc = create_desc.desc;
-
     D3D11_TEXTURE2D_DESC desc;
-    desc.Width = texture_desc.width;
-    desc.Height = texture_desc.height;
-    desc.MipLevels = texture_desc.mip_levels;
-    desc.ArraySize = texture_desc.array_size;
-    desc.Format = PPGETextureFormatToD3D11TextureFormat(texture_desc.format_type);
-    desc.SampleDesc.Count = texture_desc.sample_count;
+    desc.Width = m_desc.width;
+    desc.Height = m_desc.height;
+    desc.MipLevels = m_desc.mip_levels;
+    desc.ArraySize = m_desc.array_size;
+    desc.Format = PPGETextureFormatToD3D11TextureFormat(m_desc.format_type);
+    desc.SampleDesc.Count = m_desc.sample_count;
     desc.SampleDesc.Quality = 0;
-    desc.Usage = PPGEUsageTypeToD3D11UsageType(texture_desc.usage);
-    desc.BindFlags = PPGEBindFlagsToD3D11BindFlags(texture_desc.bind_flags);
-    desc.CPUAccessFlags = PPGECPUAccessFlagsToD3D11CPUAccessFlags(texture_desc.cpu_access_flags);
+    desc.Usage = PPGEUsageTypeToD3D11UsageType(m_desc.usage);
+    desc.BindFlags = PPGEBindFlagsToD3D11BindFlags(m_desc.bind_flags);
+    desc.CPUAccessFlags = PPGECPUAccessFlagsToD3D11CPUAccessFlags(m_desc.cpu_access_flags);
     desc.MiscFlags = 0;
 
     std::vector<D3D11_SUBRESOURCE_DATA> init_data = CreateInitData(create_desc);
@@ -264,17 +260,15 @@ void TextureD3D11Impl::CreateTexture2D(const TextureCreateDesc &create_desc)
 
 void TextureD3D11Impl::CreateTexture3D(const TextureCreateDesc &create_desc)
 {
-    const auto &texture_desc = create_desc.desc;
-
     D3D11_TEXTURE3D_DESC desc;
-    desc.Width = texture_desc.width;
-    desc.Height = texture_desc.height;
-    desc.Depth = texture_desc.depth;
-    desc.MipLevels = texture_desc.mip_levels;
-    desc.Format = PPGETextureFormatToD3D11TextureFormat(texture_desc.format_type);
-    desc.Usage = PPGEUsageTypeToD3D11UsageType(texture_desc.usage);
-    desc.BindFlags = PPGEBindFlagsToD3D11BindFlags(texture_desc.bind_flags);
-    desc.CPUAccessFlags = PPGECPUAccessFlagsToD3D11CPUAccessFlags(texture_desc.cpu_access_flags);
+    desc.Width = m_desc.width;
+    desc.Height = m_desc.height;
+    desc.Depth = m_desc.depth;
+    desc.MipLevels = m_desc.mip_levels;
+    desc.Format = PPGETextureFormatToD3D11TextureFormat(m_desc.format_type);
+    desc.Usage = PPGEUsageTypeToD3D11UsageType(m_desc.usage);
+    desc.BindFlags = PPGEBindFlagsToD3D11BindFlags(m_desc.bind_flags);
+    desc.CPUAccessFlags = PPGECPUAccessFlagsToD3D11CPUAccessFlags(m_desc.cpu_access_flags);
     desc.MiscFlags = 0;
 
     std::vector<D3D11_SUBRESOURCE_DATA> init_data = CreateInitData(create_desc);

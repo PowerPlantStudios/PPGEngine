@@ -2,19 +2,20 @@
 
 constexpr float pi = 3.14159265359f;
 
-void CreateMeshFilter(PPGE::Entity &entity, const std::vector<PPGE::VertexPosNorColor> &vertices,
+template<typename VertexBufferType>
+void CreateMeshFilter(PPGE::Entity &entity, const std::vector<VertexBufferType> &vertices,
                       const std::vector<unsigned int> &indices)
 {
     std::shared_ptr<PPGE::PPGEBuffer> vb;
     {
         PPGE::BufferDesc vb_desc;
-        vb_desc.byte_width = vertices.size() * sizeof(PPGE::FullVertex);
+        vb_desc.byte_width = vertices.size() * sizeof(VertexBufferType);
         vb_desc.bind_flags = PPGE::BindFlags::BIND_VERTEX_BUFFER;
         vb_desc.usage = PPGE::UsageType::USAGE_IMMUTABLE;
         vb_desc.cpu_access_flags = PPGE::CPUAccessFlags::CPU_ACCESS_NONE;
         PPGE::BufferData vb_init_data;
         vb_init_data.data_ptr = &vertices[0];
-        vb_init_data.data_size = vertices.size() * sizeof(PPGE::FullVertex);
+        vb_init_data.data_size = vertices.size() * sizeof(VertexBufferType);
         PPGE::RendererSystem::Get().GetDevice()->CreateBuffer(vb_desc, &vb_init_data, vb);
     }
 
@@ -79,7 +80,7 @@ class SceneLoader
             if (mesh->HasTextureCoords(0))
                 t = mesh->mTextureCoords[0][i];
             vertices.push_back(
-                {.px = v.x, .py = v.z, .pz = v.y, .nx = n.x, .ny = n.y, .nz = n.z, .r = 0, .g = 0, .b = 0});
+                {.px = v.x, .py = v.z, .pz = v.y, .nx = n.x, .ny = n.y, .nz = n.z, .color = 0xffffffff});
         }
         for (unsigned i = 0; i != mesh->mNumFaces; i++)
         {
@@ -199,19 +200,15 @@ class TestLayer : public PPGE::Widget
         {
             auto entity = m_scene.CreateEntity();
             {
-                std::vector<PPGE::VertexPosNorColor> vertices{
-                    {.px =  8.0f, .py = 0.0f, .pz =  8.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .r = 0, .g = 0, .b = 0},
-                    {.px = 8.0f, .py = 0.0f, .pz = -8.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .r = 0, .g = 0, .b = 0},
-                    {.px = -8.0f, .py = 0.0f, .pz = -8.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .r = 0, .g = 0, .b = 0},
-                    {.px = -8.0f, .py = 0.0f, .pz = 8.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .r = 0, .g = 0, .b = 0}};
+                std::vector<PPGE::VertexPosColor> vertices{
+                    {.px =  8.0f, .py = 0.0f, .pz =  8.0f, .color = 0xffffffff},
+                    {.px =  8.0f, .py = 0.0f, .pz = -8.0f, .color = 0xffffffff},
+                    {.px = -8.0f, .py = 0.0f, .pz = -8.0f, .color = 0xffffffff},
+                    {.px = -8.0f, .py = 0.0f, .pz =  8.0f, .color = 0xffffffff}};
                 std::vector<unsigned int> indices{0, 3, 2, 2, 1, 0};
                 CreateMeshFilter(entity, vertices, indices);
             }
-            if (auto resource = resource_mgr.GetCachedResource("textures/grass.jpg"))
-            {
-                auto lazy_resource = std::static_pointer_cast<PPGE::LazyResource>(std::move(resource));
-                CreateMeshRenderer(entity, lazy_resource->data);
-            }
+            auto &mesh_renderer = entity.AddComponent<PPGE::MeshRendererComponent>();
         }
     }
 

@@ -47,29 +47,31 @@ ForwardRenderPass::ForwardRenderPass()
     {
         std::shared_ptr<PPGE::PPGEShader> vs;
         {
-            auto &simple_vs = ShaderLibrary::Get().GetShaderCode("simple_vs.hlsl");
+            auto &simple_vs = ShaderLibrary::Get().GetShaderCode("forward_pass.hlsl");
             PPGE::ShaderCreateDesc cd;
             cd.desc.shader_type_flags = PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX;
             cd.compiler = PPGE::ShaderCompilerType::SHADER_COMPILER_FXC;
             cd.source_code = simple_vs.data.data();
             cd.source_code_size = simple_vs.data.size();
+            cd.entry_point_name = "main_VS";
             PPGE::RendererSystem::Get().GetDevice()->CreateShader(cd, vs);
         }
 
         std::shared_ptr<PPGE::PPGEShader> ps;
         {
-            auto &simple_ps = ShaderLibrary::Get().GetShaderCode("simple_ps.hlsl");
+            auto &simple_ps = ShaderLibrary::Get().GetShaderCode("forward_pass.hlsl");
             PPGE::ShaderCreateDesc cd;
             cd.desc.shader_type_flags = PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL;
             cd.compiler = PPGE::ShaderCompilerType::SHADER_COMPILER_FXC;
             cd.source_code = simple_ps.data.data();
             cd.source_code_size = simple_ps.data.size();
+            cd.entry_point_name = "main_PS";
             PPGE::RendererSystem::Get().GetDevice()->CreateShader(cd, ps);
         }
 
         PPGE::GfxPipelineStateCreateDesc ps_cd;
-        ps_cd.desc.input_layout_desc.elements = GetLayout("FullLayout");
-        ps_cd.desc.input_layout_desc.elements_num = sizeof(ps_cd.desc.input_layout_desc.elements);
+        ps_cd.desc.input_layout_desc.elements = GetLayout(PosColorLayout);
+        ps_cd.desc.input_layout_desc.elements_num = 2;
         ps_cd.desc.rasterizer_state_desc.cull_mode = PPGE::CullModeType::CULL_MODE_NONE;
         ps_cd.commited_vs = vs;
         ps_cd.commited_ps = ps;
@@ -81,8 +83,6 @@ ForwardRenderPass::ForwardRenderPass()
              {PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"cb_per_object",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"g_diffuse",
-             {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
             {"g_sampler",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_SAMPLER}}};
         ps_cd.srv = SRVs;
@@ -153,11 +153,14 @@ void ForwardRenderPass::Execute()
     RendererSystem::Get().GetImmediateContext()->SetPipelineStateObject(m_PSO);
 
     for (auto [entity, transform, mesh_filer, mesh_renderer] :
-         data.scene.View<const TransformComponent, const MeshFilterComponent, const MeshRendererComponent>()
-             .each())
+         data.scene.View<const TransformComponent, const MeshFilterComponent, const MeshRendererComponent>().each())
     {
         // Set per object shader resources
-        m_SRB->GetVariableByName("g_diffuse", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(mesh_renderer.albedo_map);
+        if (mesh_renderer.albedo_map)
+        {
+            m_SRB->GetVariableByName("g_diffuse", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)
+                ->Set(mesh_renderer.albedo_map);
+        }
         PPGE::RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB);
 
         // Bind vertex and index buffers

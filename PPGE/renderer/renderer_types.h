@@ -56,13 +56,12 @@ struct FullVertex
     float u1, v1, u2, v2, u3, v3;
 };
 
-struct CbCameraData
+struct alignas(16) CbCameraData
 {
     Math::Matrix view;
     Math::Matrix proj;
     Math::Matrix viewProj;
     Math::Vector3 cameraPosition;
-    float padding;
 };
 constexpr const char* CbCameraDataResourceName = "CameraDataConstBuffer";
 } // namespace PPGE

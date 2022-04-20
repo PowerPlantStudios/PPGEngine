@@ -108,6 +108,10 @@ void ShaderResourceBindingD3D11Impl::RefreshBoundResources(ShaderTypeFlags shade
 
     for (auto &SRV : SRB.SRBs)
     {
+        // Continue if no resource is bound
+        if (!SRV->Get())
+            continue;
+
         auto d3d11_resource = SRV->GetD3D11Resource();
         switch (SRV->GetDesc().resource_type)
         {

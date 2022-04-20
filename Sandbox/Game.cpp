@@ -2,7 +2,7 @@
 
 constexpr float pi = 3.14159265359f;
 
-template<typename VertexBufferType>
+template <typename VertexBufferType>
 void CreateMeshFilter(PPGE::Entity &entity, const std::vector<VertexBufferType> &vertices,
                       const std::vector<unsigned int> &indices)
 {
@@ -38,66 +38,45 @@ void CreateMeshFilter(PPGE::Entity &entity, const std::vector<VertexBufferType> 
     mesh_filter.num_indices = indices.size();
 }
 
-void CreateMeshRenderer(PPGE::Entity &entity, const std::filesystem::path &path_to_diffuse_tex)
+std::shared_ptr<PPGE::PPGETextureView> LoadTexture(const std::filesystem::path &path_to_diffuse_tex)
 {
-
     std::shared_ptr<PPGE::PPGETexture> diffuse_texture;
     {
         std::string path_to_res = path_to_diffuse_tex.string();
         PPGE::TextureCreateDesc tex_cd;
         tex_cd.resource_path = path_to_res.c_str();
-        tex_cd.file_format = PPGE::TextureFileFormat::PNG;
+        
+        auto ext = path_to_diffuse_tex.extension();
+        if (ext.compare(".dds") == 0)
+        {
+            tex_cd.file_format = PPGE::TextureFileFormat::DDS;
+        }
+        else if (ext.compare(".jpeg") == 0)
+        {
+            tex_cd.file_format = PPGE::TextureFileFormat::JPEG;
+        }
+        else if (ext.compare(".png") == 0)
+        {
+            tex_cd.file_format = PPGE::TextureFileFormat::PNG;
+        }
         tex_cd.desc.bind_flags = PPGE::BindFlags::BIND_SHADER_RESOURCE;
         PPGE::RendererSystem::Get().GetDevice()->CreateTexture(tex_cd, diffuse_texture);
     }
 
-    auto &mesh_renderer = entity.AddComponent<PPGE::MeshRendererComponent>();
-    mesh_renderer.albedo_map = diffuse_texture->GetDefaultView();
+    return diffuse_texture->GetDefaultView();
 }
 
 class SceneLoader
 {
   public:
-    static void LoadScene(const std::filesystem::path &path_to_scene, std::vector<PPGE::FullVertex> &vertices,
-                          std::vector<unsigned int> &indices)
+    static void LoadScene(const std::filesystem::path &path_to_scene, PPGE::Scene &ppge_scene, float scale_factor = 1.0f)
     {
-        const aiScene *scene = aiImportFile(path_to_scene.string().c_str(), aiProcess_Triangulate);
-
-        if (!scene || !scene->HasMeshes())
-        {
-            APP_ERROR("Unable to load {0}\n", path_to_scene.string().c_str());
-            return;
-        }
-
-        const aiMesh *mesh = scene->mMeshes[0];
-        for (unsigned i = 0; i != mesh->mNumVertices; i++)
-        {
-            aiVector3D v = mesh->mVertices[i];
-            aiVector3D n(0.0f, 0.0f, 0.0f);
-            if (mesh->HasNormals())
-                n = mesh->mNormals[i];
-            aiVector3D t(0.0f, 0.0f, 0.0f);
-            if (mesh->HasTextureCoords(0))
-                t = mesh->mTextureCoords[0][i];
-            vertices.push_back(
-                {.px = v.x, .py = v.z, .pz = v.y, .nx = n.x, .ny = n.y, .nz = n.z, .color = 0xffffffff});
-        }
-        for (unsigned i = 0; i != mesh->mNumFaces; i++)
-        {
-            for (unsigned j = 0; j != 3; j++)
-                indices.push_back(mesh->mFaces[i].mIndices[j]);
-        }
-
-        aiReleaseImport(scene);
-    }
-
-    static void LoadScene(const std::filesystem::path &path_to_scene, const std::filesystem::path &path_to_texture,
-                          PPGE::Scene &ppge_scene)
-    {
-        std::vector<PPGE::VertexPosNorColor> vertices;
+        std::unordered_map<std::string, std::shared_ptr<PPGE::PPGETextureView>> diffuse_maps;
+        std::vector<PPGE::FullVertex> vertices;
         std::vector<unsigned int> indices;
 
-        const aiScene *scene = aiImportFile(path_to_scene.string().c_str(), aiProcess_Triangulate);
+        const aiScene *scene = aiImportFile(path_to_scene.string().c_str(),
+                                            aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded);
 
         if (!scene || !scene->HasMeshes())
         {
@@ -126,6 +105,17 @@ class SceneLoader
                 }
                 if (mesh->HasTextureCoords(0))
                 {
+                    vertex.u1 = mesh->mTextureCoords[0][j].x;
+                    vertex.v1 = mesh->mTextureCoords[0][j].y;
+                }
+                if (mesh->HasTangentsAndBitangents())
+                {
+                    vertex.tx = mesh->mTangents[j].x;
+                    vertex.ty = mesh->mTangents[j].y;
+                    vertex.tz = mesh->mTangents[j].z;
+                    vertex.btx = mesh->mBitangents[j].x;
+                    vertex.bty = mesh->mBitangents[j].y;
+                    vertex.btz = mesh->mBitangents[j].z;
                 }
             }
 
@@ -142,16 +132,57 @@ class SceneLoader
             }
 
             auto entity = ppge_scene.CreateEntity();
+            auto &transform = entity.GetComponents<PPGE::TransformComponent>();
+            transform.scale = PPGE::Math::Vector3(scale_factor, scale_factor, scale_factor);
             CreateMeshFilter(entity, vertices, indices);
 
-            const aiMaterial *mat = scene->mMaterials[mesh->mMaterialIndex];
-            aiColor4D Kd, Ks;
-            aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &Kd);
-            aiGetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR, &Ks);
-
             auto &mesh_renderer = entity.AddComponent<PPGE::MeshRendererComponent>();
-            mesh_renderer.albedo_color = PPGE::Math::Color(Kd.r, Kd.g, Kd.b);
-            mesh_renderer.specular_color = PPGE::Math::Color(Ks.r, Ks.g, Ks.b);
+            {
+                aiReturn result;
+                const aiMaterial *mat = scene->mMaterials[mesh->mMaterialIndex];
+
+                aiColor4D Kd;
+                result = aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &Kd);
+                if (result == AI_SUCCESS)
+                {
+                    mesh_renderer.albedo_color = PPGE::Math::Color(Kd.r, Kd.g, Kd.b);
+                }
+                else
+                {
+                    mesh_renderer.albedo_color = PPGE::Math::Color(1.0f, 1.0f, 1.0f);
+                }
+                aiColor4D Ks;
+                result = aiGetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR, &Ks);
+                if (result == AI_SUCCESS)
+                {
+                    mesh_renderer.specular_color = PPGE::Math::Color(Ks.r, Ks.g, Ks.b, 1.0f);
+                }
+                else
+                {
+                    mesh_renderer.specular_color = PPGE::Math::Color(1.0f, 1.0f, 1.0f);
+                }
+                ai_real Ns;
+                result = aiGetMaterialFloat(mat, AI_MATKEY_SHININESS, &Ns);
+                if (result == AI_SUCCESS)
+                {
+                    mesh_renderer.specular_color.A(Ns);
+                }
+
+                aiString tex_path;
+                result = aiGetMaterialString(mat, AI_MATKEY_TEXTURE_DIFFUSE(0), &tex_path);
+                if (result == AI_SUCCESS)
+                {
+                    auto path_to_diff_texture = path_to_scene.parent_path() / std::filesystem::path(tex_path.C_Str());
+                    auto it = diffuse_maps.find(path_to_diff_texture.string());
+                    if (it == diffuse_maps.end())
+                    {
+                        auto [_it, success] =
+                            diffuse_maps.emplace(path_to_diff_texture.string(), LoadTexture(path_to_diff_texture));
+                        it = _it;
+                    }
+                    mesh_renderer.albedo_map = it->second;
+                }
+            }
 
             vertices.clear();
             indices.clear();
@@ -197,18 +228,34 @@ class TestLayer : public PPGE::Widget
 
         // Load resources
         resource_mgr.WalkRoot("../../Sandbox/assets");
+        if (auto model = resource_mgr.GetCachedResource("cornellbox/CornellBox-Original.obj"))
+        {
+            auto lazy_model = std::static_pointer_cast<PPGE::LazyResource>(model);
+            SceneLoader::LoadScene(lazy_model->data, m_scene);
+        }
+
         {
             auto entity = m_scene.CreateEntity();
             {
-                std::vector<PPGE::VertexPosColor> vertices{
-                    {.px =  8.0f, .py = 0.0f, .pz =  8.0f, .color = 0xffffffff},
-                    {.px =  8.0f, .py = 0.0f, .pz = -8.0f, .color = 0xffffffff},
-                    {.px = -8.0f, .py = 0.0f, .pz = -8.0f, .color = 0xffffffff},
-                    {.px = -8.0f, .py = 0.0f, .pz =  8.0f, .color = 0xffffffff}};
+                std::vector<PPGE::FullVertex> vertices{
+                    {.px =  1.0f, .py = 0.0f, .pz =  1.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .color = 0x1199eeff, .u1 = 0.0f, .v1 = 0.0f},
+                    {.px =  1.0f, .py = 0.0f, .pz = -1.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .color = 0x11ee99ff, .u1 = 1.0f, .v1 = 0.0f},
+                    {.px = -1.0f, .py = 0.0f, .pz = -1.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .color = 0x1199eeff, .u1 = 1.0f, .v1 = 1.0f},
+                    {.px = -1.0f, .py = 0.0f, .pz =  1.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .color = 0xee1199ff, .u1 = 0.0f, .v1 = 1.0f}};
                 std::vector<unsigned int> indices{0, 3, 2, 2, 1, 0};
                 CreateMeshFilter(entity, vertices, indices);
             }
-            auto &mesh_renderer = entity.AddComponent<PPGE::MeshRendererComponent>();
+            if (auto resource = resource_mgr.GetCachedResource("textures/landscape0_albedo.dds"))
+            {  
+                auto lazy_resource = std::static_pointer_cast<PPGE::LazyResource>(resource);
+                auto &mesh_renderer = entity.AddComponent<PPGE::MeshRendererComponent>();
+                mesh_renderer.albedo_map = LoadTexture(lazy_resource->data);
+                mesh_renderer.specular_color = PPGE::Math::Color(.85f, .85f, .85f, 10.0f);
+            }
+
+            auto &transform = entity.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(0.0f, -0.1f, 0.0f);
+            transform.scale = PPGE::Math::Vector3(5.0f, 1.0f, 5.0f);
         }
     }
 

@@ -7,20 +7,29 @@
 #include "renderer/renderer_constants.h"
 #include "renderer/renderer_types.h"
 #include "renderer/shader_library.h"
+#include "renderer/camera_controller.h"
 #include "system/renderer_system.h"
 
 namespace PPGE
 {
-struct cbVS
+struct alignas(16) cbPerObjectVS
 {
     Math::Matrix model;
     Math::Matrix modelInvTran;
 };
 
-struct cbPS
+struct alignas(16) cbPerFramePS
+{
+    Math::Vector3 eyePos;
+};
+
+struct alignas(16) cbPerObjectPS
 {
     Math::Color albedo;
     Math::Color specular;
+    bool albedo_map_bound;
+    bool specular_map_bound;
+    bool normal_map_bound;
 };
 
 ForwardRenderPass::ForwardRenderPass()
@@ -28,19 +37,51 @@ ForwardRenderPass::ForwardRenderPass()
     // Create constant buffers
     {
         BufferDesc cb_desc;
-        cb_desc.byte_width = sizeof(cbVS);
+        cb_desc.byte_width = sizeof(cbPerObjectVS);
         cb_desc.bind_flags = BindFlags::BIND_CONSTANT_BUFFER;
         cb_desc.usage = UsageType::USAGE_DYNAMIC;
         cb_desc.cpu_access_flags = CPUAccessFlags::CPU_ACCESS_WRITE;
-        RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_vs);
-        cb_desc.byte_width = sizeof(cbPS);
-        RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_ps);
+        RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_per_object_vs);
+        cb_desc.byte_width = sizeof(cbPerFramePS);
+        RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_per_frame_ps);
+        cb_desc.byte_width = sizeof(cbPerObjectPS);
+        RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_per_object_ps);
     }
 
     // Create Sampler
     {
         SamplerDesc sampler_desc;
         RendererSystem::Get().GetDevice()->CreateSampler(sampler_desc, m_sampler_state);
+    }
+
+    // Create missing texture
+    {
+        TextureCreateDesc tex_cd;
+        tex_cd.desc.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D;
+        tex_cd.desc.width = 1;
+        tex_cd.desc.height = 1;
+        tex_cd.desc.format_type = TextureFormatType::TEXTURE_FORMAT_R8G8B8A8_UNORM;
+        tex_cd.desc.bind_flags = BindFlags::BIND_SHADER_RESOURCE;
+
+        uint32_t magenta[] = {0xffff00ff};
+        TextureData tex_data;
+        tex_data.data_ptr = magenta;
+        tex_data.data_size = sizeof(magenta);
+        tex_data.pitch = 1;
+
+        tex_cd.subresource = &tex_data;
+        tex_cd.subresource_num = 1;
+
+        std::shared_ptr<PPGETexture> tex;
+        RendererSystem::Get().GetDevice()->CreateTexture(tex_cd, tex);
+
+        TextureViewDesc view_desc;
+        view_desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_SHADER_RESOURCE;
+        view_desc.resource_dimension = tex_cd.desc.resource_dimension;
+        view_desc.format = tex_cd.desc.format_type;
+        view_desc.most_detailed_mip = 0;
+        view_desc.mip_levels_num = 1;
+        m_unknown_texture = tex->CreateView(view_desc);
     }
 
     // Create Pipeline State Object
@@ -70,19 +111,27 @@ ForwardRenderPass::ForwardRenderPass()
         }
 
         PPGE::GfxPipelineStateCreateDesc ps_cd;
-        ps_cd.desc.input_layout_desc.elements = GetLayout(PosColorLayout);
-        ps_cd.desc.input_layout_desc.elements_num = 2;
+        ps_cd.desc.input_layout_desc.elements = GetLayout(FullLayout);
+        ps_cd.desc.input_layout_desc.elements_num = 8;
         ps_cd.desc.rasterizer_state_desc.cull_mode = PPGE::CullModeType::CULL_MODE_NONE;
         ps_cd.commited_vs = vs;
         ps_cd.commited_ps = ps;
 
         PPGE::ShaderResourceCreateDesc SRVs[] = {
-            {"cb_per_frame",
+            {"cb_PerFrame",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_per_object",
+            {"cb_PerObject",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_per_object",
+            {"cb_View",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
+            {"cb_Color",
+             {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
+            {"g_albedo",
+             {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
+            {"g_specular",
+             {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
+            {"g_normal",
+             {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
             {"g_sampler",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_SAMPLER}}};
         ps_cd.srv = SRVs;
@@ -93,15 +142,16 @@ ForwardRenderPass::ForwardRenderPass()
 
     // Create Shader Resource Binding
     m_SRB = m_PSO->CreateShaderResourceBinding();
-    m_SRB->GetVariableByName("cb_per_object", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_vs);
-    m_SRB->GetVariableByName("cb_per_object", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_ps);
+    m_SRB->GetVariableByName("cb_PerObject", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_object_vs);
+    m_SRB->GetVariableByName("cb_View", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_per_frame_ps);
+    m_SRB->GetVariableByName("cb_Color", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_per_object_ps);
     m_SRB->GetVariableByName("g_sampler", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_sampler_state);
 }
 
 void ForwardRenderPass::Load(RenderGraph &render_graph)
 {
     auto cb_per_frame = render_graph.GetResource<PPGEBuffer>(CbCameraDataResourceName);
-    m_SRB->GetVariableByName("cb_per_frame", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(std::move(cb_per_frame));
+    m_SRB->GetVariableByName("cb_PerFrame", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(std::move(cb_per_frame));
 
     auto shadow_map_buffer = render_graph.GetResource<PPGETexture>(RenderPassResourceDescs::Shadow_Map_Resource);
     {
@@ -150,19 +200,21 @@ void ForwardRenderPass::Execute()
 {
     const auto &data = GetSceneDataRef();
 
+    // Update per frame PS constant buffer
+    {
+        cbPerFramePS *map_data;
+        PPGE::RendererSystem::Get().GetImmediateContext()->Map(m_cb_per_frame_ps.get(), PPGE::MapType::MAP_WRITE,
+                                                               PPGE::MapFlags::MAP_DISCARD,
+                                                               reinterpret_cast<void **>(&map_data));
+        *map_data = cbPerFramePS{.eyePos = data.active_camera.GetPosition()};
+        PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_frame_ps.get());
+    }
+
     RendererSystem::Get().GetImmediateContext()->SetPipelineStateObject(m_PSO);
 
     for (auto [entity, transform, mesh_filer, mesh_renderer] :
          data.scene.View<const TransformComponent, const MeshFilterComponent, const MeshRendererComponent>().each())
     {
-        // Set per object shader resources
-        if (mesh_renderer.albedo_map)
-        {
-            m_SRB->GetVariableByName("g_diffuse", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)
-                ->Set(mesh_renderer.albedo_map);
-        }
-        PPGE::RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB);
-
         // Bind vertex and index buffers
         {
             std::shared_ptr<PPGE::PPGEBuffer> vbs[] = {mesh_filer.vertex_buffer};
@@ -173,15 +225,60 @@ void ForwardRenderPass::Execute()
 
         // Update per object VS constant buffer
         {
-            cbVS *map_data;
-            PPGE::RendererSystem::Get().GetImmediateContext()->Map(m_cb_vs.get(), PPGE::MapType::MAP_WRITE,
+            cbPerObjectVS *map_data;
+            PPGE::RendererSystem::Get().GetImmediateContext()->Map(m_cb_per_object_vs.get(), PPGE::MapType::MAP_WRITE,
                                                                    PPGE::MapFlags::MAP_DISCARD,
                                                                    reinterpret_cast<void **>(&map_data));
             auto model = transform.GetModelMatrix();
             auto inv_mode = model.Invert();
-            *map_data = cbVS{.model = model, .modelInvTran = inv_mode};
-            PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_vs.get());
+            *map_data = cbPerObjectVS{.model = model.Transpose(), .modelInvTran = inv_mode.Transpose()};
+            PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_object_vs.get());
         }
+
+        // Set per object shader resources
+        {
+            cbPerObjectPS *map_data;
+            PPGE::RendererSystem::Get().GetImmediateContext()->Map(m_cb_per_object_ps.get(), PPGE::MapType::MAP_WRITE,
+                                                                   PPGE::MapFlags::MAP_DISCARD,
+                                                                   reinterpret_cast<void **>(&map_data));
+            if (mesh_renderer.albedo_map)
+            {
+                m_SRB->GetVariableByName("g_albedo", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)
+                    ->Set(mesh_renderer.albedo_map);
+                map_data->albedo_map_bound = true;
+            }
+            else
+            {
+                map_data->albedo_map_bound = false;
+                map_data->albedo = mesh_renderer.albedo_color;
+            }
+
+            if (mesh_renderer.specular_map)
+            {
+                m_SRB->GetVariableByName("g_specular", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)
+                    ->Set(mesh_renderer.specular_map);
+                map_data->specular_map_bound = true;
+            }
+            else
+            {
+                map_data->specular_map_bound = false;
+                map_data->specular = mesh_renderer.specular_color;
+            }
+
+            if (mesh_renderer.normal_map)
+            {
+                m_SRB->GetVariableByName("g_normal", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)
+                    ->Set(mesh_renderer.normal_map);
+                map_data->normal_map_bound = true;
+            }
+            else
+            {
+                map_data->normal_map_bound = false;
+            }
+
+            PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_object_ps.get());
+        }
+        PPGE::RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB);
 
         // Draw indexed
         PPGE::RendererSystem::Get().GetImmediateContext()->DrawIndexed(mesh_filer.num_indices);

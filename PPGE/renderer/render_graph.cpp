@@ -94,8 +94,7 @@ void SceneRenderGraph::BindScene(const SceneRenderPassData &data)
         *map_data = CbCameraData{.view = data.active_camera.GetView().Transpose(),
                                  .proj = data.active_camera.GetProj().Transpose(),
                                  .viewProj = data.active_camera.GetViewProj().Transpose(),
-                                 .cameraPosition = data.active_camera.GetPosition(),
-                                 .padding = 0.0f};
+                                 .cameraPosition = data.active_camera.GetPosition()};
         PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_camera_buffer.get());
     }
     // Bind reference to scene data

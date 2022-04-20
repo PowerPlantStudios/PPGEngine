@@ -56,9 +56,13 @@ class ForwardRenderPass : public SceneRenderPass
     std::shared_ptr<PPGETextureView> m_shadow_buffer_srv;
 
     /* Resources created and used within the pass */
-    std::shared_ptr<PPGEBuffer> m_cb_vs;
+    std::shared_ptr<PPGETextureView> m_unknown_texture;
 
-    std::shared_ptr<PPGEBuffer> m_cb_ps;
+    std::shared_ptr<PPGEBuffer> m_cb_per_object_vs;
+
+    std::shared_ptr<PPGEBuffer> m_cb_per_frame_ps;
+
+    std::shared_ptr<PPGEBuffer> m_cb_per_object_ps;
 
     std::shared_ptr<PPGESampler> m_sampler_state;
 

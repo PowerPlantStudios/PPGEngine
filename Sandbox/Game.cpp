@@ -45,7 +45,7 @@ std::shared_ptr<PPGE::PPGETextureView> LoadTexture(const std::filesystem::path &
         std::string path_to_res = path_to_diffuse_tex.string();
         PPGE::TextureCreateDesc tex_cd;
         tex_cd.resource_path = path_to_res.c_str();
-        
+
         auto ext = path_to_diffuse_tex.extension();
         if (ext.compare(".dds") == 0)
         {
@@ -69,14 +69,14 @@ std::shared_ptr<PPGE::PPGETextureView> LoadTexture(const std::filesystem::path &
 class SceneLoader
 {
   public:
-    static void LoadScene(const std::filesystem::path &path_to_scene, PPGE::Scene &ppge_scene, float scale_factor = 1.0f)
+    static void LoadScene(const std::filesystem::path &path_to_scene, PPGE::Scene &ppge_scene,
+                          float scale_factor = 1.0f)
     {
         std::unordered_map<std::string, std::shared_ptr<PPGE::PPGETextureView>> diffuse_maps;
-        std::vector<PPGE::FullVertex> vertices;
+        std::vector<PPGE::StandardVertex> vertices;
         std::vector<unsigned int> indices;
 
-        const aiScene *scene = aiImportFile(path_to_scene.string().c_str(),
-                                            aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded);
+        const aiScene *scene = aiImportFile(path_to_scene.string().c_str(), aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded );
 
         if (!scene || !scene->HasMeshes())
         {
@@ -99,9 +99,9 @@ class SceneLoader
                 }
                 if (mesh->HasNormals())
                 {
-                    vertex.nx = mesh->mNormals[j].x;
-                    vertex.ny = mesh->mNormals[j].y;
-                    vertex.nz = mesh->mNormals[j].z;
+                    vertex.nx = -mesh->mNormals[j].x;
+                    vertex.ny = -mesh->mNormals[j].y;
+                    vertex.nz = -mesh->mNormals[j].z;
                 }
                 if (mesh->HasTextureCoords(0))
                 {
@@ -213,6 +213,7 @@ class TestLayer : public PPGE::Widget
 
     void OnAttach() override
     {
+        // Create camera
         auto camera_entity = m_scene.CreateEntity();
         auto &camera_component = camera_entity.AddComponent<PPGE::CameraComponent>();
         {
@@ -226,6 +227,129 @@ class TestLayer : public PPGE::Widget
         m_camera_controller.Move(PPGE::Math::Vector3(-1.5f, 1.75f, -1.5f));
         m_camera_controller.LookAt(PPGE::Math::Vector3::Zero, PPGE::Math::Vector3::Up);
 
+        // Create lights
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(1.0f, 1.0f, 1.0f);
+            transform.rotation = PPGE::Math::Quaternion::CreateFromYawPitchRoll(2.3561945, -0.7853982f, 0.0f);
+            auto &dir_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::DIRECTIONAL);
+            dir_light.color = PPGE::Math::Color(0.8f, 0.8f, 0.7f);
+            dir_light.intensity = 0.05f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(0.0f, 1.25f, 0.0f);
+            transform.rotation = PPGE::Math::Quaternion::CreateFromYawPitchRoll(0.0f, 1.5707963f, 0.0f);
+            auto &spot_ligth = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::SPOT);
+            spot_ligth.color = PPGE::Math::Color(0.8f, 0.8f, 0.8f);
+            spot_ligth.intensity = 0.8f;
+            spot_ligth.range = 20.0f;
+            spot_ligth.dist_attenuation_a0 = 1.0f;
+            spot_ligth.dist_attenuation_a1 = 0.22f;
+            spot_ligth.dist_attenuation_a2 = 0.20f;
+            spot_ligth.spot_cutoff_angle = 75.0f;
+            spot_ligth.spot_inner_cone_angle = 35.0f;
+            spot_ligth.spot_decay_rate = 4.0f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(0.8f, 1.9f, 0.8f);
+            auto &point_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::POINT);
+            point_light.color = PPGE::Math::Color(0.8f, 0.1f, 0.1f);
+            point_light.intensity = 0.75f;
+            point_light.range = 20.0f;
+            point_light.dist_attenuation_a0 = 1.0f;
+            point_light.dist_attenuation_a1 = 0.22f;
+            point_light.dist_attenuation_a2 = 0.20f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(-0.8f, 1.9f, 0.8f);
+            auto &point_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::POINT);
+            point_light.color = PPGE::Math::Color(0.1f, 0.8f, 0.8f);
+            point_light.intensity = 0.75f;
+            point_light.range = 20.0f;
+            point_light.dist_attenuation_a0 = 1.0f;
+            point_light.dist_attenuation_a1 = 0.22f;
+            point_light.dist_attenuation_a2 = 0.20f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(-0.8f, 1.9f, -0.8f);
+            auto &point_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::POINT);
+            point_light.color = PPGE::Math::Color(0.1f, 0.f, 0.8f);
+            point_light.intensity = 0.75f;
+            point_light.range = 20.0f;
+            point_light.dist_attenuation_a0 = 1.0f;
+            point_light.dist_attenuation_a1 = 0.22f;
+            point_light.dist_attenuation_a2 = 0.20f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(0.8f, 1.9f, -0.8f);
+            auto &point_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::POINT);
+            point_light.color = PPGE::Math::Color(0.8f, 0.8f, 0.1f);
+            point_light.intensity = 0.75f;
+            point_light.range = 20.0f;
+            point_light.dist_attenuation_a0 = 1.0f;
+            point_light.dist_attenuation_a1 = 0.22f;
+            point_light.dist_attenuation_a2 = 0.20f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(0.9f, 0.1f, 0.9f);
+            auto &point_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::POINT);
+            point_light.color = PPGE::Math::Color(0.8f, 0.1f, 0.1f);
+            point_light.intensity = 0.5f;
+            point_light.range = 20.0f;
+            point_light.dist_attenuation_a0 = 1.0f;
+            point_light.dist_attenuation_a1 = 0.22f;
+            point_light.dist_attenuation_a2 = 0.20f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(-0.9f, 0.1f, 0.9f);
+            auto &point_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::POINT);
+            point_light.color = PPGE::Math::Color(0.1f, 0.8f, 0.8f);
+            point_light.intensity = 0.5f;
+            point_light.range = 20.0f;
+            point_light.dist_attenuation_a0 = 1.0f;
+            point_light.dist_attenuation_a1 = 0.22f;
+            point_light.dist_attenuation_a2 = 0.20f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(-0.9f, 0.1f, -0.9f);
+            auto &point_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::POINT);
+            point_light.color = PPGE::Math::Color(0.1f, 0.f, 0.8f);
+            point_light.intensity = 0.5f;
+            point_light.range = 20.0f;
+            point_light.dist_attenuation_a0 = 1.0f;
+            point_light.dist_attenuation_a1 = 0.22f;
+            point_light.dist_attenuation_a2 = 0.20f;
+        }
+        {
+            auto light = m_scene.CreateEntity();
+            auto &transform = light.GetComponents<PPGE::TransformComponent>();
+            transform.position = PPGE::Math::Vector3(0.9f, 0.1f, -0.9f);
+            auto &point_light = light.AddComponent<PPGE::LightComponent>(PPGE::LightComponent::LightType::POINT);
+            point_light.color = PPGE::Math::Color(0.8f, 0.8f, 0.1f);
+            point_light.intensity = 0.5f;
+            point_light.range = 20.0f;
+            point_light.dist_attenuation_a0 = 1.0f;
+            point_light.dist_attenuation_a1 = 0.22f;
+            point_light.dist_attenuation_a2 = 0.20f;
+        }
+
         // Load resources
         resource_mgr.WalkRoot("../../Sandbox/assets");
         if (auto model = resource_mgr.GetCachedResource("cornellbox/CornellBox-Original.obj"))
@@ -237,7 +361,7 @@ class TestLayer : public PPGE::Widget
         {
             auto entity = m_scene.CreateEntity();
             {
-                std::vector<PPGE::FullVertex> vertices{
+                std::vector<PPGE::StandardVertex> vertices{
                     {.px =  1.0f, .py = 0.0f, .pz =  1.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .color = 0x1199eeff, .u1 = 0.0f, .v1 = 0.0f},
                     {.px =  1.0f, .py = 0.0f, .pz = -1.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .color = 0x11ee99ff, .u1 = 1.0f, .v1 = 0.0f},
                     {.px = -1.0f, .py = 0.0f, .pz = -1.0f, .nx = 0.0f, .ny = 1.0f, .nz = 0.0f, .color = 0x1199eeff, .u1 = 1.0f, .v1 = 1.0f},
@@ -245,14 +369,14 @@ class TestLayer : public PPGE::Widget
                 std::vector<unsigned int> indices{0, 3, 2, 2, 1, 0};
                 CreateMeshFilter(entity, vertices, indices);
             }
-            if (auto resource = resource_mgr.GetCachedResource("textures/landscape0_albedo.dds"))
-            {  
+            if (auto resource = resource_mgr.GetCachedResource("textures/no_texture.png"))
+            {
                 auto lazy_resource = std::static_pointer_cast<PPGE::LazyResource>(resource);
                 auto &mesh_renderer = entity.AddComponent<PPGE::MeshRendererComponent>();
                 mesh_renderer.albedo_map = LoadTexture(lazy_resource->data);
                 mesh_renderer.specular_color = PPGE::Math::Color(.85f, .85f, .85f, 10.0f);
             }
-
+        
             auto &transform = entity.GetComponents<PPGE::TransformComponent>();
             transform.position = PPGE::Math::Vector3(0.0f, -0.1f, 0.0f);
             transform.scale = PPGE::Math::Vector3(5.0f, 1.0f, 5.0f);

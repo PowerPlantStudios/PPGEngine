@@ -38,6 +38,9 @@ class ForwardRenderPass : public SceneRenderPass
     void Execute() override final;
 
   private:
+
+    void Draw();
+
     /* Constant pass Input/Output declerations */
     const std::vector<RenderPassResource> m_pass_inputs{
         {RenderPassResourceDescs::Shadow_Map_Resource, RenderPassResourceDescs::Shadow_Map_Resource_Desc},
@@ -58,15 +61,15 @@ class ForwardRenderPass : public SceneRenderPass
     /* Resources created and used within the pass */
     std::shared_ptr<PPGETextureView> m_unknown_texture;
 
-    std::shared_ptr<PPGEBuffer> m_cb_per_object_vs;
+    std::shared_ptr<PPGEBuffer> m_cb_per_draw;
 
-    std::shared_ptr<PPGEBuffer> m_cb_per_frame_ps;
-
-    std::shared_ptr<PPGEBuffer> m_cb_per_object_ps;
+    std::shared_ptr<PPGEBuffer> m_cb_light;
 
     std::shared_ptr<PPGESampler> m_sampler_state;
 
-    std::shared_ptr<PPGEPipelineState> m_PSO;
+    std::shared_ptr<PPGEPipelineState> m_ambient_PSO;
+
+    std::shared_ptr<PPGEPipelineState> m_lighting_PSO;
 
     std::shared_ptr<PPGEShaderResourceBinding> m_SRB;
 };

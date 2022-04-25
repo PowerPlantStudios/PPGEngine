@@ -55,13 +55,16 @@ ShaderD3D11Impl::ShaderD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, con
 
         DWORD shader_flags = 0;
 #ifdef PPGE_DEBUG
-        shader_flags |= 1 << 0;
+        shader_flags = (D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION);
+#else
+        shader_flags = (D3DCOMPILE_SKIP_VALIDATION | D3DCOMPILE_OPTIMIZATION_LEVEL3);
 #endif
         std::string shader_profile = GetShaderProfile(m_desc);
 
         CComPtr<ID3DBlob> compiler_output_ptr;
-        HRESULT hr = D3DCompile(source_code.data(), source_code.size(), nullptr /* Source Name */, nullptr /* Macros */,
-                                nullptr /* Include Implementation */, create_desc.entry_point_name,
+        D3D_SHADER_MACRO macros[] = {{}};
+        HRESULT hr = D3DCompile(source_code.data(), source_code.size(), create_desc.file_path, macros,
+                                D3D_COMPILE_STANDARD_FILE_INCLUDE, create_desc.entry_point_name,
                                 shader_profile.c_str(), shader_flags, 0, &m_shader_byte_code_ptr, &compiler_output_ptr);
         if (FAILED(hr))
         {

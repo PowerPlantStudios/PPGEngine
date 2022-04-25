@@ -14,12 +14,12 @@ struct TransformComponent
     Math::Quaternion rotation = Math::Quaternion::Identity;
     Math::Vector3 scale = Math::Vector3::One;
 
-    Math::Matrix GetModelMatrix() const
+    Math::Matrix GetWorldMatrix() const
     {
-        Math::Matrix model = Math::Matrix::CreateScale(scale);
-        model *= Math::Matrix::CreateFromQuaternion(rotation);
-        model.Translation(position);
-        return model;
+        Math::Matrix world = Math::Matrix::CreateScale(scale);
+        world *= Math::Matrix::CreateFromQuaternion(rotation);
+        world.Translation(position);
+        return world;
     }
 };
 } // namespace PPGE

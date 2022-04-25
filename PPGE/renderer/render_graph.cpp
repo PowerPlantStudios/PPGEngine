@@ -30,19 +30,19 @@ void RenderGraph::Run()
     }
 }
 
-void RenderGraph::ParsePassResources(const std::vector<RenderPassResource> &bla)
+void RenderGraph::ParsePassResources(const std::vector<RenderPassResource> &resources)
 {
-    for (const auto &pass_input : bla)
+    for (const auto &resource : resources)
     {
-        auto it = m_resources.find(pass_input.name);
+        auto it = m_resources.find(resource.name);
         if (it != m_resources.end())
             continue;
 
         std::shared_ptr<PPGEDeviceObject> device_object_sp;
-        switch (pass_input.resource_desc.GetType())
+        switch (resource.resource_desc.GetType())
         {
         case RenderPassResourceType::BUFFER: {
-            const auto &resourece_desc = static_cast<const RenderPassBufferResourceDesc &>(pass_input.resource_desc);
+            const auto &resourece_desc = static_cast<const RenderPassBufferResourceDesc &>(resource.resource_desc);
 
             std::shared_ptr<PPGEBuffer> buffer_sp;
             RendererSystem::Get().GetDevice()->CreateBuffer(resourece_desc.rhi_desc, nullptr, buffer_sp);
@@ -50,7 +50,7 @@ void RenderGraph::ParsePassResources(const std::vector<RenderPassResource> &bla)
             break;
         }
         case RenderPassResourceType::TEXTURE: {
-            const auto &resourece_desc = static_cast<const RenderPassTextureResourceDesc &>(pass_input.resource_desc);
+            const auto &resourece_desc = static_cast<const RenderPassTextureResourceDesc &>(resource.resource_desc);
 
             TextureCreateDesc cd;
             cd.desc = resourece_desc.rhi_desc;
@@ -78,7 +78,7 @@ void RenderGraph::ParsePassResources(const std::vector<RenderPassResource> &bla)
 
         if (device_object_sp)
         {
-            m_resources.emplace(pass_input.name, std::move(device_object_sp));
+            m_resources.emplace(resource.name, std::move(device_object_sp));
         }
     }
 }
@@ -86,16 +86,23 @@ void RenderGraph::ParsePassResources(const std::vector<RenderPassResource> &bla)
 void SceneRenderGraph::BindScene(const SceneRenderPassData &data)
 {
     // Set per frame camera data
-    CbCameraData *map_data;
+    CbPerFrame *map_data;
     {
-        PPGE::RendererSystem::Get().GetImmediateContext()->Map(m_cb_camera_buffer.get(), PPGE::MapType::MAP_WRITE,
+        PPGE::RendererSystem::Get().GetImmediateContext()->Map(m_cb_per_frame.get(), PPGE::MapType::MAP_WRITE,
                                                                PPGE::MapFlags::MAP_DISCARD,
                                                                reinterpret_cast<void **>(&map_data));
-        *map_data = CbCameraData{.view = data.active_camera.GetView().Transpose(),
-                                 .proj = data.active_camera.GetProj().Transpose(),
-                                 .viewProj = data.active_camera.GetViewProj().Transpose(),
-                                 .cameraPosition = data.active_camera.GetPosition()};
-        PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_camera_buffer.get());
+        Math::Vector3 camera_position = data.active_camera.GetPosition();
+
+        *map_data =
+            CbPerFrame{.view = data.active_camera.GetView().Transpose(),
+                       .view_inverse = data.active_camera.GetView().Invert().Transpose(),
+                       .proj = data.active_camera.GetProj().Transpose(),
+                       .proj_inverse = data.active_camera.GetProj().Invert().Transpose(),
+                       .view_proj = data.active_camera.GetViewProj().Transpose(),
+                       .view_proj_inverse = data.active_camera.GetViewProj().Invert().Transpose(),
+                       .camera_position = Math::Vector4(camera_position.x, camera_position.y, camera_position.z, 1.0f),
+                       .camera_direction = Math::Vector4()};
+        PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_frame.get());
     }
     // Bind reference to scene data
     for (auto &scene_pass : m_srp_refs)
@@ -115,15 +122,14 @@ void SceneRenderGraph::UnbindScene()
 void SceneRenderGraph::Compile()
 {
     BufferDesc cb_desc;
-    cb_desc.byte_width = sizeof(CbCameraData);
+    cb_desc.byte_width = sizeof(CbPerFrame);
     cb_desc.bind_flags = BindFlags::BIND_CONSTANT_BUFFER;
     cb_desc.usage = UsageType::USAGE_DYNAMIC;
     cb_desc.cpu_access_flags = CPUAccessFlags::CPU_ACCESS_WRITE;
-    RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_camera_buffer);
-    PPGE_ASSERT(m_cb_camera_buffer, "Scene Render Graph: Creating per frame data buffer has failed.");
+    RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_per_frame);
+    PPGE_ASSERT(m_cb_per_frame, "Scene Render Graph: Creating per frame data buffer has failed.");
 
-    m_resources.emplace(CbCameraDataResourceName,
-                        std::move(std::static_pointer_cast<PPGEDeviceObject>(m_cb_camera_buffer)));
+    m_resources.emplace(CbPerFrameResourceName, std::move(std::static_pointer_cast<PPGEDeviceObject>(m_cb_per_frame)));
 
     RenderGraph::Compile();
 }

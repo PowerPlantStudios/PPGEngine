@@ -109,6 +109,6 @@ class SceneRenderGraph : public RenderGraph
   private:
     std::vector<std::reference_wrapper<SceneRenderPass>> m_srp_refs;
 
-    std::shared_ptr<PPGEBuffer> m_cb_camera_buffer;
+    std::shared_ptr<PPGEBuffer> m_cb_per_frame;
 };
 } // namespace PPGE

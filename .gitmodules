@@ -1,0 +1,28 @@
+[submodule "Thirdparty/spdlog"]
+	path = Thirdparty/spdlog
+	url = https://github.com/gabime/spdlog.git
+	branch = v1.8.5
+[submodule "Thirdparty/glfw"]
+	path = Thirdparty/glfw
+	url = https://github.com/glfw/glfw.git
+	branch = 3.3.4
+[submodule "Thirdparty/imgui/src"]
+	path = Thirdparty/imgui/src
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
+[submodule "Thirdparty/math/dxmath"]
+	path = Thirdparty/math/dxmath
+	url = https://github.com/microsoft/DirectXMath.git
+	branch = jan2021
+[submodule "Thirdparty/directxtk/src"]
+	path = Thirdparty/directxtk/src
+	url = https://github.com/microsoft/DirectXTK.git
+	branch = sept2021
+[submodule "Thirdparty/assimp"]
+	path = Thirdparty/assimp
+	url = https://github.com/assimp/assimp.git
+	branch = v5.2.2 
+[submodule "Thirdparty/entt"]
+	path = Thirdparty/entt
+	url = https://github.com/skypjack/entt.git
+    branch = v3.9.0

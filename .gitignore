@@ -30,3 +30,26 @@
 *.exe
 *.out
 *.app
+
+# VS Files
+*.sln
+*.vcxproj
+*.filters
+*.user
+.vs
+.vscode
+
+# Build directory
+build
+
+# Log dumps
+*.log
+
+# MAC related ignores
+Makefile
+.idea
+.DS_Store
+*.xcodeproj
+*.xcworkspace
+*.plist
+Debug-macosx-x86_64/

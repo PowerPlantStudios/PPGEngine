@@ -1,0 +1,21 @@
+name: windows-latest build
+on:
+  push:
+    branches: [ core-systems ]
+  pull_request:
+    branches: [ core-systems ]
+
+jobs:
+  windows-latest-build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: core-systems
+        submodules: recursive
+
+    # build project
+    - name: configure
+      run: mkdir build && cd build && cmake ..
+    - name: build
+      run: cmake --build build --config Debug

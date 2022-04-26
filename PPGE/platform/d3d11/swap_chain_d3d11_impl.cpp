@@ -32,7 +32,7 @@ std::shared_ptr<PPGETextureView> SwapChainD3D11Impl::GetBackBufferRTV()
 
 std::shared_ptr<PPGETextureView> SwapChainD3D11Impl::GetDepthBufferDSV()
 {
-    return std::static_pointer_cast<PPGETextureView>(m_rtv_sp);
+    return std::static_pointer_cast<PPGETextureView>(m_dsv_sp);
 }
 
 CComPtr<ID3D11RenderTargetView> SwapChainD3D11Impl::GetD3D11RenderTargetView() const

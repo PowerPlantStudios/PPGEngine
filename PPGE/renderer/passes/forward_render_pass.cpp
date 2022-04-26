@@ -214,6 +214,11 @@ void ForwardRenderPass::Unload()
 void ForwardRenderPass::Execute()
 {
     RendererSystem::Get().GetImmediateContext()->SetPipelineStateObject(m_ambient_PSO);
+    
+    {
+        std::shared_ptr<PPGETextureView> RTVs[] = {m_color_buffer_rtv};
+        RendererSystem::Get().GetImmediateContext()->SetRenderTargets(1, RTVs, m_depth_buffer_dsv);
+    }
 
     Draw();
 

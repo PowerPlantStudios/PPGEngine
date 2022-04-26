@@ -84,20 +84,6 @@ void RendererSystemD3D11::StartUp(const RendererSystemProps &props)
 void RendererSystemD3D11::Update()
 {
     m_swap_chain_sp->Present(1);
-
-    auto d3d11_immediate_context = m_device_context_sp->GetD3D11DeviceContext();
-    auto d3d11_rtv = m_swap_chain_sp->GetD3D11RenderTargetView();
-    auto d3d11_dsv = m_swap_chain_sp->GetD3D11DepthStencilView();
-
-    float clear_color[] = {0.6, 0.8, 0.9, 1.0f};
-    d3d11_immediate_context->ClearRenderTargetView(d3d11_rtv, clear_color);
-
-    UINT clear_flag = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;
-    d3d11_immediate_context->ClearDepthStencilView(d3d11_dsv, clear_flag, 1.0f, 1);
-
-    ID3D11RenderTargetView *d3d11_rtvs[] = {d3d11_rtv.p};
-
-    d3d11_immediate_context->OMSetRenderTargets(1, d3d11_rtvs, d3d11_dsv);
 }
 
 void RendererSystemD3D11::ShutDown()
@@ -114,7 +100,7 @@ void RendererSystemD3D11::OnResize()
     auto d3d11_immediate_context = m_device_context_sp->GetD3D11DeviceContext();
 
     auto d3d11_rtv = m_swap_chain_sp->GetD3D11RenderTargetView();
-    ID3D11RenderTargetView* d3d11_rtvs[] = {d3d11_rtv.p};
+    ID3D11RenderTargetView *d3d11_rtvs[] = {d3d11_rtv.p};
 
     auto d3d11_dsv = m_swap_chain_sp->GetD3D11DepthStencilView();
 
@@ -136,7 +122,11 @@ PPGEDevice *RendererSystemD3D11::GetDevice()
 
 PPGEDeviceContext *RendererSystemD3D11::GetImmediateContext()
 {
-    return static_cast<PPGEDeviceContexD3D11 *>(m_device_context_sp.get());
+    return static_cast<PPGEDeviceContext *>(m_device_context_sp.get());
 }
 
+PPGESwapChain *RendererSystemD3D11::GetSwapChain()
+{
+    return static_cast<PPGESwapChain *>(m_swap_chain_sp.get());
+}
 } // namespace PPGE

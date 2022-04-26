@@ -58,8 +58,8 @@ void RenderGraph::ParsePassResources(const std::vector<RenderPassResource> &reso
                  cd.desc.resource_dimension == ResourceDimensionType::RESOURCE_DIMENSION_2D_ARRAY) &&
                 (cd.desc.width == 0 || cd.desc.height == 0))
             {
-                cd.desc.width = 1280;
-                cd.desc.height = 720;
+                cd.desc.width = 1264;
+                cd.desc.height = 681;
             }
             std::shared_ptr<PPGETexture> texture_sp;
             RendererSystem::Get().GetDevice()->CreateTexture(cd, texture_sp);

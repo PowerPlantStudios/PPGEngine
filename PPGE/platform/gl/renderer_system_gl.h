@@ -34,6 +34,8 @@ class PPGE_API RendererSystemGL : public RendererSystem
 
     PPGEDeviceContext *GetImmediateContext() override final;
 
+    PPGESwapChain *GetSwapChain() override final;
+
   private:
 };
 } // namespace PPGE

@@ -49,4 +49,9 @@ PPGEDeviceContext *RendererSystemGL::GetImmediateContext()
 {
     return nullptr;
 }
+
+PPGESwapChain *RendererSystemGL::GetSwapChain()
+{
+    return nullptr;
+}
 } // namespace PPGE

@@ -4,6 +4,7 @@
 #include "core/defines.h"
 #include "rhi/device.h"
 #include "rhi/device_context.h"
+#include "rhi/swap_chain.h"
 #include "system/isystem.h"
 #include "system/logger_system.h"
 
@@ -45,6 +46,8 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
     virtual PPGEDevice *GetDevice() = 0;
 
     virtual PPGEDeviceContext *GetImmediateContext() = 0;
+
+    virtual PPGESwapChain *GetSwapChain() = 0;
 
   public:
     static void Initialize(RendererAPI api);

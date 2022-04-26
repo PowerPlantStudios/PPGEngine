@@ -37,6 +37,8 @@ class PPGE_API RendererSystemD3D11 final : public RendererSystem
 
     PPGEDeviceContext *GetImmediateContext() override final;
 
+    PPGESwapChain *GetSwapChain() override final;
+
   private:
     std::shared_ptr<DeviceD3D11Impl> m_device_sp;
     std::shared_ptr<DeviceContextD3D11Impl> m_device_context_sp;

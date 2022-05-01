@@ -95,24 +95,22 @@ void RendererSystemD3D11::OnResize()
     if (!m_swap_chain_sp)
         return;
 
+    m_device_context_sp->SetRenderTargets(0, nullptr, nullptr);
+
     m_swap_chain_sp->Resize(DisplaySystem::Get().GetWidth(), DisplaySystem::Get().GetHeight());
 
-    auto d3d11_immediate_context = m_device_context_sp->GetD3D11DeviceContext();
+    auto color_buffer_rtv = m_swap_chain_sp->GetBackBufferRTV();
+    auto depth_buffer_dsv = m_swap_chain_sp->GetDepthBufferDSV();
+    m_device_context_sp->SetRenderTargets(1, &color_buffer_rtv, depth_buffer_dsv);
 
-    auto d3d11_rtv = m_swap_chain_sp->GetD3D11RenderTargetView();
-    ID3D11RenderTargetView *d3d11_rtvs[] = {d3d11_rtv.p};
-
-    auto d3d11_dsv = m_swap_chain_sp->GetD3D11DepthStencilView();
-
-    d3d11_immediate_context->OMSetRenderTargets(1, d3d11_rtvs, d3d11_dsv);
-
-    m_viewport.TopLeftX = 0;
-    m_viewport.TopLeftY = 0;
-    m_viewport.Width = DisplaySystem::Get().GetWidth();
-    m_viewport.Height = DisplaySystem::Get().GetHeight();
-    m_viewport.MinDepth = 0.0f;
-    m_viewport.MaxDepth = 1.0f;
-    d3d11_immediate_context->RSSetViewports(1, &m_viewport);
+    Viewport viewport;
+    viewport.top_left_x = 0.0f;
+    viewport.top_left_y = 0.0f;
+    viewport.width = DisplaySystem::Get().GetWidth();
+    viewport.height = DisplaySystem::Get().GetHeight();
+    viewport.min_depth = 0.0f;
+    viewport.max_depth = 1.0f;
+    m_device_context_sp->SetViewports(1, &viewport);
 }
 
 PPGEDevice *RendererSystemD3D11::GetDevice()

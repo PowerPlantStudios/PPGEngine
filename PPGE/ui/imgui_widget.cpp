@@ -6,7 +6,7 @@
 
  namespace PPGE
  {
- std::unique_ptr<ImGuiWidget> ImGuiWidget::CreateImGuiLayer()
+ std::unique_ptr<ImGuiWidget> ImGuiWidget::CreateImGuiWidget()
  {
      auto api = RendererSystem::Get().GetRendererAPI();
      switch (api)

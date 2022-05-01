@@ -13,7 +13,7 @@ class PPGE_API ImGuiWidget : public Widget
 {
   public:
     // Static function to create ImGui Layer dynamically for the current platform
-    static std::unique_ptr<ImGuiWidget> CreateImGuiLayer();
+    static std::unique_ptr<ImGuiWidget> CreateImGuiWidget();
     
     ImGuiWidget(const std::string &name) : Widget(name)
     {

@@ -142,7 +142,6 @@ void SwapChainD3D11Impl::CreateRTVandDSV()
 {
     auto d3d11_device_impl = m_device_wp.lock();
     PPGE_ASSERT(d3d11_device_impl, "Creating RTV and DSV have failed: Cannot get device reference.");
-    auto d3d11_device = d3d11_device_impl->GetD3D11Device();
 
     CComPtr<ID3D11Texture2D> d3d11_back_buffer;
     PPGE_HR(m_swap_chain_ptr->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(&d3d11_back_buffer)));

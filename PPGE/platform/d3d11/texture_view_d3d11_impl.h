@@ -24,6 +24,15 @@ class TextureViewD3D11Impl final : public TextureViewBase<RendererTraitsD3D11>
         return m_d3d11_view_ptr;
     }
 
+    size_t GetGenericHandle() override final
+    {
+        PPGE_ASSERT(sizeof(m_d3d11_view_ptr.p) <= sizeof(size_t),
+                    "Destination type is too short to cast source type");
+        size_t handle = 0;
+        memcpy(&handle, &(m_d3d11_view_ptr.p), sizeof(m_d3d11_view_ptr.p));
+        return handle;
+    }
+
   private:
     CComPtr<ID3D11View> m_d3d11_view_ptr;
 };

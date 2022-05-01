@@ -19,6 +19,7 @@
 #include "event/input_event.h"
 #include "io/resource_manager.h"
 #include "renderer/camera_controller.h"
+#include "renderer/render_graph.h"
 #include "renderer/renderer.h"
 #include "renderer/renderer_types.h"
 #include "rhi/buffer.h"

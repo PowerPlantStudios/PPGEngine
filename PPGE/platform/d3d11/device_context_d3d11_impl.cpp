@@ -154,6 +154,20 @@ void DeviceContextD3D11Impl::CommitShaderResources(const std::shared_ptr<PPGESha
 
 void DeviceContextD3D11Impl::SetViewports(uint32_t num_viewports, const Viewport viewports[])
 {
+    D3D11_VIEWPORT d3d11_viewports[Num_Of_Viewports];
+    m_viewport_count = num_viewports > Num_Of_Viewports ? Num_Of_Viewports : num_viewports;
+    for (uint32_t i = 0; i < m_viewport_count; i++)
+    {
+        m_viewports[i] = viewports[i];
+        d3d11_viewports[i].TopLeftX = m_viewports[i].top_left_x;
+        d3d11_viewports[i].TopLeftY = m_viewports[i].top_left_y;
+        d3d11_viewports[i].Width = m_viewports[i].width;
+        d3d11_viewports[i].Height = m_viewports[i].height;
+        d3d11_viewports[i].MinDepth = m_viewports[i].min_depth;
+        d3d11_viewports[i].MaxDepth = m_viewports[i].max_depth;
+    }
+
+    m_d3d11_device_context_ptr->RSSetViewports(m_viewport_count, d3d11_viewports);
 }
 
 void DeviceContextD3D11Impl::SetScissorRects(uint32_t num_rects, const Rect rects[])

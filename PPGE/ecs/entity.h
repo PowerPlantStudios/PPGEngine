@@ -22,9 +22,29 @@ class Entity
 
     Entity &operator=(const Entity &other) = default;
 
+    bool operator==(const Entity &rhs) const
+    {
+        return (rhs.m_handle == m_handle) && (rhs.m_scene_ptr == m_scene_ptr);
+    }
+
+    bool operator!=(const Entity &rhs) const
+    {
+        return !(*this == rhs);
+    }
+
+    operator uint64_t() const
+    {
+        return static_cast<uint64_t>(m_handle);
+    }
+
+    operator bool() const
+    {
+        return IsValid();
+    }
+
     inline bool IsValid() const
     {
-        return GetRegistry().valid(m_handle);
+        return m_scene_ptr && m_handle != entt::null && GetRegistry().valid(m_handle);
     }
 
     /**

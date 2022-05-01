@@ -100,7 +100,7 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
         case PPGE::TextureFileFormat::DDS:
             DirectX::CreateDDSTextureFromFileEx(
                 d3d11_device, d3d11_device_context, std::filesystem::path(create_desc.resource_path).c_str(), 0, usage,
-                bind_flags, cpu_access_flags, misc_flags, false, &m_d311_texture_ptr, &default_srv);
+                bind_flags, cpu_access_flags, misc_flags, false, &m_d3d11_texture_ptr, &default_srv);
             break;
         case PPGE::TextureFileFormat::JPEG:
         case PPGE::TextureFileFormat::PNG:
@@ -108,7 +108,7 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
             DirectX::CreateWICTextureFromFileEx(
                 d3d11_device, d3d11_device_context, std::filesystem::path(create_desc.resource_path).c_str(), 0, usage,
                 bind_flags, cpu_access_flags, misc_flags, DirectX::WIC_LOADER_FLAGS::WIC_LOADER_DEFAULT,
-                &m_d311_texture_ptr, &default_srv);
+                &m_d3d11_texture_ptr, &default_srv);
             break;
         case PPGE::TextureFileFormat::UNKNOWN:
             PPGE_ASSERT(false, "Creating texture has failed: Texture file format is not defined.");
@@ -152,19 +152,19 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
 TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, ID3D11Texture1D *texture)
     : TextureBaseType(std::move(device_sp), TextureDescFromD3D11Texture{}(texture))
 {
-    m_d311_texture_ptr = texture;
+    m_d3d11_texture_ptr = texture;
 }
 
 TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, ID3D11Texture2D *texture)
     : TextureBaseType(std::move(device_sp), TextureDescFromD3D11Texture{}(texture))
 {
-    m_d311_texture_ptr = texture;
+    m_d3d11_texture_ptr = texture;
 }
 
 TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, ID3D11Texture3D *texture)
     : TextureBaseType(std::move(device_sp), TextureDescFromD3D11Texture{}(texture))
 {
-    m_d311_texture_ptr = texture;
+    m_d3d11_texture_ptr = texture;
 }
 
 TextureD3D11Impl::~TextureD3D11Impl()
@@ -232,7 +232,7 @@ void TextureD3D11Impl::CreateTexture1D(const TextureCreateDesc &create_desc)
     auto d3d11_device = m_device_sp->GetD3D11Device();
     ID3D11Texture1D *d3d11_texture1D_ptr;
     PPGE_HR(d3d11_device->CreateTexture1D(&desc, init_data.empty() ? nullptr : init_data.data(), &d3d11_texture1D_ptr));
-    m_d311_texture_ptr = d3d11_texture1D_ptr;
+    m_d3d11_texture_ptr = d3d11_texture1D_ptr;
 }
 
 void TextureD3D11Impl::CreateTexture2D(const TextureCreateDesc &create_desc)
@@ -255,7 +255,7 @@ void TextureD3D11Impl::CreateTexture2D(const TextureCreateDesc &create_desc)
     auto d3d11_device = m_device_sp->GetD3D11Device();
     ID3D11Texture2D *d3d11_texture2D_ptr;
     PPGE_HR(d3d11_device->CreateTexture2D(&desc, init_data.empty() ? nullptr : init_data.data(), &d3d11_texture2D_ptr));
-    m_d311_texture_ptr = d3d11_texture2D_ptr;
+    m_d3d11_texture_ptr = d3d11_texture2D_ptr;
 }
 
 void TextureD3D11Impl::CreateTexture3D(const TextureCreateDesc &create_desc)
@@ -276,7 +276,7 @@ void TextureD3D11Impl::CreateTexture3D(const TextureCreateDesc &create_desc)
     auto d3d11_device = m_device_sp->GetD3D11Device();
     ID3D11Texture3D *d3d11_texture3D_ptr;
     PPGE_HR(d3d11_device->CreateTexture3D(&desc, init_data.empty() ? nullptr : init_data.data(), &d3d11_texture3D_ptr));
-    m_d311_texture_ptr = d3d11_texture3D_ptr;
+    m_d3d11_texture_ptr = d3d11_texture3D_ptr;
 }
 
 std::vector<D3D11_SUBRESOURCE_DATA> TextureD3D11Impl::CreateInitData(const TextureCreateDesc &create_desc)
@@ -372,7 +372,7 @@ void TextureD3D11Impl::CreateShaderResourceView(const TextureViewDesc &view_desc
     }
 
     auto d3d11_device = m_device_sp->GetD3D11Device();
-    PPGE_HR(d3d11_device->CreateShaderResourceView(m_d311_texture_ptr, &desc, d3d11_srv_pp));
+    PPGE_HR(d3d11_device->CreateShaderResourceView(m_d3d11_texture_ptr, &desc, d3d11_srv_pp));
 }
 
 void TextureD3D11Impl::CreateRenderTargetView(const TextureViewDesc &view_desc, ID3D11RenderTargetView **d3d11_rtv_pp)
@@ -440,7 +440,7 @@ void TextureD3D11Impl::CreateRenderTargetView(const TextureViewDesc &view_desc, 
     }
 
     auto d3d11_device = m_device_sp->GetD3D11Device();
-    PPGE_HR(d3d11_device->CreateRenderTargetView(m_d311_texture_ptr, &desc, d3d11_rtv_pp));
+    PPGE_HR(d3d11_device->CreateRenderTargetView(m_d3d11_texture_ptr, &desc, d3d11_rtv_pp));
 }
 
 void TextureD3D11Impl::CreateDepthStencilView(const TextureViewDesc &view_desc, ID3D11DepthStencilView **d3d11_dsv_pp)
@@ -505,6 +505,6 @@ void TextureD3D11Impl::CreateDepthStencilView(const TextureViewDesc &view_desc, 
     }
 
     auto d3d11_device = m_device_sp->GetD3D11Device();
-    PPGE_HR(d3d11_device->CreateDepthStencilView(m_d311_texture_ptr, &desc, d3d11_dsv_pp));
+    PPGE_HR(d3d11_device->CreateDepthStencilView(m_d3d11_texture_ptr, &desc, d3d11_dsv_pp));
 }
 } // namespace PPGE

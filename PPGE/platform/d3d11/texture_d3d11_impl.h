@@ -28,7 +28,16 @@ class TextureD3D11Impl final : public TextureBase<RendererTraitsD3D11>
 
     CComPtr<ID3D11Resource> GetD3D11Resource() const override final
     {
-        return m_d311_texture_ptr;
+        return m_d3d11_texture_ptr;
+    }
+
+    size_t GetGenericHandle() override final
+    {
+        PPGE_ASSERT(sizeof(m_d3d11_texture_ptr.p) <= sizeof(size_t),
+                    "Destination type is too short to cast source type");
+        size_t handle = 0;
+        memcpy(&handle, &(m_d3d11_texture_ptr.p), sizeof(m_d3d11_texture_ptr.p));
+        return handle;
     }
 
   private:
@@ -46,7 +55,7 @@ class TextureD3D11Impl final : public TextureBase<RendererTraitsD3D11>
 
     void CreateDepthStencilView(const TextureViewDesc &view_desc, ID3D11DepthStencilView **d3d11_dsv_pp);
 
-    CComPtr<ID3D11Resource> m_d311_texture_ptr;
+    CComPtr<ID3D11Resource> m_d3d11_texture_ptr;
     CComPtr<ID3D11View> m_default_view;
 };
 } // namespace PPGE

@@ -39,6 +39,7 @@
 // Commonly used (mostly unchanged) PPGE third party libraries
 // ImGui includes
 #include <imgui.h>
+#include <imgui_internal.h>
 
 // Logger includes
 // Do not change order of the includes

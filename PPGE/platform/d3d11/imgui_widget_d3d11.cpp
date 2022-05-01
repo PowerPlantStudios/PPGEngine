@@ -55,6 +55,12 @@ void ImGuiWidgetD3D11::ImGuiBegin()
 
 void ImGuiWidgetD3D11::ImGuiEnd()
 {
+    auto swap_chain = RendererSystem::Get().GetSwapChain();
+    auto color_buffer_rtv = swap_chain->GetBackBufferRTV();
+    auto depth_buffer_dsv = swap_chain->GetDepthBufferDSV();
+    auto device_context = RendererSystem::Get().GetImmediateContext();
+    device_context->SetRenderTargets(1, &color_buffer_rtv, depth_buffer_dsv);
+
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
     ImGuiIO &io = ImGui::GetIO();

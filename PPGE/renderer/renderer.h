@@ -35,6 +35,11 @@ class Renderer
 
     SceneRenderer BeginScene(const Scene &scene, const CameraController& active_camera);
 
+    const SceneRenderGraph &GetActiveSRGH() const
+    {
+        return m_active_srgh;
+    }
+
   private:
     SceneRenderGraph m_active_srgh;
 };

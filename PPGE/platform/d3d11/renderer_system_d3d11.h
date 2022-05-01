@@ -44,8 +44,6 @@ class PPGE_API RendererSystemD3D11 final : public RendererSystem
     std::shared_ptr<DeviceContextD3D11Impl> m_device_context_sp;
     std::shared_ptr<SwapChainD3D11Impl> m_swap_chain_sp;
 
-    D3D11_VIEWPORT m_viewport;
-
     friend ImGuiWidgetD3D11;
 };
 } // namespace PPGE

@@ -9,7 +9,7 @@ void WidgetSystem::StartUp(const WidgetSystemProps &props)
     b_imgui_layer_enabled = props.enable_imgui_debug_layer;
     if (b_imgui_layer_enabled)
     {
-        m_imgui_widget = ImGuiWidget::CreateImGuiLayer();
+        m_imgui_widget = ImGuiWidget::CreateImGuiWidget();
         m_imgui_widget->OnAttach();
     }
 }

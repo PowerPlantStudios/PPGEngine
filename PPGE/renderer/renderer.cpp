@@ -27,7 +27,6 @@ Renderer::Renderer()
 {
     m_active_srgh.CreateRenderPass<ClearBufferPass>();
     m_active_srgh.CreateRenderPass<ForwardRenderPass>();
-    m_active_srgh.CreateRenderPass<PresentPass>();
     m_active_srgh.Compile();
 }
 

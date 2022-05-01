@@ -41,7 +41,7 @@ class RenderGraph
 
     template <typename PPGEDeviceObjectType,
               typename std::enable_if_t<std::is_base_of_v<PPGEDeviceObject, PPGEDeviceObjectType>> * = nullptr>
-    std::shared_ptr<PPGEDeviceObjectType> GetResource(const std::string &resource_name)
+    std::shared_ptr<PPGEDeviceObjectType> GetResource(const std::string &resource_name) const
     {
         auto it = m_resources.find(resource_name);
         if (it == m_resources.end())

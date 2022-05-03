@@ -35,9 +35,9 @@ float4 light_pass_PS(PixelIn pin) : SV_Target
     light.Initialize(pin.PosL);
 
     Fragment frag;
-    frag.Initialize(pin.PosL, pin.Normal, pin.TexCoord0, pin.PosH.z / pin.PosH.w);
+    frag.Initialize(pin.PosL, pin.Normal, pin.Tangent, pin.TexCoord0, pin.PosH.z / pin.PosH.w);
 
     LitColor lit_color = light.ShadeFragment(frag);
-    
+
     return saturate(float4(lit_color.diffuse + lit_color.specular, frag.alpha));
 }

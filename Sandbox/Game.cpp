@@ -84,6 +84,8 @@ class SceneLoader
         const aiScene *scene = aiImportFile(path_to_scene.string().c_str(),
                                             aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded);
 
+        scene = aiApplyPostProcessing(scene, aiProcess_FixInfacingNormals);
+
         if (!scene || !scene->HasMeshes())
         {
             APP_ERROR("Unable to load {0}\n", path_to_scene.string().c_str());
@@ -222,6 +224,10 @@ class TestLayer : public Widget
 
     Renderer m_renderer;
 
+    Entity m_light;
+
+    bool is_normal_map_enabled = false;
+
   public:
     TestLayer() : Widget("TestSubsystem"), m_camera_controller{}
     {
@@ -245,10 +251,10 @@ class TestLayer : public Widget
 
         // Create lights
         {
-            auto light = m_scene.CreateEntity("Point Light");
-            auto &transform = light.GetComponents<TransformComponent>();
+            m_light = m_scene.CreateEntity("Point Light");
+            auto &transform = m_light.GetComponents<TransformComponent>();
             transform.position = Math::Vector3(1.0f, 1.0f, 1.0f);
-            auto &point_light = light.AddComponent<LightComponent>(LightComponent::LightType::POINT);
+            auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::POINT);
             point_light.color = Math::Color(1.0f, 1.0f, 1.0f);
             point_light.intensity = 1.5f;
         }
@@ -277,9 +283,97 @@ class TestLayer : public Widget
 
     virtual void OnImGui()
     {
+        ImGui::Begin("Light Debug");
+
+        auto &transform = m_light.GetComponents<TransformComponent>();
+        DrawVectorController("Position", transform.position, 0.0f, 100.0f);
+
+        if (ImGui::Checkbox("Enable Normal Map", &is_normal_map_enabled))
+        {
+            if (is_normal_map_enabled)
+            {
+                RendererOptions options = m_renderer.GetRendererOptions();
+                options |= RendererOptions::ENABLE_NORMAL_MAP;
+                m_renderer.SetRendererOptions(options);
+            }
+            else
+            {
+                RendererOptions options = m_renderer.GetRendererOptions();
+                options &= ~RendererOptions::ENABLE_NORMAL_MAP;
+                m_renderer.SetRendererOptions(options);
+            }
+        }
+
+        ImGui::End();
     }
 
   private:
+    void DrawVectorController(const std::string &label, Math::Vector3 &vec3, float reset_value, float column_width)
+
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        auto bold_font = io.Fonts->Fonts[0];
+
+        ImGui::PushID(label.c_str());
+
+        ImGui::Columns(2);
+        ImGui::SetColumnWidth(0, column_width);
+        ImGui::Text(label.c_str());
+        ImGui::NextColumn();
+
+        ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 0});
+
+        float line_height = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+        ImVec2 button_size = {line_height + 3.0f, line_height};
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.8f, 0.1f, 0.15f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.9f, 0.2f, 0.2f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.8f, 0.1f, 0.15f, 1.0f});
+        ImGui::PushFont(bold_font);
+        if (ImGui::Button("X", button_size))
+            vec3.x = reset_value;
+        ImGui::PopFont();
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##X", &vec3.x, 0.1f, 0.0f, 0.0f, "%.2f");
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.2f, 0.7f, 0.2f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.3f, 0.8f, 0.3f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.2f, 0.7f, 0.2f, 1.0f});
+        ImGui::PushFont(bold_font);
+        if (ImGui::Button("Y", button_size))
+            vec3.y = reset_value;
+        ImGui::PopFont();
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##Y", &vec3.y, 0.1f, 0.0f, 0.0f, "%.2f");
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.1f, 0.25f, 0.8f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.2f, 0.35f, 0.9f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.1f, 0.25f, 0.8f, 1.0f});
+        ImGui::PushFont(bold_font);
+        if (ImGui::Button("Z", button_size))
+            vec3.z = reset_value;
+        ImGui::PopFont();
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##Z", &vec3.z, 0.1f, 0.0f, 0.0f, "%.2f");
+        ImGui::PopItemWidth();
+
+        ImGui::PopStyleVar();
+
+        ImGui::Columns(1);
+
+        ImGui::PopID();
+    }
 };
 
 class Game : public Application

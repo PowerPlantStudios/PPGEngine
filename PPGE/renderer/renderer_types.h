@@ -57,6 +57,13 @@ struct StandardVertex
     float u1, v1, u2, v2, u3, v3;
 };
 
+enum class RendererOptions : uint32_t
+{
+    NONE = 0,
+    ENABLE_NORMAL_MAP = 1 << 0
+};
+PPGE_ENUM_OPERATORS(RendererOptions);
+
 enum class LightOptions : uint32_t
 {
     NONE = 0,
@@ -75,6 +82,12 @@ enum class MaterialOptions : uint32_t
     NORMAL_MAP_BOUND = 1 << 2,
 };
 PPGE_ENUM_OPERATORS(MaterialOptions);
+
+struct alignas(16) CbRenderer
+{
+    RendererOptions renderer_options;
+};
+constexpr const char *CbRendererOptionsName = "RendererOptions";
 
 struct alignas(16) CbPerFrame
 {

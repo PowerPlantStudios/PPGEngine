@@ -16,7 +16,10 @@ PixelIn main_VS(VertexIn vin)
     vout.PosH = mul(float4(vout.PosL, 1.0), g_viewProj);
 
     // World normal
-    vout.Normal = normalize(mul(float4(vin.Normal, 0.0f), g_worldInvTran));
+    vout.Normal = normalize(mul(float4(vin.Normal, 0.0f), g_worldInvTran).xyz);
+
+    // World tangent
+    vout.Tangent = normalize(mul(float4(vin.Tangent, 0.0f), g_world).xyz);
 
     // TexCoord
     vout.TexCoord0 = vin.TexCoord0;

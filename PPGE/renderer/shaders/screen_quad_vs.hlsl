@@ -10,7 +10,7 @@ void main_VS(in uint VertexID     : SV_VERTEXID,
     // VertexID will be 0, 1 and 3 only.
 
     // TexCoord0 will be (0, 0), (0, 2) and (2, 0)
-	TexCoord0 = float2(uint2(VertexID, VertexID << 1) & 2);
+    TexCoord0 = float2(uint2(VertexID, VertexID << 1) & 2);
     // PosH will be (-1, 1), (-1, -3), (3, 1)
     PosH = float4(lerp(float2(-1, 1), float2(1, -1), TexCoord0), 0, 1);
 }

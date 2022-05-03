@@ -102,10 +102,14 @@ ForwardRenderPass::ForwardRenderPass()
         ps_cd.desc.rasterizer_state_desc.cull_mode = PPGE::CullModeType::CULL_MODE_NONE;
 
         PPGE::ShaderResourceCreateDesc SRVs[] = {
+            {"cb_Renderer",
+             {PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"cb_PerFrame",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"cb_PerDraw",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
+            {"cb_Renderer",
+             {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"cb_PerFrame",
              {PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL, PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"cb_PerDraw",
@@ -164,6 +168,10 @@ ForwardRenderPass::ForwardRenderPass()
 
 void ForwardRenderPass::Load(RenderGraph &render_graph)
 {
+    auto cb_renderer = render_graph.GetResource<PPGEBuffer>(CbRendererOptionsName);
+    m_SRB->GetVariableByName("cb_Renderer", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(cb_renderer);
+    m_SRB->GetVariableByName("cb_Renderer", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(std::move(cb_renderer));
+
     auto cb_per_frame = render_graph.GetResource<PPGEBuffer>(CbPerFrameResourceName);
     m_SRB->GetVariableByName("cb_PerFrame", PPGE::ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(cb_per_frame);
     m_SRB->GetVariableByName("cb_PerFrame", PPGE::ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(std::move(cb_per_frame));

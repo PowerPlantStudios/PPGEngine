@@ -49,6 +49,13 @@ class RenderGraph
         return std::static_pointer_cast<PPGEDeviceObjectType>(it->second);
     }
 
+    void PushResource(const std::string &resource_name, std::shared_ptr<PPGEDeviceObject> resource_sp)
+    {
+        auto it = m_resources.find(resource_name);
+        if (it == m_resources.end())
+            m_resources.emplace(resource_name, std::move(resource_sp));
+    }
+
   private:
     void ParsePassResources(const std::vector<RenderPassResource> &resources);
 

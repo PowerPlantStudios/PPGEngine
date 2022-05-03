@@ -7,6 +7,7 @@
 #include "common_buffers.hlsl"
 #include "common_samplers.hlsl"
 #include "common_textures.hlsl"
+#include "renderer_helpers.hlsl"
 
 #define IS_ALBEDO_MAP_BOUND    uint(1U << 0)
 #define IS_SPECULAR_MAP_BOUND  uint(1U << 1)
@@ -28,7 +29,21 @@ struct Fragment
     float  to_eye_distance;
     float3 to_eye;
 
-    void Initialize(float3 in_position, float3 in_normal, float2 in_uv, float in_depth)
+    float3 SampleNormalMap(float3 in_normal, float3 in_tangent, float2 in_uv)
+    {
+        float3 normal_map_value = g_texture_material_specular.Sample(g_sampler_anisotropic_wrap, in_uv).rgb;
+        normal_map_value = 2.0f * normal_map_value - 1.0f;
+
+        float3 N = normalize(in_normal);
+        float3 T = normalize(in_tangent - dot(in_tangent, N) * N);
+        float3 B = cross(N, T);
+
+        float3x3 TBN = float3x3(T, B, N);
+
+        return mul(normal_map_value, TBN);
+    }
+
+    void Initialize(float3 in_position, float3 in_normal, float3 in_tangent, float2 in_uv, float in_depth)
     {
         [flatten]
         if (material_is_albedo_map_bound())
@@ -55,8 +70,8 @@ struct Fragment
         }
 
         [flatten]
-        if (material_is_normal_map_bound())
-            normal = normalize(g_texture_material_normal.Sample(g_sampler_anisotropic_wrap, in_uv).xyz);
+        if (renderer_is_normal_map_enabled() && material_is_normal_map_bound())
+            normal = SampleNormalMap(in_normal, in_tangent, in_uv);
         else
             normal = normalize(in_normal);
 

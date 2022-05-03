@@ -4,7 +4,12 @@
 #ifndef PPGE_COMMON_BUFFERS
 #define PPGE_COMMON_BUFFERS
 
-cbuffer cb_PerFrame  : register(b0)
+cbuffer cb_Renderer : register(b0)
+{
+    uint g_renderer_options : packoffset(c0);
+} 
+
+cbuffer cb_PerFrame : register(b1)
 {
     float4x4 g_view            : packoffset(c0);
     float4x4 g_viewInv         : packoffset(c4);
@@ -17,9 +22,9 @@ cbuffer cb_PerFrame  : register(b0)
     float3   g_cameraDirection : packoffset(c25);
 };
 
-cbuffer cb_PerDraw : register(b1)
+cbuffer cb_PerDraw : register(b2)
 {
-	float4x4 g_world            : packoffset(c0);
+    float4x4 g_world            : packoffset(c0);
     float4x4 g_worldInvTran     : packoffset(c4);
 
     float4   g_albedo_color     : packoffset(c8);
@@ -29,7 +34,7 @@ cbuffer cb_PerDraw : register(b1)
     uint     g_entity_id        : packoffset(c10.y);
 };
 
-cbuffer cb_Light : register(b2)
+cbuffer cb_Light : register(b3)
 {
     float4x4 g_light_viewProj          : packoffset(c0);
     float3   g_light_position          : packoffset(c4);

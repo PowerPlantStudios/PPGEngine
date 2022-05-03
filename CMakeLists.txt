@@ -12,5 +12,6 @@ set(PPGE_EDITOR_DIR ${PROJECT_SOURCE_DIR}/Editor)
 set(GAME_DIR ${PROJECT_SOURCE_DIR}/Sandbox)
 
 add_subdirectory(PPGE)
+add_subdirectory(Editor)
 add_subdirectory(Sandbox)
 add_subdirectory(Thirdparty)

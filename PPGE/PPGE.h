@@ -35,4 +35,7 @@
 #include "system/renderer_system.h"
 
 // Entry point for client side application
+#if defined(PPGE_APP_ENTRY_POINT)
 #include "core/main.h"
+#undef PPGE_APP_ENTRY_POINT
+#endif

@@ -10,14 +10,6 @@ namespace PPGE
 {
 namespace RenderPassResourceDescs
 {
-inline constexpr const char* Shadow_Map_Resource = "ShadowMap";
-inline constexpr const RenderPassTextureResourceDesc Shadow_Map_Resource_Desc{
-    TextureDesc{.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D,
-                .width = 4096,
-                .height = 4096,
-                .format_type = TextureFormatType::TEXTURE_FORMAT_R24G8_TYPELESS,
-                .bind_flags = (BindFlags::BIND_SHADER_RESOURCE | BindFlags::BIND_DEPTH_STENCIL)}};
-
 inline constexpr const char* Color_Buffer_Resource = "ColorBuffer";
 inline constexpr const RenderPassTextureResourceDesc Color_Buffer_Resource_Desc{
     TextureDesc{.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D,

@@ -212,7 +212,7 @@ std::shared_ptr<PPGETextureView> TextureD3D11Impl::GetDefaultView()
     /* TODO: Fill desc */
 
     return std::make_shared<TextureViewD3D11Impl>(m_device_sp->shared_from_this(), this->shared_from_this(),
-                                                             m_default_view, desc);
+                                                  m_default_view, desc);
 }
 
 void TextureD3D11Impl::CreateTexture1D(const TextureCreateDesc &create_desc)
@@ -248,7 +248,10 @@ void TextureD3D11Impl::CreateTexture2D(const TextureCreateDesc &create_desc)
     desc.Usage = PPGEUsageTypeToD3D11UsageType(m_desc.usage);
     desc.BindFlags = PPGEBindFlagsToD3D11BindFlags(m_desc.bind_flags);
     desc.CPUAccessFlags = PPGECPUAccessFlagsToD3D11CPUAccessFlags(m_desc.cpu_access_flags);
-    desc.MiscFlags = 0;
+    desc.MiscFlags = (m_desc.resource_dimension == ResourceDimensionType::RESOURCE_DIMENSION_CUBE ||
+                      m_desc.resource_dimension == ResourceDimensionType::RESOURCE_DIMENSION_CUBE_ARRAY)
+                         ? D3D11_RESOURCE_MISC_TEXTURECUBE
+                         : 0;
 
     std::vector<D3D11_SUBRESOURCE_DATA> init_data = CreateInitData(create_desc);
 

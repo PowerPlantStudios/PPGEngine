@@ -15,13 +15,13 @@ struct TextureViewDesc : public DeviceObjectDesc
     ResourceDimensionType resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_UNDEFINED;
     TextureFormatType format = TextureFormatType::TEXTURE_FORMAT_UNKNOWN;
     uint32_t most_detailed_mip = 0;
-    uint32_t mip_levels_num = 0;
+    uint32_t mip_levels_num = 1;
     union {
         uint32_t first_array_slice = 0;
         uint32_t first_depth_slice;
     };
     union {
-        uint32_t array_slices_num = 0;
+        uint32_t array_slices_num = 1;
         uint32_t depth_slices_num;
     };
 };

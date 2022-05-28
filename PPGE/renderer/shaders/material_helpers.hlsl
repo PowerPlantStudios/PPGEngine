@@ -24,6 +24,7 @@ struct Fragment
     float  shininess;
     float3 specular;
     float3 normal;
+    float3 vertex_normal;
     float  depth;
     float3 position;
     float  to_eye_distance;
@@ -31,7 +32,7 @@ struct Fragment
 
     float3 SampleNormalMap(float3 in_normal, float3 in_tangent, float2 in_uv)
     {
-        float3 normal_map_value = g_texture_material_specular.Sample(g_sampler_anisotropic_wrap, in_uv).rgb;
+        float3 normal_map_value = g_texture_material_normal.Sample(g_sampler_anisotropic, in_uv).rgb;
         normal_map_value = 2.0f * normal_map_value - 1.0f;
 
         float3 N = normalize(in_normal);
@@ -40,7 +41,7 @@ struct Fragment
 
         float3x3 TBN = float3x3(T, B, N);
 
-        return mul(normal_map_value, TBN);
+        return normalize(mul(normal_map_value, TBN));
     }
 
     void Initialize(float3 in_position, float3 in_normal, float3 in_tangent, float2 in_uv, float in_depth)
@@ -48,8 +49,8 @@ struct Fragment
         [flatten]
         if (material_is_albedo_map_bound())
         {
-            albedo = g_texture_material_albedo.Sample(g_sampler_anisotropic_wrap, in_uv).rgb;
-            alpha  = g_texture_material_albedo.Sample(g_sampler_anisotropic_wrap, in_uv).a;
+            albedo = g_texture_material_albedo.Sample(g_sampler_anisotropic, in_uv).rgb;
+            alpha  = g_texture_material_albedo.Sample(g_sampler_anisotropic, in_uv).a;
         }
         else
         {
@@ -62,7 +63,7 @@ struct Fragment
         [flatten]
         if (material_is_specular_map_bound())
         {
-            specular = g_texture_material_specular.Sample(g_sampler_anisotropic_wrap, in_uv).rgb;
+            specular = g_texture_material_specular.Sample(g_sampler_anisotropic, in_uv).rgb;
         }
         else
         {
@@ -76,6 +77,7 @@ struct Fragment
             normal = normalize(in_normal);
 
         depth           = in_depth;
+        vertex_normal   = normalize(in_normal);
         position        = in_position;
         to_eye          = g_cameraPosition - in_position;
         to_eye_distance = length(to_eye);

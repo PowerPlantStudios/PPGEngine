@@ -7,6 +7,7 @@
 #include "common_textures.hlsl"
 #include "lighting_helpers.hlsl"
 #include "material_helpers.hlsl"
+#include "shadow_helpers.hlsl"
 
 float4 ambient_pass_PS(PixelIn pin) : SV_Target
 {
@@ -16,8 +17,8 @@ float4 ambient_pass_PS(PixelIn pin) : SV_Target
     [flatten]
     if (material_is_albedo_map_bound())
     {
-        albedo = g_texture_material_albedo.Sample(g_sampler_anisotropic_wrap, pin.TexCoord0).rgb;
-        alpha  = g_texture_material_albedo.Sample(g_sampler_anisotropic_wrap, pin.TexCoord0).a;
+        albedo = g_texture_material_albedo.Sample(g_sampler_anisotropic, pin.TexCoord0).rgb;
+        alpha  = g_texture_material_albedo.Sample(g_sampler_anisotropic, pin.TexCoord0).a;
     }
     else
     {
@@ -25,19 +26,21 @@ float4 ambient_pass_PS(PixelIn pin) : SV_Target
         alpha  = g_albedo_color.a;
     }
 
-    return float4(0.05f * albedo * float3(1.0f, 1.0f, 1.0f), alpha);
+    return float4(0.15f * albedo * float3(1.0f, 1.0f, 1.0f), alpha);
 }
 
 
 float4 light_pass_PS(PixelIn pin) : SV_Target
 {
-    Light light;
-    light.Initialize(pin.PosL);
-
     Fragment frag;
     frag.Initialize(pin.PosL, pin.Normal, pin.Tangent, pin.TexCoord0, pin.PosH.z / pin.PosH.w);
 
+    Light light;
+    light.Initialize(frag.position, frag.normal);
+
+    float shadow = GetShadowFactor(light, frag);
+
     LitColor lit_color = light.ShadeFragment(frag);
 
-    return saturate(float4(lit_color.diffuse + lit_color.specular, frag.alpha));
+    return saturate(float4(shadow * (lit_color.diffuse + lit_color.specular), frag.alpha));
 }

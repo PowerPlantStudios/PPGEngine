@@ -11,11 +11,19 @@ namespace PPGE
 class ClearBufferPass : public RenderPass
 {
   public:
-    const std::vector<RenderPassResource> &GetPassInputs() const override final;
-
-    const std::vector<RenderPassResource> &GetPassOutputs() const override final;
-
     ClearBufferPass();
+    
+    std::vector<RenderPassResource> GetPassInputs() const override final
+    {
+        return {{RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc},
+                {RenderPassResourceDescs::Depth_Buffer_Resource, RenderPassResourceDescs::Depth_Buffer_Resource_Desc}};
+    }
+
+    std::vector<RenderPassResource> GetPassOutputs() const override final
+    {
+        return {{RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc},
+                {RenderPassResourceDescs::Depth_Buffer_Resource, RenderPassResourceDescs::Depth_Buffer_Resource_Desc}};
+    }
 
     void Load(RenderGraph &render_graph) override final;
 
@@ -24,18 +32,9 @@ class ClearBufferPass : public RenderPass
     void Execute() override final;
 
   private:
-    const std::vector<RenderPassResource> m_pass_inputs{
-        {RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc},
-        {RenderPassResourceDescs::Depth_Buffer_Resource, RenderPassResourceDescs::Depth_Buffer_Resource_Desc}};
-
-    const std::vector<RenderPassResource> m_pass_outputs{
-        {RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc},
-        {RenderPassResourceDescs::Depth_Buffer_Resource, RenderPassResourceDescs::Depth_Buffer_Resource_Desc}};
-
     /* Resources shared between other render passes within render graph */
     std::shared_ptr<PPGETextureView> m_color_buffer_rtv;
 
     std::shared_ptr<PPGETextureView> m_depth_buffer_dsv;
-
 };
 } // namespace PPGE

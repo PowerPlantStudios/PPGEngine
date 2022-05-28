@@ -6,13 +6,13 @@
 
 namespace PPGE
 {
-class ShadowPass : public RenderPass
+class PPGEBuffer;
+class PPGEPipelineState;
+class PPGEShaderResourceBinding;
+
+class ShadowPass : public SceneRenderPass
 {
   public:
-    const std::vector<RenderPassResource> &GetPassInputs() const override final;
-
-    const std::vector<RenderPassResource> &GetPassOutputs() const override final;
-
     ShadowPass();
 
     void Load(RenderGraph &render_graph) override final;
@@ -20,5 +20,15 @@ class ShadowPass : public RenderPass
     void Unload() override final;
 
     void Execute() override final;
+
+  private:
+    /* Resources created and used within the pass */
+    std::shared_ptr<PPGEBuffer> m_cb_per_draw;
+
+    std::shared_ptr<PPGEBuffer> m_cb_per_frame;
+
+    std::shared_ptr<PPGEPipelineState> m_PSO;
+
+    std::shared_ptr<PPGEShaderResourceBinding> m_SRB;
 };
 } // namespace PPGE

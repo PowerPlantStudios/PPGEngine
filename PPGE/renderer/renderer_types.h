@@ -86,6 +86,9 @@ PPGE_ENUM_OPERATORS(MaterialOptions);
 struct alignas(16) CbRenderer
 {
     RendererOptions renderer_options;
+    uint32_t pad[3];
+    Math::Vector2 render_resolution;
+    float shadowmap_resolution;
 };
 constexpr const char *CbRendererOptionsName = "RendererOptions";
 
@@ -118,7 +121,7 @@ constexpr const char *CbPerDrawResourceName = "PerDrawConstantBuffer";
 
 struct alignas(16) CbLight
 {
-    Math::Matrix view_proj;
+    Math::Matrix view_proj[6];
     Math::Vector3 position;
     uint32_t pad1;
     Math::Vector3 direction;

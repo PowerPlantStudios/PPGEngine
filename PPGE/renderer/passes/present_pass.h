@@ -13,11 +13,12 @@ namespace PPGE
 class PresentPass : public RenderPass
 {
   public:
-    const std::vector<RenderPassResource> &GetPassInputs() const override final;
-
-    const std::vector<RenderPassResource> &GetPassOutputs() const override final;
-
     PresentPass();
+
+    std::vector<RenderPassResource> GetPassInputs() const override final
+    {
+        return {{RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc}};
+    }
 
     void Load(RenderGraph &render_graph) override final;
 
@@ -26,11 +27,6 @@ class PresentPass : public RenderPass
     void Execute() override final;
 
   private:
-    const std::vector<RenderPassResource> m_pass_inputs{
-        {RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc}};
-
-    const std::vector<RenderPassResource> m_pass_outputs;
-
     /* Resources created and used within the pass */
     std::shared_ptr<PPGESampler> m_sampler_state;
 

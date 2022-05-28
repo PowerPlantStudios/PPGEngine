@@ -237,6 +237,10 @@ class TestLayer : public Widget
 
     void OnAttach() override
     {
+        RendererOptions options = m_renderer.GetRendererOptions();
+        options |= RendererOptions::ENABLE_NORMAL_MAP;
+        m_renderer.SetRendererOptions(options);
+
         // Create camera
         auto camera_entity = m_scene.CreateEntity("Camera");
         auto &camera_component = camera_entity.AddComponent<CameraComponent>();
@@ -251,12 +255,13 @@ class TestLayer : public Widget
 
         // Create lights
         {
-            m_light = m_scene.CreateEntity("Point Light");
+            m_light = m_scene.CreateEntity("Directional Light");
             auto &transform = m_light.GetComponents<TransformComponent>();
-            transform.position = Math::Vector3(1.0f, 1.0f, 1.0f);
+            transform.position = Math::Vector3(1.5f, 2.2f, 1.5f);
+            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(1.5707963f / 2, -1.5707963f / 2, 0.0f);
             auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::POINT);
             point_light.color = Math::Color(1.0f, 1.0f, 1.0f);
-            point_light.intensity = 1.5f;
+            point_light.intensity = 1.0f;
         }
 
         resource_mgr.WalkRoot("../../Sandbox/assets");
@@ -264,6 +269,61 @@ class TestLayer : public Widget
         {
             auto lazy_model = std::static_pointer_cast<LazyResource>(model);
             SceneLoader::LoadScene(lazy_model->data, m_scene);
+        }
+
+        {
+            auto entity = m_scene.CreateEntity("Ground");
+            {
+                std::vector<StandardVertex> vertices{{.px = 1.0f,
+                                                      .py = 0.0f,
+                                                      .pz = 1.0f,
+                                                      .nx = 0.0f,
+                                                      .ny = 1.0f,
+                                                      .nz = 0.0f,
+                                                      .color = 0x1199eeff,
+                                                      .u1 = 0.0f,
+                                                      .v1 = 0.0f},
+                                                     {.px = 1.0f,
+                                                      .py = 0.0f,
+                                                      .pz = -1.0f,
+                                                      .nx = 0.0f,
+                                                      .ny = 1.0f,
+                                                      .nz = 0.0f,
+                                                      .color = 0x11ee99ff,
+                                                      .u1 = 1.0f,
+                                                      .v1 = 0.0f},
+                                                     {.px = -1.0f,
+                                                      .py = 0.0f,
+                                                      .pz = -1.0f,
+                                                      .nx = 0.0f,
+                                                      .ny = 1.0f,
+                                                      .nz = 0.0f,
+                                                      .color = 0x1199eeff,
+                                                      .u1 = 1.0f,
+                                                      .v1 = 1.0f},
+                                                     {.px = -1.0f,
+                                                      .py = 0.0f,
+                                                      .pz = 1.0f,
+                                                      .nx = 0.0f,
+                                                      .ny = 1.0f,
+                                                      .nz = 0.0f,
+                                                      .color = 0xee1199ff,
+                                                      .u1 = 0.0f,
+                                                      .v1 = 1.0f}};
+                std::vector<unsigned int> indices{0, 3, 2, 2, 1, 0};
+                CreateMeshFilter(entity, vertices, indices);
+            }
+            if (auto resource = resource_mgr.GetCachedResource("textures/no_texture.png"))
+            {
+                auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
+                auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
+                mesh_renderer.albedo_map = LoadTexture(lazy_resource->data);
+                mesh_renderer.specular_color = Math::Color(.85f, .85f, .85f, 10.0f);
+            }
+
+            auto &transform = entity.GetComponents<TransformComponent>();
+            transform.position = Math::Vector3(0.0f, -0.8f, 0.0f);
+            transform.scale = Math::Vector3(5.0f, 1.0f, 5.0f);
         }
     }
 
@@ -283,28 +343,28 @@ class TestLayer : public Widget
 
     virtual void OnImGui()
     {
-        ImGui::Begin("Light Debug");
+        // ImGui::Begin("Light Debug");
 
-        auto &transform = m_light.GetComponents<TransformComponent>();
-        DrawVectorController("Position", transform.position, 0.0f, 100.0f);
+        // auto &transform = m_light.GetComponents<TransformComponent>();
+        // DrawVectorController("Position", transform.position, 0.0f, 100.0f);
 
-        if (ImGui::Checkbox("Enable Normal Map", &is_normal_map_enabled))
-        {
-            if (is_normal_map_enabled)
-            {
-                RendererOptions options = m_renderer.GetRendererOptions();
-                options |= RendererOptions::ENABLE_NORMAL_MAP;
-                m_renderer.SetRendererOptions(options);
-            }
-            else
-            {
-                RendererOptions options = m_renderer.GetRendererOptions();
-                options &= ~RendererOptions::ENABLE_NORMAL_MAP;
-                m_renderer.SetRendererOptions(options);
-            }
-        }
+        // if (ImGui::Checkbox("Enable Normal Map", &is_normal_map_enabled))
+        //{
+        //     if (is_normal_map_enabled)
+        //     {
+        //         RendererOptions options = m_renderer.GetRendererOptions();
+        //         options |= RendererOptions::ENABLE_NORMAL_MAP;
+        //         m_renderer.SetRendererOptions(options);
+        //     }
+        //     else
+        //     {
+        //         RendererOptions options = m_renderer.GetRendererOptions();
+        //         options &= ~RendererOptions::ENABLE_NORMAL_MAP;
+        //         m_renderer.SetRendererOptions(options);
+        //     }
+        // }
 
-        ImGui::End();
+        // ImGui::End();
     }
 
   private:

@@ -4,16 +4,17 @@
 #include "color_helpers.hlsl"
 #include "common_buffers.hlsl"
 #include "common_layouts.hlsl"
+#include "transformation_helpers.hlsl"
 
 PixelIn main_VS(VertexIn vin)
 {
 	PixelIn vout;
 
     // World position
-    vout.PosL = mul(float4(vin.PosL, 1.0), g_world).xyz;
-
-    // Homogenous device position
-    vout.PosH = mul(float4(vout.PosL, 1.0), g_viewProj);
+    vout.PosL = ModelToWorld(vin.PosL);
+ 
+     // Homogenous device position
+    vout.PosH = mul(float4(vout.PosL, 1.0f), g_viewProj);
 
     // World normal
     vout.Normal = normalize(mul(float4(vin.Normal, 0.0f), g_worldInvTran).xyz);

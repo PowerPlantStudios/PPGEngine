@@ -5,16 +5,6 @@
 
 namespace PPGE
 {
-const std::vector<RenderPassResource> &ClearBufferPass::GetPassInputs() const
-{
-    return m_pass_inputs;
-}
-
-const std::vector<RenderPassResource> &ClearBufferPass::GetPassOutputs() const
-{
-    return m_pass_outputs;
-}
-
 ClearBufferPass::ClearBufferPass()
 {
 }

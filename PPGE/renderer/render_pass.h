@@ -52,7 +52,7 @@ struct RenderPassBufferResourceDesc final : public RenderPassResourceDesc
 
 struct RenderPassResource
 {
-    const char* name;
+    const char *name;
     const RenderPassResourceDesc &resource_desc;
 };
 
@@ -65,9 +65,15 @@ class RenderPass
 
     virtual void Execute() = 0;
 
-    virtual const std::vector<RenderPassResource> &GetPassInputs() const = 0;
+    virtual std::vector<RenderPassResource> GetPassInputs() const
+    {
+        return {};
+    }
 
-    virtual const std::vector<RenderPassResource> &GetPassOutputs() const = 0;
+    virtual std::vector<RenderPassResource> GetPassOutputs() const
+    {
+        return {};
+    }
 };
 
 struct SceneRenderPassData

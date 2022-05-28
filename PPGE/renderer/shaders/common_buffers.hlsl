@@ -6,7 +6,9 @@
 
 cbuffer cb_Renderer : register(b0)
 {
-    uint g_renderer_options : packoffset(c0);
+    uint   g_renderer_options              : packoffset(c0);
+    float2 g_renderer_resolution           : packoffset(c1);
+    float  g_renderer_shadowmap_resolution : packoffset(c1.z);
 } 
 
 cbuffer cb_PerFrame : register(b1)
@@ -36,15 +38,15 @@ cbuffer cb_PerDraw : register(b2)
 
 cbuffer cb_Light : register(b3)
 {
-    float4x4 g_light_viewProj          : packoffset(c0);
-    float3   g_light_position          : packoffset(c4);
-    float3   g_light_direction         : packoffset(c5);
-    uint     g_light_options           : packoffset(c6);
-    float3   g_light_color             : packoffset(c7);    // Valid for all light types
-    float    g_light_intensity         : packoffset(c7.w);  // Valid for all light types
-    float3   g_light_dist_attenuation  : packoffset(c8);    // Only valid for point and spot light
-    float    g_light_range             : packoffset(c8.w);  // Only valid for point and spot light
-    float3   g_light_angle_attenuation : packoffset(c9);    // Only valid for spot light (theta_max, theta_inner, decay_rate)
+    float4x4 g_light_viewProj[6]       : packoffset(c0);
+    float3   g_light_position          : packoffset(c24);
+    float3   g_light_direction         : packoffset(c25);
+    uint     g_light_options           : packoffset(c26);
+    float3   g_light_color             : packoffset(c27);    // Valid for all light types (r, g, b)
+    float    g_light_intensity         : packoffset(c27.w);  // Valid for all light types
+    float3   g_light_dist_attenuation  : packoffset(c28);    // Only valid for point and spot light (a0, a1, a2)
+    float    g_light_range             : packoffset(c28.w);  // Only valid for point and spot light
+    float3   g_light_angle_attenuation : packoffset(c29);    // Only valid for spot light (theta_max, theta_inner, decay_rate)
 };
 
 #endif // PPGE_COMMON_BUFFERS

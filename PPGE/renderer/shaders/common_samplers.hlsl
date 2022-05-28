@@ -4,6 +4,7 @@
 #ifndef PPGE_COMMON_SAMPLERS
 #define PPGE_COMMON_SAMPLERS
 
-SamplerState g_sampler_anisotropic_wrap : register(s0);
+SamplerComparisonState g_sampler_comparison : register(s0);
+SamplerState g_sampler_anisotropic : register(s1);
 
 #endif // PPGE_COMMON_SAMPLERS

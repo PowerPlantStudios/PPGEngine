@@ -15,4 +15,9 @@ float4 Decode32bitRGBA(uint color)
     return float4(r, g, b, a);
 }
 
+inline bool IsSaturated(float val)  { return val == saturate(val); }
+inline bool IsSaturated(float2 val) { return IsSaturated(val.x)   && IsSaturated(val.y); } 
+inline bool IsSaturated(float3 val) { return IsSaturated(val.xy)  && IsSaturated(val.z); } 
+inline bool IsSaturated(float4 val) { return IsSaturated(val.xyz) && IsSaturated(val.w); } 
+
 #endif // PPGE_COLOR_HELPERS

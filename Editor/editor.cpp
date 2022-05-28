@@ -528,9 +528,9 @@ void EditorWidget::ShowPropertiesPanel()
             DrawVectorController("Scale", component.scale, 1.0f);
         });
 
-        DrawComponent<LightComponent>("Light", m_selected_entity, [](auto &component) {
+        DrawComponent<LightComponent>("Light", m_selected_entity, [](LightComponent &component) {
             const char *light_types[] = {"Directional", "Point", "Spot"};
-            const char *current_light_type = light_types[(uint8_t)component.type];
+            const char *current_light_type = light_types[(uint8_t)component.GetLightType()];
             if (ImGui::BeginCombo("Light Type", current_light_type))
             {
                 for (int i = 0; i < 3; i++)
@@ -539,7 +539,7 @@ void EditorWidget::ShowPropertiesPanel()
                     if (ImGui::Selectable(light_types[i], is_selected))
                     {
                         current_light_type = light_types[i];
-                        component.type = (LightComponent::LightType)i;
+                        component.SetLightType((LightComponent::LightType)i);
                     }
 
                     if (is_selected)
@@ -557,7 +557,7 @@ void EditorWidget::ShowPropertiesPanel()
             if (ImGui::DragFloat("Intensity", &light_intensity))
                 component.intensity = light_intensity;
 
-            if (component.type != LightComponent::LightType::DIRECTIONAL)
+            if (component.GetLightType() != LightComponent::LightType::DIRECTIONAL)
             {
                 float dist_attenuation_a0 = component.dist_attenuation_a0;
                 if (ImGui::DragFloat("Att (A0)", &dist_attenuation_a0))
@@ -576,7 +576,7 @@ void EditorWidget::ShowPropertiesPanel()
                     component.range = light_range;
             }
 
-            if (component.type == LightComponent::LightType::SPOT)
+            if (component.GetLightType() == LightComponent::LightType::SPOT)
             {
                 float spot_cutoff_angle = component.spot_cutoff_angle;
                 if (ImGui::DragFloat("Cutoff Angle", &spot_cutoff_angle))

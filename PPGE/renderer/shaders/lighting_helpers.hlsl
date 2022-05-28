@@ -13,10 +13,11 @@
 #define LIGHT_IS_SPOT          uint(1U << 2)
 #define LIGHT_CAN_CAST_SHADOW  uint(1U << 3)
 
-bool light_is_directional()  { return g_light_options & LIGHT_IS_DIRECTIONAL;  }
-bool light_is_point()        { return g_light_options & LIGHT_IS_POINT;        }
-bool light_is_spot()         { return g_light_options & LIGHT_IS_SPOT;         }
-bool light_can_cast_shadow() { return g_light_options & LIGHT_CAN_CAST_SHADOW; }
+bool     light_is_directional()       { return g_light_options & LIGHT_IS_DIRECTIONAL;  }
+bool     light_is_point()             { return g_light_options & LIGHT_IS_POINT;        }
+bool     light_is_spot()              { return g_light_options & LIGHT_IS_SPOT;         }
+bool     light_can_cast_shadow()      { return g_light_options & LIGHT_CAN_CAST_SHADOW; }
+float4x4 light_get_viewProj(uint idx) { return g_light_viewProj[idx];                   }
 
 struct LitColor
 {
@@ -30,10 +31,11 @@ struct Light
     float3 light_to_fragment;
     float  light_to_fragment_distance;
     float  attenuation;
+    float  lambertian_reflectance;  // n dot l
 
     bool IsInRange() { return light_to_fragment_distance < g_light_range; }
 
-    void Initialize(float3 frag_pos)
+    void Initialize(float3 frag_pos, float3 frag_normal)
     {
         color = g_light_color * g_light_intensity;
 
@@ -49,6 +51,8 @@ struct Light
             light_to_fragment_distance = PLUS_INF;
             light_to_fragment = normalize(g_light_direction);
         }
+
+        lambertian_reflectance = saturate(dot(frag_normal, -light_to_fragment));
 
         [flatten]
         // No attenuation for directional light
@@ -100,13 +104,11 @@ struct Light
 
         if (!light_is_directional() && !IsInRange())
             return lit_color;
-
-        float n_dot_l = dot(frag.normal, -light_to_fragment);
         
         [flatten]
-        if (n_dot_l > 0.0f)
+        if (lambertian_reflectance > 0.0f)
         {
-            lit_color.diffuse = n_dot_l * (frag.albedo * color) * attenuation;
+            lit_color.diffuse = lambertian_reflectance * (frag.albedo * color) * attenuation;
 
             float3 h = normalize(-light_to_fragment + frag.to_eye);
             float n_dot_h = dot(frag.normal, h);

@@ -50,9 +50,15 @@ class Renderer
     }
 
   private:
+    void SubmitRendererOptions();
+
     SceneRenderGraph m_active_srgh;
 
     RendererOptions m_options = RendererOptions::NONE;
+
+    Math::Vector2 m_resolution = Math::Vector2(1280.0f, 720.0f);
+
+    float m_shadowmap_resolution = 2048.0f;
 
     std::shared_ptr<PPGEBuffer> m_cb_renderer_options;
 };

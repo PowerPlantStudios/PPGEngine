@@ -7,16 +7,6 @@
 
 namespace PPGE
 {
-const std::vector<RenderPassResource> &PresentPass::GetPassInputs() const
-{
-    return m_pass_inputs;
-}
-
-const std::vector<RenderPassResource> &PresentPass::GetPassOutputs() const
-{
-    return m_pass_outputs;
-}
-
 PresentPass::PresentPass()
 {
     // Create Sampler
@@ -103,7 +93,16 @@ void PresentPass::Execute()
         std::shared_ptr<PPGETextureView> DSV = RendererSystem::Get().GetSwapChain()->GetDepthBufferDSV();
         RendererSystem::Get().GetImmediateContext()->ClearRenderTarget(RTVs[0], 0.0f, 0.0f, 0.0f, 0.0f);
         RendererSystem::Get().GetImmediateContext()->ClearDepthStencil(DSV, 1.0f, 0);
+        auto text_desc = RTVs[0]->GetTexture()->GetDesc();
+        Viewport viewport{.top_left_x = 0.0f,
+                          .top_left_y = 0.0f,
+                          .width = static_cast<float>(text_desc.width),
+                          .height = static_cast<float>(text_desc.height),
+                          .min_depth = 0.0f,
+                          .max_depth = 1.0f};
+        RendererSystem::Get().GetImmediateContext()->SetViewports(1, &viewport);
         RendererSystem::Get().GetImmediateContext()->SetRenderTargets(1, RTVs, std::move(DSV));
+
     }
 
     RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB);

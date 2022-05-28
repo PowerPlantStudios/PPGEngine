@@ -55,14 +55,19 @@ void DeviceContextD3D11Impl::SetPipelineStateObject(std::shared_ptr<PPGEPipeline
     if (m_bound_pipeline_state_sp.get() == p_PSO.get())
         return;
 
-    static ID3D11Buffer *nullCB[] = {nullptr};
-    static ID3D11ShaderResourceView *nullSRV[] = {nullptr};
-    static ID3D11SamplerState *nullSamplerState[] = {nullptr};
+    m_bound_pipeline_state_sp = std::static_pointer_cast<PipelineStateD3D11Impl>(std::move(p_PSO));
+
+    static ID3D11Buffer *nullCB[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT] = {};
+    static ID3D11ShaderResourceView *nullSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {};
+    static ID3D11SamplerState *nullSamplerState[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT] = {};
 
 #define UNBIND_SHADER_RESOURCES(SHADER_NAME_SHORT)                                                                     \
-    m_d3d11_device_context_ptr->##SHADER_NAME_SHORT##SetConstantBuffers(0, 1, nullCB);                                 \
-    m_d3d11_device_context_ptr->##SHADER_NAME_SHORT##SetShaderResources(0, 1, nullSRV);                                \
-    m_d3d11_device_context_ptr->##SHADER_NAME_SHORT##SetSamplers(0, 1, nullSamplerState);
+    m_d3d11_device_context_ptr->##SHADER_NAME_SHORT##SetConstantBuffers(                                               \
+        0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, nullCB);                                                 \
+    m_d3d11_device_context_ptr->##SHADER_NAME_SHORT##SetShaderResources(                                               \
+        0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, nullSRV);                                                     \
+    m_d3d11_device_context_ptr->##SHADER_NAME_SHORT##SetSamplers(0, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT,             \
+                                                                 nullSamplerState);
 
     UNBIND_SHADER_RESOURCES(VS);
     UNBIND_SHADER_RESOURCES(PS);
@@ -70,9 +75,7 @@ void DeviceContextD3D11Impl::SetPipelineStateObject(std::shared_ptr<PPGEPipeline
     UNBIND_SHADER_RESOURCES(HS);
     UNBIND_SHADER_RESOURCES(DS);
     UNBIND_SHADER_RESOURCES(CS);
-
-    b_is_shader_bound.fill(false);
-    m_bound_pipeline_state_sp = std::static_pointer_cast<PipelineStateD3D11Impl>(std::move(p_PSO));
+#undef UNBIND_SHADER_RESOURCES
 
 #define BIND_SHADER(SHADER_NAME, SHADER_NAME_SHORT, SHADER_IDX)                                                        \
     auto d3d11_##SHADER_NAME_SHORT##_shader = m_bound_pipeline_state_sp->GetD3D11##SHADER_NAME##Shared();              \
@@ -85,6 +88,11 @@ void DeviceContextD3D11Impl::SetPipelineStateObject(std::shared_ptr<PPGEPipeline
             m_d3d11_device_context_ptr->##SHADER_NAME_SHORT##SetShader(d3d11_##SHADER_NAME_SHORT##_shader, nullptr,    \
                                                                        0);                                             \
         }                                                                                                              \
+    }                                                                                                                  \
+    else                                                                                                               \
+    {                                                                                                                  \
+        b_is_shader_bound[##SHADER_IDX##] = false;                                                                     \
+        m_d3d11_device_context_ptr->##SHADER_NAME_SHORT##SetShader(nullptr, nullptr, 0);                               \
     }
 
     BIND_SHADER(VertexShader, VS, 0);
@@ -95,7 +103,6 @@ void DeviceContextD3D11Impl::SetPipelineStateObject(std::shared_ptr<PPGEPipeline
     BIND_SHADER(ComputeShader, CS, 5);
 #undef BIND_SHADER
 
-    m_bound_pipeline_state_sp->GetD3D11BlendStateRaw();
     m_d3d11_device_context_ptr->RSSetState(m_bound_pipeline_state_sp->GetD3D11RasterizerStateRaw());
     m_d3d11_device_context_ptr->OMSetBlendState(m_bound_pipeline_state_sp->GetD3D11BlendStateRaw(), nullptr,
                                                 0xffffffff);

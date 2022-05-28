@@ -26,16 +26,16 @@ ShaderResourceBindingD3D11Impl::ShaderResourceBindingD3D11Impl(
 
         switch (desc.resource_type)
         {
-        case PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER:
+        case ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER:
             SRV_up = std::make_unique<ConstantBufferBindingD3D11>(desc);
             break;
-        case PPGE::ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV:
+        case ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV:
             SRV_up = std::make_unique<TextureSRVBindingD3D11>(desc);
             break;
-        case PPGE::ShaderResourceType::SHADER_RESOURCE_SAMPLER:
+        case ShaderResourceType::SHADER_RESOURCE_SAMPLER:
             SRV_up = std::make_unique<SamplerBindingD3D11>(desc);
             break;
-        case PPGE::ShaderResourceType::SHADER_RESOURCE_UNKNOWN:
+        case ShaderResourceType::SHADER_RESOURCE_UNKNOWN:
             PPGE_ASSERT(false, "Creating shader resource variable has failed: Reource type is not set.");
             break;
         default:
@@ -110,12 +110,32 @@ void ShaderResourceBindingD3D11Impl::RefreshBoundResources(ShaderTypeFlags shade
     {
         // Continue if no resource is bound
         if (!SRV->Get())
+        {
+            switch (SRV->GetDesc().resource_type)
+            {
+            case ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER:
+                bound_resource.constant_buffers.push_back(nullptr);
+                break;
+            case ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV:
+                bound_resource.shader_resource_views.push_back(nullptr);
+                break;
+            case ShaderResourceType::SHADER_RESOURCE_SAMPLER:
+                bound_resource.sampler_states.push_back(nullptr);
+                break;
+            case ShaderResourceType::SHADER_RESOURCE_UNKNOWN:
+                PPGE_ASSERT(false, "Shader resource type is unset.");
+                break;
+            default:
+                PPGE_ASSERT(false, "Unknown shader resource type.");
+                break;
+            }
             continue;
+        }
 
         auto d3d11_resource = SRV->GetD3D11Resource();
         switch (SRV->GetDesc().resource_type)
         {
-        case PPGE::ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER: {
+        case ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER: {
             ID3D11Buffer *d3d11_constant_buffer = nullptr;
             PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11Buffer),
                                                    reinterpret_cast<void **>(&d3d11_constant_buffer)));
@@ -123,7 +143,7 @@ void ShaderResourceBindingD3D11Impl::RefreshBoundResources(ShaderTypeFlags shade
                 bound_resource.constant_buffers.push_back(d3d11_constant_buffer);
             break;
         }
-        case PPGE::ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV: {
+        case ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV: {
             ID3D11ShaderResourceView *d3d11_srv = nullptr;
             PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11ShaderResourceView),
                                                    reinterpret_cast<void **>(&d3d11_srv)));
@@ -131,7 +151,7 @@ void ShaderResourceBindingD3D11Impl::RefreshBoundResources(ShaderTypeFlags shade
                 bound_resource.shader_resource_views.push_back(d3d11_srv);
             break;
         }
-        case PPGE::ShaderResourceType::SHADER_RESOURCE_SAMPLER: {
+        case ShaderResourceType::SHADER_RESOURCE_SAMPLER: {
             ID3D11SamplerState *d3d11_sampler_state = nullptr;
             PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11SamplerState),
                                                    reinterpret_cast<void **>(&d3d11_sampler_state)));
@@ -139,7 +159,7 @@ void ShaderResourceBindingD3D11Impl::RefreshBoundResources(ShaderTypeFlags shade
                 bound_resource.sampler_states.push_back(d3d11_sampler_state);
             break;
         }
-        case PPGE::ShaderResourceType::SHADER_RESOURCE_UNKNOWN:
+        case ShaderResourceType::SHADER_RESOURCE_UNKNOWN:
             PPGE_ASSERT(false, "Shader resource type is unset.");
             break;
         default:

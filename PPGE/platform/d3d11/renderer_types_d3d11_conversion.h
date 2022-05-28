@@ -632,9 +632,9 @@ inline D3D11_INPUT_CLASSIFICATION PPGEElementClassificationTypeToD3D11InputClass
 {
     switch (element_classification_type)
     {
-    case PPGE::ElementClassificationType::ELEMENT_CLASSIFICATION_PER_VERTEX_DATA:
+    case ElementClassificationType::ELEMENT_CLASSIFICATION_PER_VERTEX_DATA:
         return D3D11_INPUT_PER_VERTEX_DATA;
-    case PPGE::ElementClassificationType::ELEMENT_CLASSIFICATION_PER_INSTANCE_DATA:
+    case ElementClassificationType::ELEMENT_CLASSIFICATION_PER_INSTANCE_DATA:
         return D3D11_INPUT_PER_INSTANCE_DATA;
     default:
         PPGE_ASSERT(false, "Unknown ElementClassificationType.");
@@ -646,41 +646,41 @@ inline D3D11_BLEND PPGEBlendTypeToD3D11Blend(BlendType blend_type)
 {
     switch (blend_type)
     {
-    case PPGE::BlendType::BLEND_ZERO:
+    case BlendType::BLEND_ZERO:
         return D3D11_BLEND_ZERO;
-    case PPGE::BlendType::BLEND_ONE:
+    case BlendType::BLEND_ONE:
         return D3D11_BLEND_ONE;
-    case PPGE::BlendType::BLEND_SRC_COLOR:
+    case BlendType::BLEND_SRC_COLOR:
         return D3D11_BLEND_SRC_COLOR;
-    case PPGE::BlendType::BLEND_INV_SRC_COLOR:
+    case BlendType::BLEND_INV_SRC_COLOR:
         return D3D11_BLEND_INV_SRC_COLOR;
-    case PPGE::BlendType::BLEND_SRC_ALPHA:
+    case BlendType::BLEND_SRC_ALPHA:
         return D3D11_BLEND_SRC_ALPHA;
-    case PPGE::BlendType::BLEND_INV_SRC_ALPHA:
+    case BlendType::BLEND_INV_SRC_ALPHA:
         return D3D11_BLEND_INV_SRC_ALPHA;
-    case PPGE::BlendType::BLEND_DEST_ALPHA:
+    case BlendType::BLEND_DEST_ALPHA:
         return D3D11_BLEND_DEST_ALPHA;
-    case PPGE::BlendType::BLEND_INV_DEST_ALPHA:
+    case BlendType::BLEND_INV_DEST_ALPHA:
         return D3D11_BLEND_INV_DEST_ALPHA;
-    case PPGE::BlendType::BLEND_DEST_COLOR:
+    case BlendType::BLEND_DEST_COLOR:
         return D3D11_BLEND_DEST_COLOR;
-    case PPGE::BlendType::BLEND_INV_DEST_COLOR:
+    case BlendType::BLEND_INV_DEST_COLOR:
         return D3D11_BLEND_INV_DEST_COLOR;
-    case PPGE::BlendType::BLEND_SRC_ALPHA_SAT:
+    case BlendType::BLEND_SRC_ALPHA_SAT:
         return D3D11_BLEND_SRC_ALPHA_SAT;
-    case PPGE::BlendType::BLEND_BLEND_FACTOR:
+    case BlendType::BLEND_BLEND_FACTOR:
         return D3D11_BLEND_BLEND_FACTOR;
-    case PPGE::BlendType::BLEND_INV_BLEND_FACTOR:
+    case BlendType::BLEND_INV_BLEND_FACTOR:
         return D3D11_BLEND_INV_BLEND_FACTOR;
-    case PPGE::BlendType::BLEND_SRC1_COLOR:
+    case BlendType::BLEND_SRC1_COLOR:
         return D3D11_BLEND_SRC1_COLOR;
-    case PPGE::BlendType::BLEND_INV_SRC1_COLOR:
+    case BlendType::BLEND_INV_SRC1_COLOR:
         return D3D11_BLEND_INV_SRC1_COLOR;
-    case PPGE::BlendType::BLEND_SRC1_ALPHA:
+    case BlendType::BLEND_SRC1_ALPHA:
         return D3D11_BLEND_SRC1_ALPHA;
-    case PPGE::BlendType::BLEND_INV_SRC1_ALPHA:
+    case BlendType::BLEND_INV_SRC1_ALPHA:
         return D3D11_BLEND_INV_SRC1_ALPHA;
-    case PPGE::BlendType::BLEND_UNDEFINED:
+    case BlendType::BLEND_UNDEFINED:
         PPGE_ASSERT(false, "Blend type is undefined.");
         return (D3D11_BLEND)0;
     default:
@@ -693,17 +693,17 @@ inline D3D11_BLEND_OP PPGEBlendOpTypeToD3D11BlendOp(BlendOpType blend_op)
 {
     switch (blend_op)
     {
-    case PPGE::BlendOpType::BLEND_OP_ADD:
+    case BlendOpType::BLEND_OP_ADD:
         return D3D11_BLEND_OP_ADD;
-    case PPGE::BlendOpType::BLEND_OP_SUBTRACT:
+    case BlendOpType::BLEND_OP_SUBTRACT:
         return D3D11_BLEND_OP_SUBTRACT;
-    case PPGE::BlendOpType::BLEND_OP_REV_SUBTRACT:
+    case BlendOpType::BLEND_OP_REV_SUBTRACT:
         return D3D11_BLEND_OP_REV_SUBTRACT;
-    case PPGE::BlendOpType::BLEND_OP_MIN:
+    case BlendOpType::BLEND_OP_MIN:
         return D3D11_BLEND_OP_MIN;
-    case PPGE::BlendOpType::BLEND_OP_MAX:
+    case BlendOpType::BLEND_OP_MAX:
         return D3D11_BLEND_OP_MAX;
-    case PPGE::BlendOpType::BLEND_OP_UNDEFINED:
+    case BlendOpType::BLEND_OP_UNDEFINED:
         PPGE_ASSERT(false, "Blend operation type is undefined.");
         return (D3D11_BLEND_OP)0;
     default:
@@ -738,11 +738,11 @@ inline D3D11_FILL_MODE PPGEFillModeTypeToD3D11FillMode(FillModeType fill_mode)
 {
     switch (fill_mode)
     {
-    case PPGE::FillModeType::FILL_MODE_WIREFRAME:
+    case FillModeType::FILL_MODE_WIREFRAME:
         return D3D11_FILL_WIREFRAME;
-    case PPGE::FillModeType::FILL_MODE_SOLID:
+    case FillModeType::FILL_MODE_SOLID:
         return D3D11_FILL_SOLID;
-    case PPGE::FillModeType::FILL_MODE_UNDEFINED:
+    case FillModeType::FILL_MODE_UNDEFINED:
         PPGE_ASSERT(false, "Fill mode type is undefined.");
         return (D3D11_FILL_MODE)0;
     default:
@@ -755,13 +755,13 @@ inline D3D11_CULL_MODE PPGECullModeTypeToD3D11CullMode(CullModeType cull_mode)
 {
     switch (cull_mode)
     {
-    case PPGE::CullModeType::CULL_MODE_NONE:
+    case CullModeType::CULL_MODE_NONE:
         return D3D11_CULL_NONE;
-    case PPGE::CullModeType::CULL_MODE_FRONT:
+    case CullModeType::CULL_MODE_FRONT:
         return D3D11_CULL_FRONT;
-    case PPGE::CullModeType::CULL_MODE_BACK:
+    case CullModeType::CULL_MODE_BACK:
         return D3D11_CULL_BACK;
-    case PPGE::CullModeType::CULL_MODE_UNDEFINED:
+    case CullModeType::CULL_MODE_UNDEFINED:
         PPGE_ASSERT(false, "Fill mode type is undefined.");
         return (D3D11_CULL_MODE)0;
     default:
@@ -774,23 +774,23 @@ inline D3D11_COMPARISON_FUNC PPGEComperisonFuncTypeToD3D11ComparisonFunc(Comperi
 {
     switch (comparison_func)
     {
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_NEVER:
+    case ComperisonFuncType::COMPARISON_FUNC_NEVER:
         return D3D11_COMPARISON_NEVER;
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_LESS:
+    case ComperisonFuncType::COMPARISON_FUNC_LESS:
         return D3D11_COMPARISON_LESS;
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_EQUAL:
+    case ComperisonFuncType::COMPARISON_FUNC_EQUAL:
         return D3D11_COMPARISON_EQUAL;
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_LESS_EQUAL:
+    case ComperisonFuncType::COMPARISON_FUNC_LESS_EQUAL:
         return D3D11_COMPARISON_LESS_EQUAL;
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_GREATER:
+    case ComperisonFuncType::COMPARISON_FUNC_GREATER:
         return D3D11_COMPARISON_GREATER;
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_NOT_EQUAL:
+    case ComperisonFuncType::COMPARISON_FUNC_NOT_EQUAL:
         return D3D11_COMPARISON_NOT_EQUAL;
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_GREATER_EQUAL:
+    case ComperisonFuncType::COMPARISON_FUNC_GREATER_EQUAL:
         return D3D11_COMPARISON_GREATER_EQUAL;
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_ALWAYS:
+    case ComperisonFuncType::COMPARISON_FUNC_ALWAYS:
         return D3D11_COMPARISON_ALWAYS;
-    case PPGE::ComperisonFuncType::COMPARISON_FUNC_UNDEFINED:
+    case ComperisonFuncType::COMPARISON_FUNC_UNDEFINED:
         PPGE_ASSERT(false, "Comparison function type is undefined.");
         return (D3D11_COMPARISON_FUNC)0;
     default:
@@ -803,23 +803,23 @@ inline D3D11_STENCIL_OP PPGEStencilOpTypeToD3D11StencilOp(StencilOpType stencil_
 {
     switch (stencil_op)
     {
-    case PPGE::StencilOpType::STENCIL_OP_KEEP:
+    case StencilOpType::STENCIL_OP_KEEP:
         return D3D11_STENCIL_OP_KEEP;
-    case PPGE::StencilOpType::STENCIL_OP_ZERO:
+    case StencilOpType::STENCIL_OP_ZERO:
         return D3D11_STENCIL_OP_ZERO;
-    case PPGE::StencilOpType::STENCIL_OP_REPLACE:
+    case StencilOpType::STENCIL_OP_REPLACE:
         return D3D11_STENCIL_OP_REPLACE;
-    case PPGE::StencilOpType::STENCIL_OP_INCR_SAT:
+    case StencilOpType::STENCIL_OP_INCR_SAT:
         return D3D11_STENCIL_OP_INCR_SAT;
-    case PPGE::StencilOpType::STENCIL_OP_DECR_SAT:
+    case StencilOpType::STENCIL_OP_DECR_SAT:
         return D3D11_STENCIL_OP_DECR_SAT;
-    case PPGE::StencilOpType::STENCIL_OP_INVERT:
+    case StencilOpType::STENCIL_OP_INVERT:
         return D3D11_STENCIL_OP_INVERT;
-    case PPGE::StencilOpType::STENCIL_OP_INCR:
+    case StencilOpType::STENCIL_OP_INCR:
         return D3D11_STENCIL_OP_INCR;
-    case PPGE::StencilOpType::STENCIL_OP_DECR:
+    case StencilOpType::STENCIL_OP_DECR:
         return D3D11_STENCIL_OP_DECR;
-    case PPGE::StencilOpType::STENCIL_OP_UNDEFINED:
+    case StencilOpType::STENCIL_OP_UNDEFINED:
         PPGE_ASSERT(false, "Stencil op type is undefined.");
         return (D3D11_STENCIL_OP)0;
     default:
@@ -833,93 +833,354 @@ inline D3D11_PRIMITIVE_TOPOLOGY PPGEPrimitiveTopologyTypeToD3D11PrimitiveTopolog
 {
     switch (primitive_topology)
     {
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_UNDEFINED:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_UNDEFINED:
         return D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_POINTLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_POINTLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_LINELIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_LINELIST:
         return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_LINESTRIP:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_LINESTRIP:
         return D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLELIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLELIST:
         return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
         return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_LINELIST_ADJ:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_LINELIST_ADJ:
         return D3D11_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ:
         return D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ:
         return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ:
         return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_2_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_2_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_2_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_5_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_5_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_5_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_6_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_6_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_6_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_7_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_7_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_7_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_8_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_8_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_8_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_9_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_9_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_9_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_10_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_10_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_10_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_11_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_11_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_11_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_12_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_12_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_12_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_13_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_13_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_13_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_14_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_14_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_14_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_15_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_15_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_15_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_17_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_17_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_17_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_18_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_18_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_18_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_19_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_19_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_19_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_20_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_20_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_20_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_21_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_21_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_21_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_22_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_22_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_22_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_23_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_23_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_23_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_24_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_24_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_24_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_26_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_26_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_26_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_27_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_27_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_27_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_28_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_28_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_28_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_29_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_29_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_29_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_30_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_30_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_30_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_31_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_31_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_31_CONTROL_POINT_PATCHLIST;
-    case PPGE::PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_32_CONTROL_POINT_PATCHLIST:
+    case PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_32_CONTROL_POINT_PATCHLIST:
         return D3D11_PRIMITIVE_TOPOLOGY_32_CONTROL_POINT_PATCHLIST;
     default:
         PPGE_ASSERT(false, "Primitive topology type is unknown.");
         return (D3D11_PRIMITIVE_TOPOLOGY)0;
     }
+}
+
+inline D3D11_FILTER PPGEFilterTypeToD3D11FilterType(FilterType min_filter, FilterType mag_filter, FilterType mip_filter)
+{
+    switch (min_filter)
+    {
+    case FilterType::FILTER_UNDEFINED:
+        PPGE_ASSERT(false, "Undefined filter type is passed for min filter");
+        break;
+    case FilterType::FILTER_POINT:
+        if (mag_filter == FilterType::FILTER_POINT)
+        {
+            if (mip_filter == FilterType::FILTER_POINT)
+            {
+                return D3D11_FILTER_MIN_MAG_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_LINEAR)
+            {
+                return D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+            }
+        }
+        else if (mag_filter == FilterType::FILTER_LINEAR)
+        {
+            if (mip_filter == FilterType::FILTER_POINT)
+            {
+                return D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_LINEAR)
+            {
+                return D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+            }
+        }
+        break;
+    case FilterType::FILTER_LINEAR:
+        if (mag_filter == FilterType::FILTER_POINT)
+        {
+            if (mip_filter == FilterType::FILTER_POINT)
+            {
+                return D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_LINEAR)
+            {
+                return D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+            }
+        }
+        else if (mag_filter == FilterType::FILTER_LINEAR)
+        {
+            if (mip_filter == FilterType::FILTER_POINT)
+            {
+                return D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_LINEAR)
+            {
+                return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+            }
+        }
+        break;
+    case FilterType::FILTER_ANISOTROPIC:
+        if (mag_filter == FilterType::FILTER_ANISOTROPIC && mip_filter == FilterType::FILTER_ANISOTROPIC)
+        {
+            return D3D11_FILTER_ANISOTROPIC;
+        }
+        PPGE_ASSERT(false, "Min filter cannot be anistropic without all of them being anisotropic at the same time.");
+        break;
+    case FilterType::FILTER_COMPARISON_POINT:
+        if (mag_filter == FilterType::FILTER_COMPARISON_POINT)
+        {
+            if (mip_filter == FilterType::FILTER_COMPARISON_POINT)
+            {
+                return D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_COMPARISON_LINEAR)
+            {
+                return D3D11_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR;
+            }
+        }
+        else if (mag_filter == FilterType::FILTER_COMPARISON_LINEAR)
+        {
+            if (mip_filter == FilterType::FILTER_COMPARISON_POINT)
+            {
+                return D3D11_FILTER_COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_COMPARISON_LINEAR)
+            {
+                return D3D11_FILTER_COMPARISON_MIN_POINT_MAG_MIP_LINEAR;
+            }
+        }
+        break;
+    case FilterType::FILTER_COMPARISON_LINEAR:
+        if (mag_filter == FilterType::FILTER_COMPARISON_POINT)
+        {
+            if (mip_filter == FilterType::FILTER_COMPARISON_POINT)
+            {
+                return D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_COMPARISON_LINEAR)
+            {
+                return D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+            }
+        }
+        else if (mag_filter == FilterType::FILTER_COMPARISON_LINEAR)
+        {
+            if (mip_filter == FilterType::FILTER_COMPARISON_POINT)
+            {
+                return D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_COMPARISON_LINEAR)
+            {
+                return D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+            }
+        }
+        break;
+    case FilterType::FILTER_COMPARISON_ANISOTROPIC:
+        if (mag_filter == FilterType::FILTER_ANISOTROPIC && mip_filter == FilterType::FILTER_ANISOTROPIC)
+        {
+            return D3D11_FILTER_COMPARISON_ANISOTROPIC;
+        }
+        PPGE_ASSERT(false, "Min filter cannot be anistropic without all of them being anisotropic at the same time.");
+        break;
+    case FilterType::FILTER_MINIMUM_POINT:
+        if (mag_filter == FilterType::FILTER_MINIMUM_POINT)
+        {
+            if (mip_filter == FilterType::FILTER_MINIMUM_POINT)
+            {
+                return D3D11_FILTER_MINIMUM_MIN_MAG_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_MINIMUM_LINEAR)
+            {
+                return D3D11_FILTER_MINIMUM_MIN_MAG_POINT_MIP_LINEAR;
+            }
+        }
+        else if (mag_filter == FilterType::FILTER_MINIMUM_LINEAR)
+        {
+            if (mip_filter == FilterType::FILTER_MINIMUM_POINT)
+            {
+                return D3D11_FILTER_MINIMUM_MIN_POINT_MAG_LINEAR_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_MINIMUM_LINEAR)
+            {
+                return D3D11_FILTER_MINIMUM_MIN_POINT_MAG_MIP_LINEAR;
+            }
+        }
+        break;
+    case FilterType::FILTER_MINIMUM_LINEAR:
+        if (mag_filter == FilterType::FILTER_MINIMUM_POINT)
+        {
+            if (mip_filter == FilterType::FILTER_MINIMUM_POINT)
+            {
+                return D3D11_FILTER_MINIMUM_MIN_LINEAR_MAG_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_MINIMUM_LINEAR)
+            {
+                return D3D11_FILTER_MINIMUM_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+            }
+        }
+        else if (mag_filter == FilterType::FILTER_MINIMUM_LINEAR)
+        {
+            if (mip_filter == FilterType::FILTER_MINIMUM_POINT)
+            {
+                return D3D11_FILTER_MINIMUM_MIN_MAG_LINEAR_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_MINIMUM_LINEAR)
+            {
+                return D3D11_FILTER_MINIMUM_MIN_MAG_MIP_LINEAR;
+            }
+        }
+        break;
+    case FilterType::FILTER_MINIMUM_ANISOTROPIC:
+        if (mag_filter == FilterType::FILTER_ANISOTROPIC && mip_filter == FilterType::FILTER_ANISOTROPIC)
+        {
+            return D3D11_FILTER_MINIMUM_ANISOTROPIC;
+        }
+        PPGE_ASSERT(false, "Min filter cannot be anistropic without all of them being anisotropic at the same time.");
+        break;
+    case FilterType::FILTER_MAXIMUM_POINT:
+        if (mag_filter == FilterType::FILTER_MAXIMUM_POINT)
+        {
+            if (mip_filter == FilterType::FILTER_MAXIMUM_POINT)
+            {
+                return D3D11_FILTER_MAXIMUM_MIN_MAG_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_MAXIMUM_LINEAR)
+            {
+                return D3D11_FILTER_MAXIMUM_MIN_MAG_POINT_MIP_LINEAR;
+            }
+        }
+        else if (mag_filter == FilterType::FILTER_MAXIMUM_LINEAR)
+        {
+            if (mip_filter == FilterType::FILTER_MAXIMUM_POINT)
+            {
+                return D3D11_FILTER_MAXIMUM_MIN_POINT_MAG_LINEAR_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_MAXIMUM_LINEAR)
+            {
+                return D3D11_FILTER_MAXIMUM_MIN_POINT_MAG_MIP_LINEAR;
+            }
+        }
+        break;
+    case FilterType::FILTER_MAXIMUM_LINEAR:
+        if (mag_filter == FilterType::FILTER_MAXIMUM_POINT)
+        {
+            if (mip_filter == FilterType::FILTER_MAXIMUM_POINT)
+            {
+                return D3D11_FILTER_MAXIMUM_MIN_LINEAR_MAG_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_MAXIMUM_LINEAR)
+            {
+                return D3D11_FILTER_MAXIMUM_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+            }
+        }
+        else if (mag_filter == FilterType::FILTER_MAXIMUM_LINEAR)
+        {
+            if (mip_filter == FilterType::FILTER_MAXIMUM_POINT)
+            {
+                return D3D11_FILTER_MAXIMUM_MIN_MAG_LINEAR_MIP_POINT;
+            }
+            else if (mip_filter == FilterType::FILTER_MAXIMUM_LINEAR)
+            {
+                return D3D11_FILTER_MAXIMUM_MIN_MAG_MIP_LINEAR;
+            }
+        }
+        break;
+    case FilterType::FILTER_MAXIMUM_ANISOTROPIC:
+        if (mag_filter == FilterType::FILTER_ANISOTROPIC && mip_filter == FilterType::FILTER_ANISOTROPIC)
+        {
+            return D3D11_FILTER_MAXIMUM_ANISOTROPIC;
+        }
+        PPGE_ASSERT(false, "Min filter cannot be anistropic without all of them being anisotropic at the same time.");
+        break;
+    default:
+        break;
+    }
+
+    PPGE_ASSERT(false, "Combination of min, mag and mip filters cannot be converted to D3D11_FILTER type");
+
+    return D3D11_FILTER_MIN_MAG_MIP_POINT;
+}
+
+inline D3D11_TEXTURE_ADDRESS_MODE PPGETextureAddressTypeToD3D11TextureAddressType(TextureAddressType address_type)
+{
+    switch (address_type)
+    {
+    case TextureAddressType::TEXTURE_ADDRESS_UNDEFINED:
+        PPGE_ASSERT(false, "Undefined texture adress mode is passed.");
+        break;
+    case TextureAddressType::TEXTURE_ADDRESS_WRAP:
+        return D3D11_TEXTURE_ADDRESS_WRAP;
+    case TextureAddressType::TEXTURE_ADDRESS_MIRROR:
+        return D3D11_TEXTURE_ADDRESS_MIRROR;
+    case TextureAddressType::TEXTURE_ADDRESS_CLAMP:
+        return D3D11_TEXTURE_ADDRESS_CLAMP;
+    case TextureAddressType::TEXTURE_ADDRESS_BORDER:
+        return D3D11_TEXTURE_ADDRESS_BORDER;
+    case TextureAddressType::TEXTURE_ADDRESS_MIRROR_ONCE:
+        return D3D11_TEXTURE_ADDRESS_MIRROR_ONCE;
+    default:
+        PPGE_ASSERT(false, "Unknown texture adress mode is passed.");
+        break;
+    }
+    
+    return D3D11_TEXTURE_ADDRESS_CLAMP;
 }
 } // namespace PPGE

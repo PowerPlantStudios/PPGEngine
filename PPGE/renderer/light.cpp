@@ -23,7 +23,7 @@ Math::Matrix Light::GetLightView(size_t index) const
     switch (m_light_comp.GetLightType())
     {
     case PPGE::LightComponent::LightType::DIRECTIONAL: {
-        eye = Math::Matrix::CreateFromQuaternion(m_transform_comp.rotation).Backward();
+        eye = Math::Matrix::CreateFromQuaternion(m_transform_comp.rotation).Forward();
         target = Math::Vector3::Zero;
         break;
     }
@@ -32,11 +32,11 @@ Math::Matrix Light::GetLightView(size_t index) const
         switch (index)
         {
         case 0: {
-            target = eye + Math::Vector3::Right;
+            target = eye + Math::Vector3::Left;
             break;
         }
         case 1: {
-            target = eye + Math::Vector3::Left;
+            target = eye + Math::Vector3::Right;
             break;
         }
         case 2: {
@@ -50,11 +50,11 @@ Math::Matrix Light::GetLightView(size_t index) const
             break;
         }
         case 4: {
-            target = eye + Math::Vector3::Forward;
+            target = eye + Math::Vector3::Backward;
             break;
         }
         case 5: {
-            target = eye + Math::Vector3::Backward;
+            target = eye + Math::Vector3::Forward;
             break;
         }
         default:
@@ -65,7 +65,7 @@ Math::Matrix Light::GetLightView(size_t index) const
     }
     case PPGE::LightComponent::LightType::SPOT: {
         eye = m_transform_comp.position;
-        target = eye + Math::Matrix::CreateFromQuaternion(m_transform_comp.rotation).Forward();
+        target = eye + Math::Matrix::CreateFromQuaternion(m_transform_comp.rotation).Backward();
         break;
     }
     default: {

@@ -56,7 +56,7 @@ float PCF(float3 uv, float compare_val)
 
 inline float get_slope_corrected_bias(float lambertian_reflectance, float bias = -5.0f)
 {
-    return (1.0f - lambertian_reflectance) * 0.0001f * bias;
+    return (1.0f - lambertian_reflectance) * 0.0005f * bias;
 }
 
 inline float3 get_normal_offset(float3 normal, float lambertian_reflectance, float normal_bias = 5.0f)
@@ -68,11 +68,13 @@ float GetShadowFactor(Light light, Fragment fragment)
 {
     float shadow = 1.0f;
 
+    if (!light_can_cast_shadow())
+        return shadow;
+
     // Add bias in the direction of fragment normal
     float3 world_pos = fragment.position + get_normal_offset(
         fragment.vertex_normal, saturate(dot(fragment.vertex_normal, -light.light_to_fragment)));
 
-    [flatten]
     if (light_is_directional())
     {
         float3 frag_in_light_space = WorldToNDC(world_pos, light_get_viewProj(0));

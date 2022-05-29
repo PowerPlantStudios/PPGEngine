@@ -72,7 +72,7 @@ void LightComponent::CreateShadowMapBuffers()
     case PPGE::LightComponent::LightType::POINT: {
         TextureViewDesc dsv_desc;
         dsv_desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_DEPTH_STENCIL;
-        dsv_desc.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D;
+        dsv_desc.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D_ARRAY;
         dsv_desc.format = TextureFormatType::TEXTURE_FORMAT_D32_FLOAT;
         for (unsigned i = 0; i < 6; i++)
         {
@@ -92,15 +92,11 @@ void LightComponent::CreateShadowMapBuffers()
         dsv_desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_DEPTH_STENCIL;
         dsv_desc.resource_dimension = ResourceDimensionType::RESOURCE_DIMENSION_2D;
         dsv_desc.format = TextureFormatType::TEXTURE_FORMAT_D32_FLOAT;
-        dsv_desc.first_array_slice = 0;
-        dsv_desc.array_slices_num = 1;
         shadow_map_dsv_array.push_back({std::move(texture_sp->CreateView(dsv_desc)), shadowmap_viewport});
         TextureViewDesc srv_desc;
         srv_desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_SHADER_RESOURCE;
         srv_desc.resource_dimension = cd.desc.resource_dimension;
         srv_desc.format = TextureFormatType::TEXTURE_FORMAT_R32_FLOAT;
-        srv_desc.first_array_slice = 0;
-        srv_desc.array_slices_num = 6;
         shadow_map_srv = texture_sp->CreateView(srv_desc);
         break;
     }

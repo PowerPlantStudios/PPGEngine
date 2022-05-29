@@ -258,7 +258,6 @@ void ForwardRenderPass::Execute()
             RendererSystem::Get().GetImmediateContext()->Map(m_cb_light.get(), MapType::MAP_WRITE,
                                                              MapFlags::MAP_DISCARD,
                                                              reinterpret_cast<void **>(&light_data_map));
-            auto world = light_transform_data.GetWorldMatrix();
 
             for (size_t i = 0; i < light.GetShadowMapViewCount(); i++)
             {
@@ -268,19 +267,22 @@ void ForwardRenderPass::Execute()
                 light_data_map->view_proj[i] = view_proj.Transpose();
             }
 
+            auto world = light_transform_data.GetWorldMatrix();
             light_data_map->position = world.Translation();
-            light_data_map->direction = world.Forward();
+            light_data_map->direction = world.Backward();
 
             light_data_map->color_intensity =
                 Math::Color(light_data.color.R(), light_data.color.G(), light_data.color.B(), light_data.intensity);
 
-            light_data_map->light_options = LightOptions::NONE;
+            light_data_map->light_options = light_data.CanCastShadow() ? LightOptions::CAN_CAST_SHADOW : LightOptions::NONE;
+
             switch (light_data.GetLightType())
             {
             case LightComponent::LightType::DIRECTIONAL: {
                 light_data_map->light_options |= LightOptions::TYPE_DIRECTIONAL_LIGHT;
-                m_SRB->GetVariableByName("g_shadow_map_dir_light", ShaderTypeFlags::SHADER_TYPE_PIXEL)
-                    ->Set(light.GetShadowMapSRView());
+                if (light_data.CanCastShadow())
+                    m_SRB->GetVariableByName("g_shadow_map_dir_light", ShaderTypeFlags::SHADER_TYPE_PIXEL)
+                        ->Set(light.GetShadowMapSRView());
                 break;
             }
             case LightComponent::LightType::POINT: {
@@ -288,8 +290,9 @@ void ForwardRenderPass::Execute()
                 light_data_map->dist_attenuation_range =
                     Math::Vector4(light_data.dist_attenuation_a0, light_data.dist_attenuation_a1,
                                   light_data.dist_attenuation_a2, light_data.range);
-                m_SRB->GetVariableByName("g_shadow_map_point_light", ShaderTypeFlags::SHADER_TYPE_PIXEL)
-                    ->Set(light.GetShadowMapSRView());
+                if (light_data.CanCastShadow())
+                    m_SRB->GetVariableByName("g_shadow_map_point_light", ShaderTypeFlags::SHADER_TYPE_PIXEL)
+                        ->Set(light.GetShadowMapSRView());
                 break;
             }
             case LightComponent::LightType::SPOT: {
@@ -299,8 +302,9 @@ void ForwardRenderPass::Execute()
                                   light_data.dist_attenuation_a2, light_data.range);
                 light_data_map->angle_attenuation = Math::Vector4(
                     light_data.spot_cutoff_angle, light_data.spot_inner_cone_angle, light_data.spot_decay_rate, 0.0f);
-                m_SRB->GetVariableByName("g_shadow_map_spot_light", ShaderTypeFlags::SHADER_TYPE_PIXEL)
-                    ->Set(light.GetShadowMapSRView());
+                if (light_data.CanCastShadow())
+                    m_SRB->GetVariableByName("g_shadow_map_spot_light", ShaderTypeFlags::SHADER_TYPE_PIXEL)
+                        ->Set(light.GetShadowMapSRView());
                 break;
             };
             default: {

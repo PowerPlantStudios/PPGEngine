@@ -74,7 +74,9 @@ std::shared_ptr<PPGETextureView> LoadTexture(const std::filesystem::path &path_t
 class SceneLoader
 {
   public:
-    static void LoadScene(const std::filesystem::path &path_to_scene, Scene &ppge_scene, float scale_factor = 1.0f)
+    static void LoadScene(const std::filesystem::path &path_to_scene, Scene &ppge_scene, float pos_x = 0.0f,
+                          float pos_y = 0.0f, float pos_z = 0.0f, float yaw = 0.0f, float pitch = 0.0f,
+                          float roll = 0.0f, float scale_factor = 1.0f)
     {
         std::unordered_map<std::string, std::shared_ptr<PPGETextureView>> diffuse_maps;
         std::unordered_map<std::string, std::shared_ptr<PPGETextureView>> normal_maps;
@@ -141,6 +143,8 @@ class SceneLoader
 
             auto entity = ppge_scene.CreateEntity("Entity " + std::to_string(++ENTITY_COUNT));
             auto &transform = entity.GetComponents<TransformComponent>();
+            transform.position = Math::Vector3(pos_x, pos_y, pos_z);
+            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
             transform.scale = Math::Vector3(scale_factor, scale_factor, scale_factor);
             CreateMeshFilter(entity, vertices, indices);
 
@@ -250,25 +254,35 @@ class TestLayer : public Widget
             camera_component.projection = Math::Matrix::CreatePerspectiveFieldOfView(fov, aspect_ratio, 0.1f, 1000.0f);
         }
         m_camera_controller.Possess(camera_entity);
-        m_camera_controller.Move(Math::Vector3(-1.5f, 1.75f, -1.5f));
+        m_camera_controller.Move(Math::Vector3(-2.0f, 2.0f, -2.0f));
         m_camera_controller.LookAt(Math::Vector3::Zero, Math::Vector3::Up);
 
         // Create lights
         {
-            m_light = m_scene.CreateEntity("Directional Light");
+            m_light = m_scene.CreateEntity("Sun Light");
             auto &transform = m_light.GetComponents<TransformComponent>();
-            transform.position = Math::Vector3(1.5f, 2.2f, 1.5f);
-            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(1.5707963f / 2, -1.5707963f / 2, 0.0f);
+            transform.position = Math::Vector3(2.0f, 2.0f, 2.0f);
+            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(-3 * PI / 4, 2 * PI / 5, 0.0f);
+            auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::DIRECTIONAL, false);
+            point_light.color = Math::Color(.8f, .8f, .7f);
+            point_light.intensity = .25f;
+        }
+        {
+            m_light = m_scene.CreateEntity("Light");
+            auto &transform = m_light.GetComponents<TransformComponent>();
+            transform.position = Math::Vector3(0.0f, 2.0f, 0.0f);
+            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(0.0f, 2 * PI / 5, 0.0f);
             auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::POINT);
             point_light.color = Math::Color(1.0f, 1.0f, 1.0f);
-            point_light.intensity = 1.0f;
+            point_light.intensity = 5.0f;
         }
 
         resource_mgr.WalkRoot("../../Sandbox/assets");
         if (auto model = resource_mgr.GetCachedResource("cube/cube.obj"))
         {
             auto lazy_model = std::static_pointer_cast<LazyResource>(model);
-            SceneLoader::LoadScene(lazy_model->data, m_scene);
+            SceneLoader::LoadScene(lazy_model->data, m_scene, 0.0f, 0.25f, 1.25f);
+            SceneLoader::LoadScene(lazy_model->data, m_scene, 0.0f, 0.25f, -1.25f);
         }
 
         {

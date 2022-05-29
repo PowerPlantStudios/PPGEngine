@@ -48,7 +48,7 @@ inline uint CubemapDirectionToFaceIndex(float3 direction)
 
     if (max_coord == abs_direction.x)
     {
-        return direction.x == abs_direction.x ? 0 : 1;
+        return direction.x == abs_direction.x ? 1 : 0;
     }
     else if (max_coord == abs_direction.y)
     {

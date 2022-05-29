@@ -117,7 +117,7 @@ ForwardRenderPass::ForwardRenderPass()
         auto [elments, element_count] = GetStandardLayout();
         ps_cd.desc.input_layout_desc.elements = elments;
         ps_cd.desc.input_layout_desc.elements_num = element_count;
-        ps_cd.desc.rasterizer_state_desc.cull_mode = CullModeType::CULL_MODE_NONE;
+        ps_cd.desc.rasterizer_state_desc.cull_mode = CullModeType::CULL_MODE_BACK;
 
         ShaderResourceCreateDesc SRVs[] = {
             {"cb_Renderer", {ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},

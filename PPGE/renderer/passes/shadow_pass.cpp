@@ -52,9 +52,10 @@ ShadowPass::ShadowPass()
         auto [elments, element_count] = GetStandardLayout();
         ps_cd.desc.input_layout_desc.elements = elments;
         ps_cd.desc.input_layout_desc.elements_num = element_count;
-        ps_cd.desc.rasterizer_state_desc.cull_mode = CullModeType::CULL_MODE_NONE;
-        ps_cd.desc.rasterizer_state_desc.depth_bias = 0.005f;
+        ps_cd.desc.rasterizer_state_desc.cull_mode = CullModeType::CULL_MODE_BACK;
+        ps_cd.desc.rasterizer_state_desc.depth_bias = 0.005f * (1 << 23);
         ps_cd.desc.rasterizer_state_desc.slope_scaled_depth_bias = 1.0f;
+        ps_cd.desc.rasterizer_state_desc.depth_bias_clamp = 0.0f;
 
         ShaderResourceCreateDesc SRVs[] = {
             {"cb_Renderer", {ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},

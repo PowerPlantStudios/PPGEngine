@@ -86,7 +86,7 @@ class SceneLoader
         const aiScene *scene = aiImportFile(path_to_scene.string().c_str(),
                                             aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded);
 
-        scene = aiApplyPostProcessing(scene, aiProcess_FixInfacingNormals);
+        scene = aiApplyPostProcessing(scene, aiProcess_FixInfacingNormals | aiProcess_FlipUVs | aiProcess_MakeLeftHanded);
 
         if (!scene || !scene->HasMeshes())
         {
@@ -283,6 +283,8 @@ class TestLayer : public Widget
             auto lazy_model = std::static_pointer_cast<LazyResource>(model);
             SceneLoader::LoadScene(lazy_model->data, m_scene, 0.0f, 0.25f, 1.25f);
             SceneLoader::LoadScene(lazy_model->data, m_scene, 0.0f, 0.25f, -1.25f);
+            SceneLoader::LoadScene(lazy_model->data, m_scene, 1.25f, 0.25f, 0.0f);
+            SceneLoader::LoadScene(lazy_model->data, m_scene, -1.25f, 0.25f, 0.0f);
         }
 
         {

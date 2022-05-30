@@ -77,10 +77,50 @@ class TextureDescFromD3D11Texture
     }
 };
 
+void InitializePPGEDescFromD3DResource(ID3D11Resource *d3d_resource, TextureDesc &desc)
+{
+    if (desc.resource_dimension == ResourceDimensionType::RESOURCE_DIMENSION_UNDEFINED)
+    {
+        PPGE_WARN("Resource dimension for the texture created from file is not specified. PPGE texture description "
+                  "cannot be completed.");
+    }
+    else
+    {
+        switch (desc.resource_dimension)
+        {
+        case PPGE::ResourceDimensionType::RESOURCE_DIMENSION_1D:
+        case PPGE::ResourceDimensionType::RESOURCE_DIMENSION_1D_ARRAY: {
+            CComPtr<ID3D11Texture1D> texture_1D;
+            PPGE_HR(d3d_resource->QueryInterface<ID3D11Texture1D>(&texture_1D));
+            desc = TextureDescFromD3D11Texture{}(texture_1D);
+            break;
+        }
+        case PPGE::ResourceDimensionType::RESOURCE_DIMENSION_2D:
+        case PPGE::ResourceDimensionType::RESOURCE_DIMENSION_2D_ARRAY:
+        case PPGE::ResourceDimensionType::RESOURCE_DIMENSION_CUBE:
+        case PPGE::ResourceDimensionType::RESOURCE_DIMENSION_CUBE_ARRAY: {
+            CComPtr<ID3D11Texture2D> texture_2D;
+            PPGE_HR(d3d_resource->QueryInterface<ID3D11Texture2D>(&texture_2D));
+            desc = TextureDescFromD3D11Texture{}(texture_2D);
+            break;
+        }
+        case PPGE::ResourceDimensionType::RESOURCE_DIMENSION_3D: {
+            CComPtr<ID3D11Texture3D> texture_3D;
+            PPGE_HR(d3d_resource->QueryInterface<ID3D11Texture3D>(&texture_3D));
+            desc = TextureDescFromD3D11Texture{}(texture_3D);
+            break;
+        }
+        default:
+            PPGE_ASSERT(false, "Unknown resource dimenson type is passed.");
+            break;
+        }
+    }
+}
+
 TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, const TextureCreateDesc &create_desc)
     : TextureBaseType(std::move(device_sp), create_desc.desc)
 {
-    if (create_desc.resource_path)
+    if (create_desc.resource_path || create_desc.is_compressed)
     {
         ID3D11Device *d3d11_device = m_device_sp->GetD3D11Device();
         ID3D11DeviceContext *d3d11_device_context = nullptr;
@@ -98,17 +138,45 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
         switch (create_desc.file_format)
         {
         case PPGE::TextureFileFormat::DDS:
-            DirectX::CreateDDSTextureFromFileEx(
-                d3d11_device, d3d11_device_context, std::filesystem::path(create_desc.resource_path).c_str(), 0, usage,
-                bind_flags, cpu_access_flags, misc_flags, false, &m_d3d11_texture_ptr, &default_srv);
+            if (create_desc.resource_path)
+            {
+                DirectX::CreateDDSTextureFromFileEx(
+                    d3d11_device, d3d11_device_context, std::filesystem::path(create_desc.resource_path).c_str(), 0,
+                    usage, bind_flags, cpu_access_flags, misc_flags, false, &m_d3d11_texture_ptr, &default_srv);
+            }
+            else
+            {
+                PPGE_ASSERT(create_desc.subresource_num == 1,
+                            "Texture from compressed resource can only be created by single subresource. Subresource "
+                            "number passed is not equal to 1.");
+                DirectX::CreateDDSTextureFromMemoryEx(
+                    d3d11_device, d3d11_device_context,
+                    reinterpret_cast<const uint8_t *>(create_desc.subresource[0].data_ptr),
+                    create_desc.subresource[0].data_size, 0, usage, bind_flags, cpu_access_flags, misc_flags, false,
+                    &m_d3d11_texture_ptr, &default_srv);
+            }
             break;
         case PPGE::TextureFileFormat::JPEG:
         case PPGE::TextureFileFormat::PNG:
         case PPGE::TextureFileFormat::TIFF:
-            DirectX::CreateWICTextureFromFileEx(
-                d3d11_device, d3d11_device_context, std::filesystem::path(create_desc.resource_path).c_str(), 0, usage,
-                bind_flags, cpu_access_flags, misc_flags, DirectX::WIC_LOADER_FLAGS::WIC_LOADER_DEFAULT,
-                &m_d3d11_texture_ptr, &default_srv);
+            if (create_desc.resource_path)
+            {
+                DirectX::CreateWICTextureFromFileEx(
+                    d3d11_device, d3d11_device_context, std::filesystem::path(create_desc.resource_path).c_str(), 0,
+                    usage, bind_flags, cpu_access_flags, misc_flags, DirectX::WIC_LOADER_FLAGS::WIC_LOADER_DEFAULT,
+                    &m_d3d11_texture_ptr, &default_srv);
+            }
+            else
+            {
+                PPGE_ASSERT(create_desc.subresource_num == 1,
+                            "Texture from compressed resource can only be created by single subresource. Subresource "
+                            "number passed is not equal to 1.");
+                DirectX::CreateWICTextureFromMemoryEx(
+                    d3d11_device, d3d11_device_context,
+                    reinterpret_cast<const uint8_t *>(create_desc.subresource[0].data_ptr),
+                    create_desc.subresource[0].data_size, 0, usage, bind_flags, cpu_access_flags, misc_flags,
+                    DirectX::WIC_LOADER_DEFAULT, &m_d3d11_texture_ptr, &default_srv);
+            }
             break;
         case PPGE::TextureFileFormat::UNKNOWN:
             PPGE_ASSERT(false, "Creating texture has failed: Texture file format is not defined.");
@@ -118,6 +186,8 @@ TextureD3D11Impl::TextureD3D11Impl(std::shared_ptr<DeviceD3D11Impl> device_sp, c
             break;
         }
         PPGE_HR(default_srv.QueryInterface<ID3D11View>(&m_default_view));
+
+        InitializePPGEDescFromD3DResource(m_d3d11_texture_ptr, m_desc);
     }
     else
     {

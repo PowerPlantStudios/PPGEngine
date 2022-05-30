@@ -55,6 +55,7 @@ struct TextureCreateDesc
 
     TextureData *subresource = nullptr;
     uint32_t subresource_num = 0;
+    bool is_compressed = false;
 };
 
 class PPGE_API PPGETexture : public PPGEDeviceObject

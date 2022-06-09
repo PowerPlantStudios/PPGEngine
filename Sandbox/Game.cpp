@@ -7,217 +7,6 @@ static size_t ENTITY_COUNT = 0;
 
 namespace PPGE
 {
-template <typename VertexBufferType>
-void CreateMeshFilter(Entity &entity, const std::vector<VertexBufferType> &vertices,
-                      const std::vector<unsigned int> &indices)
-{
-    std::shared_ptr<PPGEBuffer> vb;
-    {
-        BufferDesc vb_desc;
-        vb_desc.byte_width = vertices.size() * sizeof(VertexBufferType);
-        vb_desc.bind_flags = BindFlags::BIND_VERTEX_BUFFER;
-        vb_desc.usage = UsageType::USAGE_IMMUTABLE;
-        vb_desc.cpu_access_flags = CPUAccessFlags::CPU_ACCESS_NONE;
-        BufferData vb_init_data;
-        vb_init_data.data_ptr = &vertices[0];
-        vb_init_data.data_size = vertices.size() * sizeof(VertexBufferType);
-        RendererSystem::Get().GetDevice()->CreateBuffer(vb_desc, &vb_init_data, vb);
-    }
-
-    std::shared_ptr<PPGEBuffer> ib;
-    {
-        BufferDesc ib_desc;
-        ib_desc.byte_width = indices.size() * sizeof(unsigned int);
-        ib_desc.bind_flags = BindFlags::BIND_INDEX_BUFFER;
-        ib_desc.usage = UsageType::USAGE_IMMUTABLE;
-        ib_desc.cpu_access_flags = CPUAccessFlags::CPU_ACCESS_NONE;
-        BufferData ib_init_data;
-        ib_init_data.data_ptr = &indices[0];
-        ib_init_data.data_size = indices.size() * sizeof(unsigned int);
-        RendererSystem::Get().GetDevice()->CreateBuffer(ib_desc, &ib_init_data, ib);
-    }
-
-    auto &mesh_filter = entity.AddComponent<MeshFilterComponent>();
-    mesh_filter.vertex_buffer = vb;
-    mesh_filter.index_buffer = ib;
-    mesh_filter.num_indices = indices.size();
-}
-
-std::shared_ptr<PPGETextureView> LoadTexture(const std::filesystem::path &path_to_diffuse_tex)
-{
-    std::shared_ptr<PPGETexture> diffuse_texture;
-    {
-        std::string path_to_res = path_to_diffuse_tex.string();
-        TextureCreateDesc tex_cd;
-        tex_cd.resource_path = path_to_res.c_str();
-
-        auto ext = path_to_diffuse_tex.extension();
-        if (ext.compare(".dds") == 0)
-        {
-            tex_cd.file_format = TextureFileFormat::DDS;
-        }
-        else if (ext.compare(".jpeg") == 0)
-        {
-            tex_cd.file_format = TextureFileFormat::JPEG;
-        }
-        else if (ext.compare(".png") == 0)
-        {
-            tex_cd.file_format = TextureFileFormat::PNG;
-        }
-        tex_cd.desc.bind_flags = BindFlags::BIND_SHADER_RESOURCE;
-        RendererSystem::Get().GetDevice()->CreateTexture(tex_cd, diffuse_texture);
-    }
-
-    return diffuse_texture->GetDefaultView();
-}
-
-class SceneLoader
-{
-  public:
-    static void LoadScene(const std::filesystem::path &path_to_scene, Scene &ppge_scene, float pos_x = 0.0f,
-                          float pos_y = 0.0f, float pos_z = 0.0f, float yaw = 0.0f, float pitch = 0.0f,
-                          float roll = 0.0f, float scale_factor = 1.0f)
-    {
-        std::unordered_map<std::string, std::shared_ptr<PPGETextureView>> diffuse_maps;
-        std::unordered_map<std::string, std::shared_ptr<PPGETextureView>> normal_maps;
-        std::vector<StandardVertex> vertices;
-        std::vector<unsigned int> indices;
-
-        const aiScene *scene = aiImportFile(path_to_scene.string().c_str(),
-                                            aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded);
-
-        scene = aiApplyPostProcessing(scene, aiProcess_FixInfacingNormals | aiProcess_FlipUVs | aiProcess_MakeLeftHanded);
-
-        if (!scene || !scene->HasMeshes())
-        {
-            APP_ERROR("Unable to load {0}\n", path_to_scene.string().c_str());
-            return;
-        }
-
-        for (unsigned i = 0; i < scene->mNumMeshes; ++i)
-        {
-
-            const aiMesh *mesh = scene->mMeshes[i];
-            for (unsigned j = 0; j < mesh->mNumVertices; ++j)
-            {
-                auto &vertex = vertices.emplace_back();
-                if (mesh->HasPositions())
-                {
-                    vertex.px = mesh->mVertices[j].x;
-                    vertex.py = mesh->mVertices[j].y;
-                    vertex.pz = mesh->mVertices[j].z;
-                }
-                if (mesh->HasNormals())
-                {
-                    vertex.nx = mesh->mNormals[j].x;
-                    vertex.ny = mesh->mNormals[j].y;
-                    vertex.nz = mesh->mNormals[j].z;
-                }
-                if (mesh->HasTextureCoords(0))
-                {
-                    vertex.u1 = mesh->mTextureCoords[0][j].x;
-                    vertex.v1 = mesh->mTextureCoords[0][j].y;
-                }
-                if (mesh->HasTangentsAndBitangents())
-                {
-                    vertex.tx = mesh->mTangents[j].x;
-                    vertex.ty = mesh->mTangents[j].y;
-                    vertex.tz = mesh->mTangents[j].z;
-                    vertex.btx = mesh->mBitangents[j].x;
-                    vertex.bty = mesh->mBitangents[j].y;
-                    vertex.btz = mesh->mBitangents[j].z;
-                }
-            }
-
-            if (mesh->HasFaces())
-            {
-                for (unsigned j = 0; j < mesh->mNumFaces; ++j)
-                {
-                    const aiFace face = mesh->mFaces[j];
-                    for (unsigned k = 0; k < face.mNumIndices; k++)
-                    {
-                        indices.push_back(face.mIndices[k]);
-                    }
-                }
-            }
-
-            auto entity = ppge_scene.CreateEntity("Entity " + std::to_string(++ENTITY_COUNT));
-            auto &transform = entity.GetComponents<TransformComponent>();
-            transform.position = Math::Vector3(pos_x, pos_y, pos_z);
-            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(yaw, pitch, roll);
-            transform.scale = Math::Vector3(scale_factor, scale_factor, scale_factor);
-            CreateMeshFilter(entity, vertices, indices);
-
-            auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
-            {
-                aiReturn result;
-                const aiMaterial *mat = scene->mMaterials[mesh->mMaterialIndex];
-
-                aiColor4D Kd;
-                result = aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &Kd);
-                if (result == AI_SUCCESS)
-                {
-                    mesh_renderer.albedo_color = Math::Color(Kd.r, Kd.g, Kd.b);
-                }
-                else
-                {
-                    mesh_renderer.albedo_color = Math::Color(1.0f, 1.0f, 1.0f);
-                }
-                aiColor4D Ks;
-                result = aiGetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR, &Ks);
-                if (result == AI_SUCCESS)
-                {
-                    mesh_renderer.specular_color = Math::Color(Ks.r, Ks.g, Ks.b, 1.0f);
-                }
-                else
-                {
-                    mesh_renderer.specular_color = Math::Color(1.0f, 1.0f, 1.0f);
-                }
-                ai_real Ns;
-                result = aiGetMaterialFloat(mat, AI_MATKEY_SHININESS, &Ns);
-                if (result == AI_SUCCESS)
-                {
-                    mesh_renderer.specular_color.A(Ns);
-                }
-
-                aiString tex_path;
-                result = aiGetMaterialString(mat, AI_MATKEY_TEXTURE_DIFFUSE(0), &tex_path);
-                if (result == AI_SUCCESS)
-                {
-                    auto path_to_diff_texture = path_to_scene.parent_path() / std::filesystem::path(tex_path.C_Str());
-                    auto it = diffuse_maps.find(path_to_diff_texture.string());
-                    if (it == diffuse_maps.end())
-                    {
-                        auto [_it, success] =
-                            diffuse_maps.emplace(path_to_diff_texture.string(), LoadTexture(path_to_diff_texture));
-                        it = _it;
-                    }
-                    mesh_renderer.albedo_map = it->second;
-                }
-
-                result = aiGetMaterialString(mat, AI_MATKEY_TEXTURE_NORMALS(0), &tex_path);
-                if (result == AI_SUCCESS)
-                {
-                    auto path_to_normal_texture = path_to_scene.parent_path() / std::filesystem::path(tex_path.C_Str());
-                    auto it = normal_maps.find(path_to_normal_texture.string());
-                    if (it == normal_maps.end())
-                    {
-                        auto [_it, success] =
-                            normal_maps.emplace(path_to_normal_texture.string(), LoadTexture(path_to_normal_texture));
-                        it = _it;
-                    }
-                    mesh_renderer.normal_map = it->second;
-                }
-            }
-
-            vertices.clear();
-            indices.clear();
-        }
-
-        aiReleaseImport(scene);
-    }
-};
-
 class TestLayer : public Widget
 {
     ResourceManager resource_mgr;
@@ -270,76 +59,48 @@ class TestLayer : public Widget
         {
             m_light = m_scene.CreateEntity("Light");
             auto &transform = m_light.GetComponents<TransformComponent>();
-            transform.position = Math::Vector3(0.0f, 2.0f, 0.0f);
-            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(0.0f, 2 * PI / 5, 0.0f);
-            auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::POINT);
+            transform.position = Math::Vector3(.5f, 2.0f, .5f);
+            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(-3 * PI / 4, 2 * PI / 5, 0.0f);
+            auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::SPOT);
             point_light.color = Math::Color(1.0f, 1.0f, 1.0f);
-            point_light.intensity = 5.0f;
+            point_light.intensity = 2.0f;
         }
 
         resource_mgr.WalkRoot("../../Sandbox/assets");
-        if (auto model = resource_mgr.GetCachedResource("cube/cube.obj"))
+        if (auto model = resource_mgr.GetCachedResource("damaged_helmet/damaged_helmet.gltf"))
         {
             auto lazy_model = std::static_pointer_cast<LazyResource>(model);
-            SceneLoader::LoadScene(lazy_model->data, m_scene, 0.0f, 0.25f, 1.25f);
-            SceneLoader::LoadScene(lazy_model->data, m_scene, 0.0f, 0.25f, -1.25f);
-            SceneLoader::LoadScene(lazy_model->data, m_scene, 1.25f, 0.25f, 0.0f);
-            SceneLoader::LoadScene(lazy_model->data, m_scene, -1.25f, 0.25f, 0.0f);
+            auto entity = m_scene.CreateEntity("Helmet");
+            ModelLoader::ImportModel(*lazy_model, entity);
         }
 
         {
             auto entity = m_scene.CreateEntity("Ground");
             {
-                std::vector<StandardVertex> vertices{{.px = 1.0f,
-                                                      .py = 0.0f,
-                                                      .pz = 1.0f,
-                                                      .nx = 0.0f,
-                                                      .ny = 1.0f,
-                                                      .nz = 0.0f,
-                                                      .color = 0x1199eeff,
-                                                      .u1 = 0.0f,
-                                                      .v1 = 0.0f},
-                                                     {.px = 1.0f,
-                                                      .py = 0.0f,
-                                                      .pz = -1.0f,
-                                                      .nx = 0.0f,
-                                                      .ny = 1.0f,
-                                                      .nz = 0.0f,
-                                                      .color = 0x11ee99ff,
-                                                      .u1 = 1.0f,
-                                                      .v1 = 0.0f},
-                                                     {.px = -1.0f,
-                                                      .py = 0.0f,
-                                                      .pz = -1.0f,
-                                                      .nx = 0.0f,
-                                                      .ny = 1.0f,
-                                                      .nz = 0.0f,
-                                                      .color = 0x1199eeff,
-                                                      .u1 = 1.0f,
-                                                      .v1 = 1.0f},
-                                                     {.px = -1.0f,
-                                                      .py = 0.0f,
-                                                      .pz = 1.0f,
-                                                      .nx = 0.0f,
-                                                      .ny = 1.0f,
-                                                      .nz = 0.0f,
-                                                      .color = 0xee1199ff,
-                                                      .u1 = 0.0f,
-                                                      .v1 = 1.0f}};
-                std::vector<unsigned int> indices{0, 3, 2, 2, 1, 0};
-                CreateMeshFilter(entity, vertices, indices);
-            }
-            if (auto resource = resource_mgr.GetCachedResource("textures/no_texture.png"))
-            {
-                auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
+                GeometryPrimitives::CreatePlaneMesh(entity);
+
                 auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
-                mesh_renderer.albedo_map = LoadTexture(lazy_resource->data);
+                if (auto resource = resource_mgr.GetCachedResource("textures/landscape1_albedo.dds"))
+                {
+                    auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
+                    mesh_renderer.albedo_map = ModelLoader::ImportTexture(*lazy_resource);
+                }
+                else
+                {
+                    mesh_renderer.albedo_color = Math::Color(0.75f, 0.0f, 0.75f);
+                }
+                if (auto resource = resource_mgr.GetCachedResource("textures/landscape1_normal.dds"))
+                {
+                    auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
+                    mesh_renderer.normal_map = ModelLoader::ImportTexture(*lazy_resource);
+                }
                 mesh_renderer.specular_color = Math::Color(.85f, .85f, .85f, 10.0f);
+                
+                auto &transform = entity.GetComponents<TransformComponent>();
+                transform.position = Math::Vector3(0.0f, -0.5f, 0.0f);
+                transform.scale = Math::Vector3(5.0f, 1.0f, 5.0f);
             }
 
-            auto &transform = entity.GetComponents<TransformComponent>();
-            transform.position = Math::Vector3(0.0f, -0.8f, 0.0f);
-            transform.scale = Math::Vector3(5.0f, 1.0f, 5.0f);
         }
     }
 

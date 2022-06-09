@@ -26,6 +26,6 @@ Entity Scene::CreateEntity(const std::string &tag)
 
 void Scene::DestroyEntity(Entity entity)
 {
-    m_registry.destroy(entity.m_handle);
+    entity.Destroy();
 }
 } // namespace PPGE

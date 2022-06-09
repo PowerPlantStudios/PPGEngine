@@ -3,7 +3,6 @@
 
 #include "core/defines.h"
 #include "core/ppge_enum.h"
-#include "rhi/pipeline_state.h"
 
 namespace PPGE
 {

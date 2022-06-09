@@ -47,6 +47,8 @@ class Entity
         return m_scene_ptr && m_handle != entt::null && GetRegistry().valid(m_handle);
     }
 
+    Entity &CreateChildEntity();
+
     /**
      * Attempting to add a component that already exists for the
      * given entity results in underfined behaviour. If in doubt, it is
@@ -143,8 +145,14 @@ class Entity
 
     entt::registry &GetRegistry() const;
 
+    void Destroy();
+
     Scene *m_scene_ptr = nullptr;
 
     EntityTraits::EntityHandle m_handle = entt::null;
+
+    std::vector<Entity> m_childred;
+    
+    Entity *m_parent;
 };
 } // namespace PPGE

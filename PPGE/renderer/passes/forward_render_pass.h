@@ -52,6 +52,8 @@ class ForwardRenderPass : public SceneRenderPass
 
     std::shared_ptr<PPGEBuffer> m_cb_per_draw;
 
+    std::shared_ptr<PPGEBuffer> m_cb_material;
+    
     std::shared_ptr<PPGEBuffer> m_cb_light;
 
     std::shared_ptr<PPGESampler> m_comparison_sampler;

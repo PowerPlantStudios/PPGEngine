@@ -6,7 +6,7 @@
 
 #include "color_helpers.hlsl"
 #include "common_buffers.hlsl"
-#include "common_defines.hlsl"
+#include "common_constants.hlsl"
 #include "common_textures.hlsl"
 #include "common_samplers.hlsl"
 #include "lighting_helpers.hlsl"

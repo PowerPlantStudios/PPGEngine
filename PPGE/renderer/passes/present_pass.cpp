@@ -36,6 +36,7 @@ PresentPass::PresentPass()
             ShaderCreateDesc cd;
             cd.desc.shader_type_flags = ShaderTypeFlags::SHADER_TYPE_PIXEL;
             cd.compiler = ShaderCompilerType::SHADER_COMPILER_FXC;
+            cd.file_path = "../../PPGE/renderer/shaders/present_ps.hlsl";
             cd.source_code = present_ps.data.data();
             cd.source_code_size = present_ps.data.size();
             cd.entry_point_name = "main_PS";

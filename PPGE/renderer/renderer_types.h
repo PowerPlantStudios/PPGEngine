@@ -78,7 +78,13 @@ enum class MaterialOptions : uint32_t
     NONE = 0,
     ALBEDO_MAP_BOUND = 1 << 0,
     SPECULAR_MAP_BOUND = 1 << 1,
-    NORMAL_MAP_BOUND = 1 << 2,
+    ROUGHNESS_MAP_BOUND = 1 << 2,
+    METALLIC_MAP_BOUND = 1 << 3,
+    NORMAL_MAP_BOUND = 1 << 4,
+    OCCLUSION_MAP_BOUND = 1 << 5,
+    EMISSION_MAP_BOUND = 1 << 6,
+    HEIGHT_MAP_BOUND = 1 << 7,
+    ALPHA_MASK_MAP_BOUND = 1 << 8
 };
 PPGE_ENUM_OPERATORS(MaterialOptions);
 
@@ -108,15 +114,26 @@ struct alignas(16) CbPerDraw
 {
     Math::Matrix world;
     Math::Matrix world_inverse_transpose;
-
-    Math::Color albedo_color;
-    Math::Color specular_color;
-
-    MaterialOptions material_options;
     uint32_t entity_id;
-    uint32_t pad[2];
+    uint32_t pad[3];
 };
 constexpr const char *CbPerDrawResourceName = "PerDrawConstantBuffer";
+
+struct alignas(16) CbMaterial
+{
+    Math::Color albedo_color;
+    Math::Color specular_color;
+    Math::Color emissive_color;
+
+    float shininess;
+    float roughness_factor;
+    float metalic_factor;
+    float alpha_cutoff;
+
+    MaterialOptions material_options;
+    uint32_t pad[3];
+};
+constexpr const char *CbMaterialResourceName = "MaterialConstantBuffer";
 
 struct alignas(16) CbLight
 {

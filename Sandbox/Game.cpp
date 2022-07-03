@@ -53,54 +53,68 @@ class TestLayer : public Widget
             transform.position = Math::Vector3(2.0f, 2.0f, 2.0f);
             transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(-3 * PI / 4, 2 * PI / 5, 0.0f);
             auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::DIRECTIONAL, false);
-            point_light.color = Math::Color(.8f, .8f, .7f);
-            point_light.intensity = .25f;
+            point_light.color = Math::Color(1.00f, 0.96f, 0.84f);
+            point_light.intensity = 1.5f;
         }
+
         {
             m_light = m_scene.CreateEntity("Light");
             auto &transform = m_light.GetComponents<TransformComponent>();
-            transform.position = Math::Vector3(.5f, 2.0f, .5f);
-            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(-3 * PI / 4, 2 * PI / 5, 0.0f);
+            transform.position = Math::Vector3(-.75f, 2.0f, -.75f);
+            transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(1 * PI / 4, 2 * PI / 5, 0.0f);
             auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::SPOT);
             point_light.color = Math::Color(1.0f, 1.0f, 1.0f);
-            point_light.intensity = 2.0f;
+            point_light.intensity = 20.0f;
         }
 
         resource_mgr.WalkRoot("../../Sandbox/assets");
-        if (auto model = resource_mgr.GetCachedResource("damaged_helmet/damaged_helmet.gltf"))
+        if (auto model = resource_mgr.GetCachedResource("flight_helmet/flight_helmet_joint.gltf"))
         {
             auto lazy_model = std::static_pointer_cast<LazyResource>(model);
-            auto entity = m_scene.CreateEntity("Helmet");
-            ModelLoader::ImportModel(*lazy_model, entity);
+            auto entity = m_scene.CreateEntity("Damaged Helmet");
+            ImportHelper::ImportModel(*lazy_model, entity);
         }
 
+        auto entity = m_scene.CreateEntity("Ground");
         {
-            auto entity = m_scene.CreateEntity("Ground");
+            auto &mesh_filter = entity.AddComponent<MeshFilterComponent>();
             {
-                GeometryPrimitives::CreatePlaneMesh(entity);
-
-                auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
-                if (auto resource = resource_mgr.GetCachedResource("textures/landscape1_albedo.dds"))
-                {
-                    auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
-                    mesh_renderer.albedo_map = ModelLoader::ImportTexture(*lazy_resource);
-                }
-                else
-                {
-                    mesh_renderer.albedo_color = Math::Color(0.75f, 0.0f, 0.75f);
-                }
-                if (auto resource = resource_mgr.GetCachedResource("textures/landscape1_normal.dds"))
-                {
-                    auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
-                    mesh_renderer.normal_map = ModelLoader::ImportTexture(*lazy_resource);
-                }
-                mesh_renderer.specular_color = Math::Color(.85f, .85f, .85f, 10.0f);
-                
-                auto &transform = entity.GetComponents<TransformComponent>();
-                transform.position = Math::Vector3(0.0f, -0.5f, 0.0f);
-                transform.scale = Math::Vector3(5.0f, 1.0f, 5.0f);
+                std::vector<std::vector<StandardVertex>> vertices;
+                std::vector<unsigned int> indices;
+                auto &v = vertices.emplace_back();
+                GeometryPrimitives::CreateQuad(v, indices);
+                mesh_filter.mesh = MeshHelper::CreateMesh(vertices, indices);
             }
 
+            auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
+            {
+                PBRMaterial::MaterialDesc desc{.albedo_color = Math::Color(.15f, .20f, .40f),
+                                               .emissive_color = Math::Color(0.0f, 0.0f, 0.0f),
+                                               .roughness_factor = 1.0f,
+                                               .metalic_factor = 0.0f,
+                                               .alpha_cutoff = 1.0f};
+                auto material = MaterialHelper::CreateMaterial<PBRMaterial>(desc);
+
+                //if (auto resource = resource_mgr.GetCachedResource("textures/landscape1_albedo.dds"))
+                //{
+                //    auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
+                //    if (auto map = MaterialHelper::LoadTexture(lazy_resource->data))
+                //        material->SetAlbedoMap(std::move(map));
+                //}
+
+                //if (auto resource = resource_mgr.GetCachedResource("textures/landscape1_normal.dds"))
+                //{
+                //    auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
+                //    if (auto map = MaterialHelper::LoadTexture(lazy_resource->data))
+                //        material->SetNormalMap(std::move(map));
+                //}
+
+                mesh_renderer.material = std::move(material);
+            }
+
+            auto &transform = entity.GetComponents<TransformComponent>();
+            transform.position = Math::Vector3(0.0f, -1.5f, 0.0f);
+            transform.scale = Math::Vector3(5.0f, 1.0f, 5.0f);
         }
     }
 

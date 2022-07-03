@@ -15,9 +15,12 @@ float4 Decode32bitRGBA(uint color)
     return float4(r, g, b, a);
 }
 
-inline bool IsSaturated(float val)  { return val == saturate(val); }
+inline bool IsSaturated(float  val) { return val == saturate(val); }
 inline bool IsSaturated(float2 val) { return IsSaturated(val.x)   && IsSaturated(val.y); } 
 inline bool IsSaturated(float3 val) { return IsSaturated(val.xy)  && IsSaturated(val.z); } 
 inline bool IsSaturated(float4 val) { return IsSaturated(val.xyz) && IsSaturated(val.w); } 
+
+inline float3 degamma(float3 color, float gamma_val) { return pow(abs(color),        gamma_val); }
+inline float3 gamma  (float3 color, float gamma_val) { return pow(abs(color), 1.0f / gamma_val); }
 
 #endif // PPGE_COLOR_HELPERS

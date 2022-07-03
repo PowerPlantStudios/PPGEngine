@@ -24,6 +24,8 @@ ForwardRenderPass::ForwardRenderPass()
         cb_desc.usage = UsageType::USAGE_DYNAMIC;
         cb_desc.cpu_access_flags = CPUAccessFlags::CPU_ACCESS_WRITE;
         RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_per_draw);
+        cb_desc.byte_width = sizeof(CbMaterial);
+        RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_material);
         cb_desc.byte_width = sizeof(CbLight);
         RendererSystem::Get().GetDevice()->CreateBuffer(cb_desc, nullptr, m_cb_light);
     }
@@ -126,12 +128,23 @@ ForwardRenderPass::ForwardRenderPass()
             {"cb_Renderer", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"cb_PerFrame", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"cb_PerDraw", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
+            {"cb_Material", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"cb_Light", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
             {"g_texture_material_albedo",
              {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_texture_material_specular",
+            {"g_texture_material_roughness",
+             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
+            {"g_texture_material_metallic",
              {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
             {"g_texture_material_normal",
+             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
+            {"g_texture_material_occlusion",
+             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
+            {"g_texture_material_emission",
+             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
+            {"g_texture_material_height",
+             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
+            {"g_texture_material_alpha_mask",
              {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
             {"g_shadow_map_dir_light",
              {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
@@ -178,6 +191,7 @@ ForwardRenderPass::ForwardRenderPass()
     m_SRB->GetVariableByName("cb_PerDraw", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_draw);
 
     m_SRB->GetVariableByName("cb_PerDraw", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_per_draw);
+    m_SRB->GetVariableByName("cb_Material", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_material);
     m_SRB->GetVariableByName("cb_Light", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_light);
 
     m_SRB->GetVariableByName("g_sampler_comparison", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_comparison_sampler);
@@ -251,13 +265,13 @@ void ForwardRenderPass::Execute()
     for (auto [entity, light_transform_data, light_data] :
          data.scene.View<const TransformComponent, const LightComponent>().each())
     {
-        Light light(light_transform_data, light_data);
         // Update light buffer
+        Light light(light_transform_data, light_data);
+        CbLight *light_data_map;
+        RendererSystem::Get().GetImmediateContext()->Map(m_cb_light.get(), MapType::MAP_WRITE, MapFlags::MAP_DISCARD,
+                                                         reinterpret_cast<void **>(&light_data_map));
+        if (light_data_map)
         {
-            CbLight *light_data_map;
-            RendererSystem::Get().GetImmediateContext()->Map(m_cb_light.get(), MapType::MAP_WRITE,
-                                                             MapFlags::MAP_DISCARD,
-                                                             reinterpret_cast<void **>(&light_data_map));
 
             for (size_t i = 0; i < light.GetShadowMapViewCount(); i++)
             {
@@ -274,7 +288,8 @@ void ForwardRenderPass::Execute()
             light_data_map->color_intensity =
                 Math::Color(light_data.color.R(), light_data.color.G(), light_data.color.B(), light_data.intensity);
 
-            light_data_map->light_options = light_data.CanCastShadow() ? LightOptions::CAN_CAST_SHADOW : LightOptions::NONE;
+            light_data_map->light_options =
+                light_data.CanCastShadow() ? LightOptions::CAN_CAST_SHADOW : LightOptions::NONE;
 
             switch (light_data.GetLightType())
             {
@@ -330,47 +345,18 @@ void ForwardRenderPass::Draw()
          data.scene.View<const TransformComponent, const MeshFilterComponent, const MeshRendererComponent>().each())
     {
         // Bind vertex and index buffers
-        {
-            std::shared_ptr<PPGEBuffer> vbs[] = {mesh_filer.vertex_buffer};
-            uint64_t offsets[] = {0};
-            RendererSystem::Get().GetImmediateContext()->SetVertexBuffers(1, vbs, offsets);
-            RendererSystem::Get().GetImmediateContext()->SetIndexBuffer(mesh_filer.index_buffer);
-        }
+        mesh_filer.mesh->Bind();
+
+        // Update material
+        mesh_renderer.material->Build(m_SRB, m_cb_material);
 
         // Update per draw call constant buffer
+        CbPerDraw *per_draw_data;
+        RendererSystem::Get().GetImmediateContext()->Map(m_cb_per_draw.get(), MapType::MAP_WRITE, MapFlags::MAP_DISCARD,
+                                                         reinterpret_cast<void **>(&per_draw_data));
+        if (per_draw_data)
         {
-            CbPerDraw *per_draw_data;
-            RendererSystem::Get().GetImmediateContext()->Map(m_cb_per_draw.get(), MapType::MAP_WRITE,
-                                                             MapFlags::MAP_DISCARD,
-                                                             reinterpret_cast<void **>(&per_draw_data));
-            per_draw_data->material_options = MaterialOptions::NONE;
             per_draw_data->entity_id = static_cast<uint32_t>(entity);
-            per_draw_data->albedo_color = mesh_renderer.albedo_color;
-            per_draw_data->specular_color = mesh_renderer.specular_color;
-
-            // Set per object shader resources
-            {
-                if (mesh_renderer.albedo_map)
-                {
-                    m_SRB->GetVariableByName("g_texture_material_albedo", ShaderTypeFlags::SHADER_TYPE_PIXEL)
-                        ->Set(mesh_renderer.albedo_map);
-                    per_draw_data->material_options |= MaterialOptions::ALBEDO_MAP_BOUND;
-                }
-
-                if (mesh_renderer.specular_map)
-                {
-                    m_SRB->GetVariableByName("g_texture_material_specular", ShaderTypeFlags::SHADER_TYPE_PIXEL)
-                        ->Set(mesh_renderer.specular_map);
-                    per_draw_data->material_options |= MaterialOptions::SPECULAR_MAP_BOUND;
-                }
-
-                if (mesh_renderer.normal_map)
-                {
-                    m_SRB->GetVariableByName("g_texture_material_normal", ShaderTypeFlags::SHADER_TYPE_PIXEL)
-                        ->Set(mesh_renderer.normal_map);
-                    per_draw_data->material_options |= MaterialOptions::NORMAL_MAP_BOUND;
-                }
-            }
 
             auto world = transform.GetWorldMatrix();
             auto world_inv_trans = world.Invert().Transpose();
@@ -384,8 +370,11 @@ void ForwardRenderPass::Draw()
         // Bind shader resources
         RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB);
 
-        // Issue indexed draw call
-        RendererSystem::Get().GetImmediateContext()->DrawIndexed(mesh_filer.num_indices);
+        // Issue draw call
+        if (mesh_filer.mesh->IsIndexBufferBound())
+            RendererSystem::Get().GetImmediateContext()->DrawIndexed(mesh_filer.mesh->GetNumIndices());
+        else
+            RendererSystem::Get().GetImmediateContext()->Draw(0);
     }
 }
 } // namespace PPGE

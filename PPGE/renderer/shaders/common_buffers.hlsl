@@ -28,15 +28,24 @@ cbuffer cb_PerDraw : register(b2)
 {
     float4x4 g_world            : packoffset(c0);
     float4x4 g_worldInvTran     : packoffset(c4);
-
-    float4   g_albedo_color     : packoffset(c8);
-    float4   g_specular_color   : packoffset(c9);
-
-    uint     g_material_options : packoffset(c10.x);
-    uint     g_entity_id        : packoffset(c10.y);
+    uint     g_entity_id        : packoffset(c8.x);
 };
 
-cbuffer cb_Light : register(b3)
+cbuffer cb_Material : register(b3)
+{
+    float4   g_albedo_color     : packoffset(c0);
+    float4   g_specular_color   : packoffset(c1);
+    float4   g_emissive_color   : packoffset(c2);
+
+    float    g_shininess        : packoffset(c3.x);
+    float    g_roughness_factor : packoffset(c3.y);
+    float    g_metalic_factor   : packoffset(c3.z);
+    float    g_alpha_cutoff     : packoffset(c3.w);
+
+    uint     g_material_options : packoffset(c4.x);
+}
+
+cbuffer cb_Light : register(b4)
 {
     float4x4 g_light_viewProj[6]       : packoffset(c0);
     float3   g_light_position          : packoffset(c24);

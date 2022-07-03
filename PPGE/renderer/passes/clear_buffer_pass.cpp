@@ -42,7 +42,7 @@ void ClearBufferPass::Unload()
 
 void ClearBufferPass::Execute()
 {
-    RendererSystem::Get().GetImmediateContext()->ClearRenderTarget(m_color_buffer_rtv, 0.6, 0.8, 0.9, 1.0f);
+    RendererSystem::Get().GetImmediateContext()->ClearRenderTarget(m_color_buffer_rtv, 0.0f, 0.0f, 0.0f, 1.0f);
     RendererSystem::Get().GetImmediateContext()->ClearDepthStencil(m_depth_buffer_dsv, 1.0f, 0);
 }
 } // namespace PPGE

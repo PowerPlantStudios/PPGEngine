@@ -29,7 +29,7 @@ void DeviceContextD3D11Impl::SetVertexBuffers(uint32_t num_buffers, std::shared_
     m_bound_vertex_buffer_count = num_buffers > Num_Of_Buffer_Slots ? Num_Of_Buffer_Slots : num_buffers;
     for (uint64_t i = 0; i < m_bound_vertex_buffer_count; i++)
     {
-        m_bound_vertex_buffers_sp[i] = std::static_pointer_cast<BufferD3D11Impl>(std::move(p_buffers[i]));
+        m_bound_vertex_buffers_sp[i] = std::static_pointer_cast<BufferD3D11Impl>(p_buffers[i]);
         m_bound_d3d11_vertex_buffers_ptr[i] = m_bound_vertex_buffers_sp[i]->GetD3D11BufferRaw();
         m_bound_d3d11_vertex_buffer_strides[i] = m_bound_pipeline_state_sp->GetStride(i);
         m_bound_d3d11_vertex_buffer_offsets[i] = static_cast<UINT>(offsets[i]);

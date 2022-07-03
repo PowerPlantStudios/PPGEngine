@@ -3,18 +3,19 @@
 
 #include "core/defines.h"
 #include "io/resources.h"
+#include "rhi/buffer.h"
 #include "system/logger_system.h"
+#include "system/renderer_system.h"
 
 namespace PPGE
 {
 class Entity;
 class PPGETextureView;
 
-class ModelLoader
+namespace ImportHelper
 {
-  public:
-    static void ImportModel(const LazyResource &resource, Entity &entity);
 
-    static std::shared_ptr<PPGETextureView> ImportTexture(const LazyResource &resource);
-};
+void ImportModel(const LazyResource &resource, Entity &entity);
+
+} // namespace ImportHelper
 } // namespace PPGE

@@ -5,7 +5,7 @@
 #define PPGE_RENDERER_HELPERS
 
 #include "common_buffers.hlsl"
-#include "common_defines.hlsl"
+#include "common_constants.hlsl"
 
 #define RENDERER_ENABLE_NORMAL_MAP   uint(1U << 0)
 

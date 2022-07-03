@@ -129,12 +129,7 @@ void ShadowPass::Execute()
                      .each())
             {
                 // Bind vertex and index buffers
-                {
-                    std::shared_ptr<PPGEBuffer> vbs[] = {mesh_filer_data.vertex_buffer};
-                    uint64_t offsets[] = {0};
-                    RendererSystem::Get().GetImmediateContext()->SetVertexBuffers(1, vbs, offsets);
-                    RendererSystem::Get().GetImmediateContext()->SetIndexBuffer(mesh_filer_data.index_buffer);
-                }
+                mesh_filer_data.mesh->Bind();
 
                 // Update per draw call constant buffer
                 {
@@ -155,8 +150,11 @@ void ShadowPass::Execute()
                 // Bind shader resources
                 RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB);
 
-                // Issue indexed draw call
-                RendererSystem::Get().GetImmediateContext()->DrawIndexed(mesh_filer_data.num_indices);
+                // Issue draw call
+                if (mesh_filer_data.mesh->IsIndexBufferBound())
+                    RendererSystem::Get().GetImmediateContext()->DrawIndexed(mesh_filer_data.mesh->GetNumIndices());
+                else
+                    RendererSystem::Get().GetImmediateContext()->Draw(0);
             }
         }
     }

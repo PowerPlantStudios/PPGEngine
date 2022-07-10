@@ -208,19 +208,12 @@ class MaterialLoader
     {
         auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
         {
-            LegacyMaterial::MaterialDesc desc{.albedo_color = Math::Color(1.0f, 1.0f, 1.0f),
-                                              .specular_color = Math::Color(1.0f, 1.0f, 1.0f),
-                                              .emissive_color = Math::Color(1.0f, 1.0f, 1.0f),
-                                              .shininess = 1.0f,
-                                              .alpha_cutoff = 0.0f};
+            LegacyMaterial::MaterialDesc desc;
 
             auto name = GetMaterialProperty<std::string>(ai_material, AI_MATKEY_NAME);
 
             if (auto Kd = GetMaterialProperty<Math::Color>(ai_material, AI_MATKEY_COLOR_DIFFUSE))
                 desc.albedo_color = *Kd;
-
-            if (auto Ks = GetMaterialProperty<Math::Color>(ai_material, AI_MATKEY_COLOR_SPECULAR))
-                desc.specular_color = *Ks;
 
             if (auto Ke = GetMaterialProperty<Math::Color>(ai_material, AI_MATKEY_COLOR_EMISSIVE))
                 desc.emissive_color = *Ke;
@@ -255,11 +248,7 @@ class MaterialLoader
     {
         auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
         {
-            PBRMaterial::MaterialDesc desc{.albedo_color = Math::Color(1.0f, 1.0f, 1.0f),
-                                           .emissive_color = Math::Color(1.0f, 1.0f, 1.0f),
-                                           .roughness_factor = 1.0f,
-                                           .metalic_factor = 1.0f,
-                                           .alpha_cutoff = 0.0f};
+            PBRMaterial::MaterialDesc desc;
 
             auto name = GetMaterialProperty<std::string>(ai_material, AI_MATKEY_NAME);
 

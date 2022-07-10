@@ -34,15 +34,13 @@ cbuffer cb_per_draw : register(b2)
 cbuffer cb_material : register(b3)
 {
     float4   g_albedo_color     : packoffset(c0);
-    float4   g_specular_color   : packoffset(c1);
-    float4   g_emissive_color   : packoffset(c2);
+    float4   g_emissive_color   : packoffset(c1);
 
-    float    g_shininess        : packoffset(c3.x);
-    float    g_roughness_factor : packoffset(c3.y);
-    float    g_metalic_factor   : packoffset(c3.z);
-    float    g_alpha_cutoff     : packoffset(c3.w);
+    float    g_roughness_factor : packoffset(c2.x);
+    float    g_metalic_factor   : packoffset(c2.y);
+    float    g_alpha_cutoff     : packoffset(c2.z);
 
-    uint     g_material_options : packoffset(c4.x);
+    uint     g_material_options : packoffset(c3.x);
 }
 
 cbuffer cb_light : register(b4)

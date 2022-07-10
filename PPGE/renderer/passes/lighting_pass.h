@@ -63,8 +63,12 @@ class LightingPass : public SceneRenderPass
 
     std::shared_ptr<PPGESampler> m_anisotropic_sampler;
 
-    std::shared_ptr<PPGEPipelineState> m_PSO;
+    std::shared_ptr<PPGEPipelineState> m_light_PSO;
 
-    std::shared_ptr<PPGEShaderResourceBinding> m_SRB;
+    std::shared_ptr<PPGEShaderResourceBinding> m_light_SRB;
+
+    std::shared_ptr<PPGEPipelineState> m_emission_PSO;
+
+    std::shared_ptr<PPGEShaderResourceBinding> m_emission_SRB;
 };
 } // namespace PPGE

@@ -28,7 +28,7 @@ static TextureFileFormat GetTextureFileFormat(const char *format)
 }
 
 LegacyMaterial::LegacyMaterial(const MaterialDesc &desc)
-    : m_albedo_color(desc.albedo_color), m_specular_color(desc.specular_color), m_emissive_color(desc.emissive_color),
+    : m_albedo_color(desc.albedo_color), m_emissive_color(desc.emissive_color),
       m_shininess(desc.shininess), m_alpha_cutoff(desc.alpha_cutoff)
 {
 }
@@ -43,10 +43,9 @@ void LegacyMaterial::Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std:
         material->material_options = MaterialOptions::NONE;
 
         material->albedo_color = m_albedo_color;
-        material->specular_color = m_specular_color;
         material->emissive_color = m_emissive_color;
 
-        material->shininess = m_shininess;
+        material->roughness_factor = std::sqrtf(2.0f / (m_shininess + 2.0f));
         material->alpha_cutoff = m_alpha_cutoff;
 
 #define BindMap(MapName, MapFlag)                                                                                      \
@@ -57,10 +56,15 @@ void LegacyMaterial::Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std:
     }
 
         BindMap(albedo, ALBEDO_MAP);
-        BindMap(specular, SPECULAR_MAP);
         BindMap(normal, NORMAL_MAP);
         BindMap(emission, EMISSION_MAP);
 #undef BindMap
+
+        if (m_specular_map)
+        {
+            SRB->GetVariableByName("g_material_roughness", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_specular_map);
+            material->material_options |= MaterialOptions::SPECULAR_MAP_BOUND;
+        }
 
         RendererSystem::Get().GetImmediateContext()->Unmap(buffer.get());
     }

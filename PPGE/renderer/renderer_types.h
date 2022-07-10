@@ -122,16 +122,15 @@ constexpr const char *CbPerDrawResourceName = "PerDrawConstantBuffer";
 struct alignas(16) CbMaterial
 {
     Math::Color albedo_color;
-    Math::Color specular_color;
     Math::Color emissive_color;
 
-    float shininess;
     float roughness_factor;
     float metalic_factor;
     float alpha_cutoff;
+    float pad_1;
 
     MaterialOptions material_options;
-    uint32_t pad[3];
+    uint32_t pad_2[3];
 };
 constexpr const char *CbMaterialResourceName = "MaterialConstantBuffer";
 

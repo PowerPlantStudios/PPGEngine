@@ -101,9 +101,10 @@ struct Fragment
             occlusion = g_material_occlusion.Sample(g_sampler_anisotropic, in_uv).r;
         }
 
-        emissive = g_emissive_color.rgb;
+        emissive = 0.0f;
         [flatten] if (material_is_emission_map_bound())
         {
+            emissive = g_emissive_color.rgb;
             emissive *= g_material_emission.Sample(g_sampler_anisotropic, in_uv).rgb;
         }
 
@@ -168,7 +169,7 @@ struct Fragment
 
         color = (diffuse_energy * diffuse_brdf + specular_brdf) * light.radiance * n_dot_l;
 
-        return saturate(color /*+ emissive*/);
+        return saturate(color);
     }
 };
 

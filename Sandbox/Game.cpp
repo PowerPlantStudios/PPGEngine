@@ -17,7 +17,7 @@ class TestLayer : public Widget
 
     Renderer m_renderer;
 
-    Entity m_light;
+    Entity m_light_1, m_light_2;
 
     bool is_normal_map_enabled = false;
 
@@ -48,28 +48,28 @@ class TestLayer : public Widget
 
         // Create lights
         {
-            m_light = m_scene.CreateEntity("Sun Light");
-            auto &transform = m_light.GetComponents<TransformComponent>();
+            m_light_1 = m_scene.CreateEntity("Sun Light");
+            auto &transform = m_light_1.GetComponents<TransformComponent>();
             transform.position = Math::Vector3(2.0f, 2.0f, 2.0f);
             transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(-3 * PI / 4, 2 * PI / 5, 0.0f);
-            auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::DIRECTIONAL, false);
+            auto &point_light = m_light_1.AddComponent<LightComponent>(LightComponent::LightType::DIRECTIONAL, false);
             point_light.color = Math::Color(1.00f, 0.96f, 0.84f);
-            point_light.intensity = 1.5f;
+            point_light.intensity = 5.5f;
         }
 
         {
-            m_light = m_scene.CreateEntity("Light");
-            auto &transform = m_light.GetComponents<TransformComponent>();
+            m_light_2 = m_scene.CreateEntity("Light");
+            auto &transform = m_light_2.GetComponents<TransformComponent>();
             transform.position = Math::Vector3(-.75f, 2.0f, -.75f);
             transform.rotation = Math::Quaternion::CreateFromYawPitchRoll(1 * PI / 4, 2 * PI / 5, 0.0f);
-            auto &point_light = m_light.AddComponent<LightComponent>(LightComponent::LightType::SPOT);
+            auto &point_light = m_light_2.AddComponent<LightComponent>(LightComponent::LightType::SPOT);
             point_light.color = Math::Color(1.0f, 1.0f, 1.0f);
             point_light.intensity = 20.0f;
         }
 
         {
-            float lb = -35.0f;
-            float up = 35.0f;
+            float lb = -50.0f;
+            float up = 50.0f;
             for (size_t i = 0; i < 1000; i++)
             {
                 auto entity = m_scene.CreateEntity("Light");
@@ -77,49 +77,52 @@ class TestLayer : public Widget
 
                 transform.position =
                     Math::Vector3(lb + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (up - lb))),
-                                  0.5f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (2.5f - 0.5f))),
+                                  5.0f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (100.0f - 5.0f))),
                                   lb + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (up - lb))));
                 auto &point_light = entity.AddComponent<LightComponent>(LightComponent::LightType::POINT, false);
                 point_light.color = Math::Color(static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
                                                 static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
                                                 static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
-                point_light.intensity = 2.5f;
+                point_light.intensity = 25.0f;
             }
         }
 
         resource_mgr.WalkRoot("../../Sandbox/assets");
-        if (auto model = resource_mgr.GetCachedResource("damaged_helmet/damaged_helmet.gltf"))
+        if (auto model = resource_mgr.GetCachedResource("sponza_normal/sponza.obj"))
         {
             auto lazy_model = std::static_pointer_cast<LazyResource>(model);
             auto entity = m_scene.CreateEntity("Damaged Helmet");
             ImportHelper::ImportModel(*lazy_model, entity);
         }
 
-        auto entity = m_scene.CreateEntity("Ground");
+        static bool load_ground = false;
+        if (load_ground)
         {
-            auto &mesh_filter = entity.AddComponent<MeshFilterComponent>();
+            auto entity = m_scene.CreateEntity("Ground");
             {
-                std::vector<std::vector<StandardVertex>> vertices;
-                std::vector<unsigned int> indices;
-                auto &v = vertices.emplace_back();
-                GeometryPrimitives::CreateQuad(v, indices);
-                mesh_filter.mesh = MeshHelper::CreateMesh(vertices, indices);
-            }
+                auto &mesh_filter = entity.AddComponent<MeshFilterComponent>();
+                {
+                    std::vector<std::vector<StandardVertex>> vertices;
+                    std::vector<unsigned int> indices;
+                    auto &v = vertices.emplace_back();
+                    GeometryPrimitives::CreateQuad(v, indices);
+                    mesh_filter.mesh = MeshHelper::CreateMesh(vertices, indices);
+                }
 
-            auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
-            {
-                PBRMaterial::MaterialDesc desc{.albedo_color = Math::Color(.15f, .20f, .40f),
-                                               .emissive_color = Math::Color(0.0f, 0.0f, 0.0f),
-                                               .roughness_factor = 1.0f,
-                                               .metalic_factor = 0.0f,
-                                               .alpha_cutoff = 1.0f};
-                auto material = MaterialHelper::CreateMaterial<PBRMaterial>(desc);
-                mesh_renderer.material = std::move(material);
-            }
+                auto &mesh_renderer = entity.AddComponent<MeshRendererComponent>();
+                {
+                    PBRMaterial::MaterialDesc desc{.albedo_color = Math::Color(.15f, .20f, .40f),
+                                                   .roughness_factor = 1.0f,
+                                                   .metalic_factor = 0.0f,
+                                                   .alpha_cutoff = 1.0f};
+                    auto material = MaterialHelper::CreateMaterial<PBRMaterial>(desc);
+                    mesh_renderer.material = std::move(material);
+                }
 
-            auto &transform = entity.GetComponents<TransformComponent>();
-            transform.position = Math::Vector3(0.0f, -1.5f, 0.0f);
-            transform.scale = Math::Vector3(50.0f, 1.0f, 50.0f);
+                auto &transform = entity.GetComponents<TransformComponent>();
+                transform.position = Math::Vector3(0.0f, -1.5f, 0.0f);
+                transform.scale = Math::Vector3(50.0f, 1.0f, 50.0f);
+            }
         }
     }
 
@@ -130,6 +133,15 @@ class TestLayer : public Widget
     void OnUpdate(float delta_time) override
     {
         m_camera_controller.Update(delta_time);
+        float delta = 10.0f;
+        for (auto [entity, transform, light_data] : m_scene.View<TransformComponent, const LightComponent>().each())
+        {
+            if ((uint64_t)entity == (uint64_t)m_light_1 || (uint64_t)entity == (uint64_t)m_light_2)
+                continue;
+            transform.position += delta_time * Math::Vector3(
+                -delta + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (2 * delta))), 0.0f,
+                              -delta + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (2 * delta))));
+        }
     }
 
     void OnRender() override

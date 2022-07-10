@@ -73,15 +73,6 @@ void SwapChainD3D11Impl::UpdateSwapChain(bool recreate)
     m_rtv_sp.reset();
     m_dsv_sp.reset();
 
-    auto d3d11_device = m_device_wp.lock()->GetD3D11Device();
-    ID3D11Debug *pDebug;
-    d3d11_device->QueryInterface(IID_ID3D11Debug, (VOID **)(&pDebug));
-    if (pDebug)
-    {
-        pDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-        pDebug->Release();
-    }
-
     if (recreate)
     {
         m_swap_chain_ptr.Release();

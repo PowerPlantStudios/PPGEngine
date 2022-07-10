@@ -21,11 +21,10 @@ class LegacyMaterial : public Material
   public:
     struct MaterialDesc
     {
-        Math::Color albedo_color;
-        Math::Color specular_color;
-        Math::Color emissive_color;
-        float shininess;
-        float alpha_cutoff;
+        Math::Color albedo_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
+        Math::Color emissive_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
+        float shininess = 0.0f;
+        float alpha_cutoff = 1.0f;
     };
 
     LegacyMaterial() = default;
@@ -49,11 +48,10 @@ class LegacyMaterial : public Material
     std::shared_ptr<PPGETextureView> m_normal_map;
     std::shared_ptr<PPGETextureView> m_emission_map;
 
-    Math::Color m_albedo_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
-    Math::Color m_specular_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
-    Math::Color m_emissive_color = Math::Color(0.0f, 0.0f, 0.0f, 0.0f);
-    float m_shininess = 0.0;
-    float m_alpha_cutoff = 0.0f;
+    Math::Color m_albedo_color;
+    Math::Color m_emissive_color;
+    float m_shininess;
+    float m_alpha_cutoff;
 };
 
 class PBRMaterial : public Material
@@ -61,11 +59,11 @@ class PBRMaterial : public Material
   public:
     struct MaterialDesc
     {
-        Math::Color albedo_color;
-        Math::Color emissive_color;
-        float roughness_factor;
-        float metalic_factor;
-        float alpha_cutoff;
+        Math::Color albedo_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
+        Math::Color emissive_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
+        float roughness_factor = 1.0f;
+        float metalic_factor = 0.0f;
+        float alpha_cutoff = 1.0f;
     };
 
     PBRMaterial() = default;
@@ -95,11 +93,11 @@ class PBRMaterial : public Material
     std::shared_ptr<PPGETextureView> m_height_map;
     std::shared_ptr<PPGETextureView> m_alpha_mask_map;
 
-    Math::Color m_albedo_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
-    Math::Color m_emissive_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
-    float m_roughness_factor = 1.0;
-    float m_metalic_factor = 1.0f;
-    float m_alpha_cutoff = 0.0f;
+    Math::Color m_albedo_color;
+    Math::Color m_emissive_color;
+    float m_roughness_factor;
+    float m_metalic_factor;
+    float m_alpha_cutoff;
 };
 
 namespace MaterialHelper

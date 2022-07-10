@@ -21,16 +21,11 @@ class ForwardRenderPass : public SceneRenderPass
   public:
     ForwardRenderPass();
 
-    std::vector<RenderPassResource> GetPassInputs() const override final
-    {
-        return {{RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc},
-                {RenderPassResourceDescs::Depth_Buffer_Resource, RenderPassResourceDescs::Depth_Buffer_Resource_Desc}};
-    }
-
     std::vector<RenderPassResource> GetPassOutputs() const override final
     {
-        return {{RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc},
-                {RenderPassResourceDescs::Depth_Buffer_Resource, RenderPassResourceDescs::Depth_Buffer_Resource_Desc}};
+        return {
+            {RenderPassResourceDescs::Present_Buffer_Resource, RenderPassResourceDescs::Present_Buffer_Resource_Desc},
+            {RenderPassResourceDescs::Depth_Buffer_Resource, RenderPassResourceDescs::Depth_Buffer_Resource_Desc}};
     }
 
     void Load(RenderGraph &render_graph) override final;
@@ -53,7 +48,7 @@ class ForwardRenderPass : public SceneRenderPass
     std::shared_ptr<PPGEBuffer> m_cb_per_draw;
 
     std::shared_ptr<PPGEBuffer> m_cb_material;
-    
+
     std::shared_ptr<PPGEBuffer> m_cb_light;
 
     std::shared_ptr<PPGESampler> m_comparison_sampler;

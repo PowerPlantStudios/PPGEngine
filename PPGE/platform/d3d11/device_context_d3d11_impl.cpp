@@ -129,18 +129,20 @@ void DeviceContextD3D11Impl::CommitShaderResources(const std::shared_ptr<PPGESha
     auto d3d11_srb = static_cast<PPGEShaderResourceBindingD3D11 *>(p_SRB.get());
 #define SET_RESOURCE(SHADER_TYPE, D3D11_PREFIX)                                                                        \
     {                                                                                                                  \
-        const auto &##D3D11_PREFIX##_Bindable = d3d11_srb->GetD3D11Bindables(ShaderTypeFlags::SHADER_##SHADER_TYPE##); \
-        if (##D3D11_PREFIX##_Bindable.constant_buffers.size() > 0)                                                     \
-            m_d3d11_device_context_ptr->##D3D11_PREFIX##SetConstantBuffers(                                            \
-                0, ##D3D11_PREFIX##_Bindable.constant_buffers.size(),                                                  \
-                ##D3D11_PREFIX##_Bindable.constant_buffers.data());                                                    \
-        if (##D3D11_PREFIX##_Bindable.shader_resource_views.size() > 0)                                                \
-            m_d3d11_device_context_ptr->##D3D11_PREFIX##SetShaderResources(                                            \
-                0, ##D3D11_PREFIX##_Bindable.shader_resource_views.size(),                                             \
-                ##D3D11_PREFIX##_Bindable.shader_resource_views.data());                                               \
-        if (##D3D11_PREFIX##_Bindable.sampler_states.size() > 0)                                                       \
-            m_d3d11_device_context_ptr->##D3D11_PREFIX##SetSamplers(                                                   \
-                0, ##D3D11_PREFIX##_Bindable.sampler_states.size(), ##D3D11_PREFIX##_Bindable.sampler_states.data());  \
+        const auto &##D3D11_PREFIX##_Bindables =                                                                       \
+            d3d11_srb->GetD3D11Bindables(ShaderTypeFlags::SHADER_##SHADER_TYPE##);                                     \
+        for (const auto &[start_slot, bindables] :##D3D11_PREFIX##_Bindables.constant_buffer_ranges)                   \
+            if (bindables.size() > 0)                                                                                  \
+                m_d3d11_device_context_ptr->##D3D11_PREFIX##SetConstantBuffers(start_slot, bindables.size(),           \
+                                                                               bindables.data());                      \
+        for (const auto &[start_slot, bindables] :##D3D11_PREFIX##_Bindables.shader_resource_view_ranges)              \
+            if (bindables.size() > 0)                                                                                  \
+                m_d3d11_device_context_ptr->##D3D11_PREFIX##SetShaderResources(start_slot, bindables.size(),           \
+                                                                               bindables.data());                      \
+        for (const auto &[start_slot, bindables] :##D3D11_PREFIX##_Bindables.sampler_state_ranges)                     \
+            if (bindables.size() > 0)                                                                                  \
+                m_d3d11_device_context_ptr->##D3D11_PREFIX##SetSamplers(start_slot, bindables.size(),                  \
+                                                                        bindables.data());                             \
     }
 
     if (b_is_shader_bound[0])

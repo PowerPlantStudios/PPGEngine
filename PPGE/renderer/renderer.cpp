@@ -3,6 +3,8 @@
 #include "ecs/scene.h"
 #include "renderer/passes/clear_buffer_pass.h"
 #include "renderer/passes/forward_render_pass.h"
+#include "renderer/passes/geometry_pass.h"
+#include "renderer/passes/lighting_pass.h"
 #include "renderer/passes/present_pass.h"
 #include "renderer/passes/shadow_pass.h"
 #include "rhi/buffer.h"
@@ -42,7 +44,9 @@ Renderer::Renderer()
 
     m_active_srgh.CreateRenderPass<ClearBufferPass>();
     m_active_srgh.CreateRenderPass<ShadowPass>();
-    m_active_srgh.CreateRenderPass<ForwardRenderPass>();
+    m_active_srgh.CreateRenderPass<GeometryPass>();
+    m_active_srgh.CreateRenderPass<LightingPass>();
+    //m_active_srgh.CreateRenderPass<ForwardRenderPass>();
     m_active_srgh.CreateRenderPass<PresentPass>();
 
     m_active_srgh.Compile();

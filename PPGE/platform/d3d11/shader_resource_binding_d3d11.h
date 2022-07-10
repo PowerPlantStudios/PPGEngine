@@ -11,9 +11,12 @@ class PPGE_API PPGEShaderResourceBindingD3D11 : public PPGEShaderResourceBinding
   public:
     typedef struct
     {
-        std::vector<ID3D11Buffer *> constant_buffers;
-        std::vector<ID3D11ShaderResourceView *> shader_resource_views;
-        std::vector<ID3D11SamplerState *> sampler_states;
+        // Start slot to range of constant buffers
+        std::unordered_map<UINT, std::vector<ID3D11Buffer *>> constant_buffer_ranges;
+        // Start slot to range of shader resource views
+        std::unordered_map<UINT, std::vector<ID3D11ShaderResourceView *>> shader_resource_view_ranges;
+        // Start slot to range of samplers
+        std::unordered_map<UINT, std::vector<ID3D11SamplerState *>> sampler_state_ranges;
     } D3D11Bindables;
     virtual const D3D11Bindables &GetD3D11Bindables(ShaderTypeFlags shader_type) = 0;
 };

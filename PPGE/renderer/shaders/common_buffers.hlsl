@@ -4,14 +4,14 @@
 #ifndef PPGE_COMMON_BUFFERS
 #define PPGE_COMMON_BUFFERS
 
-cbuffer cb_Renderer : register(b0)
+cbuffer cb_renderer : register(b0)
 {
     uint   g_renderer_options              : packoffset(c0);
     float2 g_renderer_resolution           : packoffset(c1);
     float  g_renderer_shadowmap_resolution : packoffset(c1.z);
 } 
 
-cbuffer cb_PerFrame : register(b1)
+cbuffer cb_per_frame : register(b1)
 {
     float4x4 g_view            : packoffset(c0);
     float4x4 g_viewInv         : packoffset(c4);
@@ -20,18 +20,18 @@ cbuffer cb_PerFrame : register(b1)
     float4x4 g_viewProj        : packoffset(c16);
     float4x4 g_viewProjInv     : packoffset(c20);
 
-    float3   g_cameraPosition  : packoffset(c24);
-    float3   g_cameraDirection : packoffset(c25);
+    float3   g_camera_position  : packoffset(c24);
+    float3   g_camera_direction : packoffset(c25);
 };
 
-cbuffer cb_PerDraw : register(b2)
+cbuffer cb_per_draw : register(b2)
 {
     float4x4 g_world            : packoffset(c0);
     float4x4 g_worldInvTran     : packoffset(c4);
     uint     g_entity_id        : packoffset(c8.x);
 };
 
-cbuffer cb_Material : register(b3)
+cbuffer cb_material : register(b3)
 {
     float4   g_albedo_color     : packoffset(c0);
     float4   g_specular_color   : packoffset(c1);
@@ -45,7 +45,7 @@ cbuffer cb_Material : register(b3)
     uint     g_material_options : packoffset(c4.x);
 }
 
-cbuffer cb_Light : register(b4)
+cbuffer cb_light : register(b4)
 {
     float4x4 g_light_viewProj[6]       : packoffset(c0);
     float3   g_light_position          : packoffset(c24);

@@ -12,12 +12,20 @@ struct ShaderResourceDesc
 {
     ShaderTypeFlags shader_types;
     ShaderResourceType resource_type;
+    uint32_t offest = 0;
+};
+
+struct ShaderResourceRangeCreateDesc
+{
+    ShaderResourceDesc sr_desc;
+    uint32_t sr_name_num = 0;
+    const char **sr_name = nullptr;
 };
 
 struct ShaderResourceCreateDesc
 {
-    const char *name;
-    ShaderResourceDesc desc;
+    uint32_t range_num = 0;
+    ShaderResourceRangeCreateDesc *range = nullptr;
 };
 
 class PPGE_API PPGEShaderResourceVariable : public PPGEObject

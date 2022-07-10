@@ -57,26 +57,30 @@ ShadowPass::ShadowPass()
         ps_cd.desc.rasterizer_state_desc.slope_scaled_depth_bias = 1.0f;
         ps_cd.desc.rasterizer_state_desc.depth_bias_clamp = 0.0f;
 
-        ShaderResourceCreateDesc SRVs[] = {
-            {"cb_Renderer", {ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_PerFrame", {ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_PerDraw", {ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}}};
-        ps_cd.srv = SRVs;
-        ps_cd.srv_num = (sizeof(SRVs) / sizeof(ShaderResourceCreateDesc));
+        const char *vs_cbs[] = {"cb_renderer", "cb_per_frame", "cb_per_draw"};
+
+        ShaderResourceRangeCreateDesc range[] = {
+            {{ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER, 0u},
+             sizeof(vs_cbs) / sizeof(ShaderResourceDesc),
+             vs_cbs}
+        };
+
+        ps_cd.sr_create_desc.range = range;
+        ps_cd.sr_create_desc.range_num = (sizeof(range) / sizeof(ShaderResourceRangeCreateDesc));
 
         RendererSystem::Get().GetDevice()->CreatePipelineState(ps_cd, m_PSO);
     }
 
     // Create Shader Resource Binding
     m_SRB = m_PSO->CreateShaderResourceBinding();
-    m_SRB->GetVariableByName("cb_PerFrame", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_frame);
-    m_SRB->GetVariableByName("cb_PerDraw", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_draw);
+    m_SRB->GetVariableByName("cb_per_frame", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_frame);
+    m_SRB->GetVariableByName("cb_per_draw", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_draw);
 }
 
 void ShadowPass::Load(RenderGraph &render_graph)
 {
     auto cb_renderer = render_graph.GetResource<PPGEBuffer>(CbRendererOptionsName);
-    m_SRB->GetVariableByName("cb_Renderer", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(std::move(cb_renderer));
+    m_SRB->GetVariableByName("cb_renderer", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(std::move(cb_renderer));
 }
 
 void ShadowPass::Unload()

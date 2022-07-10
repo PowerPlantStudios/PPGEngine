@@ -67,8 +67,28 @@ class TestLayer : public Widget
             point_light.intensity = 20.0f;
         }
 
+        {
+            float lb = -35.0f;
+            float up = 35.0f;
+            for (size_t i = 0; i < 1000; i++)
+            {
+                auto entity = m_scene.CreateEntity("Light");
+                auto &transform = entity.GetComponents<TransformComponent>();
+
+                transform.position =
+                    Math::Vector3(lb + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (up - lb))),
+                                  0.5f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (2.5f - 0.5f))),
+                                  lb + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (up - lb))));
+                auto &point_light = entity.AddComponent<LightComponent>(LightComponent::LightType::POINT, false);
+                point_light.color = Math::Color(static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+                                                static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+                                                static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+                point_light.intensity = 2.5f;
+            }
+        }
+
         resource_mgr.WalkRoot("../../Sandbox/assets");
-        if (auto model = resource_mgr.GetCachedResource("flight_helmet/flight_helmet_joint.gltf"))
+        if (auto model = resource_mgr.GetCachedResource("damaged_helmet/damaged_helmet.gltf"))
         {
             auto lazy_model = std::static_pointer_cast<LazyResource>(model);
             auto entity = m_scene.CreateEntity("Damaged Helmet");
@@ -94,27 +114,12 @@ class TestLayer : public Widget
                                                .metalic_factor = 0.0f,
                                                .alpha_cutoff = 1.0f};
                 auto material = MaterialHelper::CreateMaterial<PBRMaterial>(desc);
-
-                //if (auto resource = resource_mgr.GetCachedResource("textures/landscape1_albedo.dds"))
-                //{
-                //    auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
-                //    if (auto map = MaterialHelper::LoadTexture(lazy_resource->data))
-                //        material->SetAlbedoMap(std::move(map));
-                //}
-
-                //if (auto resource = resource_mgr.GetCachedResource("textures/landscape1_normal.dds"))
-                //{
-                //    auto lazy_resource = std::static_pointer_cast<LazyResource>(resource);
-                //    if (auto map = MaterialHelper::LoadTexture(lazy_resource->data))
-                //        material->SetNormalMap(std::move(map));
-                //}
-
                 mesh_renderer.material = std::move(material);
             }
 
             auto &transform = entity.GetComponents<TransformComponent>();
             transform.position = Math::Vector3(0.0f, -1.5f, 0.0f);
-            transform.scale = Math::Vector3(5.0f, 1.0f, 5.0f);
+            transform.scale = Math::Vector3(50.0f, 1.0f, 50.0f);
         }
     }
 

@@ -17,7 +17,8 @@ class PresentPass : public RenderPass
 
     std::vector<RenderPassResource> GetPassInputs() const override final
     {
-        return {{RenderPassResourceDescs::Color_Buffer_Resource, RenderPassResourceDescs::Color_Buffer_Resource_Desc}};
+        return {
+            {RenderPassResourceDescs::Present_Buffer_Resource, RenderPassResourceDescs::Present_Buffer_Resource_Desc}};
     }
 
     void Load(RenderGraph &render_graph) override final;

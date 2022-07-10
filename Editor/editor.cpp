@@ -82,7 +82,7 @@ void EditorWidget::OnAttach()
         transform.scale = Math::Vector3(5.0f, 1.0f, 5.0f);
     }
 
-    auto color_buffer = m_renderer.GetActiveSRGH().GetResource<PPGETexture>("ColorBuffer");
+    auto color_buffer = m_renderer.GetActiveSRGH().GetResource<PPGETexture>("PresentBuffer");
     {
         TextureViewDesc desc;
         desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_SHADER_RESOURCE;

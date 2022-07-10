@@ -102,61 +102,64 @@ void ShaderResourceBindingD3D11Impl::RefreshBoundResources(ShaderTypeFlags shade
     auto &SRB = m_SRBs[shader_idx];
 
     auto &bound_resource = m_bound_resources[shader_idx];
-    bound_resource.constant_buffers.clear();
-    bound_resource.shader_resource_views.clear();
-    bound_resource.sampler_states.clear();
+    bound_resource.constant_buffer_ranges.clear();
+    bound_resource.shader_resource_view_ranges.clear();
+    bound_resource.sampler_state_ranges.clear();
 
     for (auto &SRV : SRB.SRBs)
     {
-        // Continue if no resource is bound
-        if (!SRV->Get())
-        {
-            switch (SRV->GetDesc().resource_type)
-            {
-            case ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER:
-                bound_resource.constant_buffers.push_back(nullptr);
-                break;
-            case ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV:
-                bound_resource.shader_resource_views.push_back(nullptr);
-                break;
-            case ShaderResourceType::SHADER_RESOURCE_SAMPLER:
-                bound_resource.sampler_states.push_back(nullptr);
-                break;
-            case ShaderResourceType::SHADER_RESOURCE_UNKNOWN:
-                PPGE_ASSERT(false, "Shader resource type is unset.");
-                break;
-            default:
-                PPGE_ASSERT(false, "Unknown shader resource type.");
-                break;
-            }
-            continue;
-        }
-
-        auto d3d11_resource = SRV->GetD3D11Resource();
-        switch (SRV->GetDesc().resource_type)
+        auto desc = SRV->GetDesc();
+        switch (desc.resource_type)
         {
         case ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER: {
-            ID3D11Buffer *d3d11_constant_buffer = nullptr;
-            PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11Buffer),
-                                                   reinterpret_cast<void **>(&d3d11_constant_buffer)));
-            if (d3d11_constant_buffer)
-                bound_resource.constant_buffers.push_back(d3d11_constant_buffer);
+            auto &constant_buffers = bound_resource.constant_buffer_ranges[static_cast<UINT>(desc.offest)];
+            if (SRV->Get())
+            {
+                auto d3d11_resource = SRV->GetD3D11Resource();
+                ID3D11Buffer *d3d11_constant_buffer = nullptr;
+                PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11Buffer),
+                                                       reinterpret_cast<void **>(&d3d11_constant_buffer)));
+                if (d3d11_constant_buffer)
+                    constant_buffers.push_back(d3d11_constant_buffer);
+            }
+            else
+            {
+                constant_buffers.push_back(nullptr);
+            }
             break;
         }
         case ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV: {
-            ID3D11ShaderResourceView *d3d11_srv = nullptr;
-            PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11ShaderResourceView),
-                                                   reinterpret_cast<void **>(&d3d11_srv)));
-            if (d3d11_srv)
-                bound_resource.shader_resource_views.push_back(d3d11_srv);
+            auto &shader_resource_views = bound_resource.shader_resource_view_ranges[static_cast<UINT>(desc.offest)];
+            if (SRV->Get())
+            {
+                auto d3d11_resource = SRV->GetD3D11Resource();
+                ID3D11ShaderResourceView *d3d11_srv = nullptr;
+                PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11ShaderResourceView),
+                                                       reinterpret_cast<void **>(&d3d11_srv)));
+                if (d3d11_srv)
+                    shader_resource_views.push_back(d3d11_srv);
+            }
+            else
+            {
+                shader_resource_views.push_back(nullptr);
+            }
             break;
         }
         case ShaderResourceType::SHADER_RESOURCE_SAMPLER: {
-            ID3D11SamplerState *d3d11_sampler_state = nullptr;
-            PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11SamplerState),
-                                                   reinterpret_cast<void **>(&d3d11_sampler_state)));
-            if (d3d11_sampler_state)
-                bound_resource.sampler_states.push_back(d3d11_sampler_state);
+            auto &sampler_states = bound_resource.sampler_state_ranges[static_cast<UINT>(desc.offest)];
+            if (SRV->Get())
+            {
+                auto d3d11_resource = SRV->GetD3D11Resource();
+                ID3D11SamplerState *d3d11_sampler_state = nullptr;
+                PPGE_HR(d3d11_resource->QueryInterface(__uuidof(ID3D11SamplerState),
+                                                       reinterpret_cast<void **>(&d3d11_sampler_state)));
+                if (d3d11_sampler_state)
+                    sampler_states.push_back(d3d11_sampler_state);
+            }
+            else
+            {
+                sampler_states.push_back(nullptr);
+            }
             break;
         }
         case ShaderResourceType::SHADER_RESOURCE_UNKNOWN:

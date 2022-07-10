@@ -87,11 +87,11 @@ ForwardRenderPass::ForwardRenderPass()
         // Create ambient pass PSO
         std::shared_ptr<PPGEShader> vs;
         {
-            auto &simple_vs = ShaderLibrary::Get().GetShaderCode("forward_pass_vs.hlsl");
+            auto &simple_vs = ShaderLibrary::Get().GetShaderCode("common_vs.hlsl");
             ShaderCreateDesc cd;
             cd.desc.shader_type_flags = ShaderTypeFlags::SHADER_TYPE_VERTEX;
             cd.compiler = ShaderCompilerType::SHADER_COMPILER_FXC;
-            cd.file_path = "../../PPGE/renderer/shaders/forward_pass_vs.hlsl";
+            cd.file_path = "../../PPGE/renderer/shaders/common_vs.hlsl";
             cd.source_code = simple_vs.data.data();
             cd.source_code_size = simple_vs.data.size();
             cd.entry_point_name = "main_VS";
@@ -121,42 +121,34 @@ ForwardRenderPass::ForwardRenderPass()
         ps_cd.desc.input_layout_desc.elements_num = element_count;
         ps_cd.desc.rasterizer_state_desc.cull_mode = CullModeType::CULL_MODE_BACK;
 
-        ShaderResourceCreateDesc SRVs[] = {
-            {"cb_Renderer", {ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_PerFrame", {ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_PerDraw", {ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_Renderer", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_PerFrame", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_PerDraw", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_Material", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"cb_Light", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER}},
-            {"g_texture_material_albedo",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_texture_material_roughness",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_texture_material_metallic",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_texture_material_normal",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_texture_material_occlusion",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_texture_material_emission",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_texture_material_height",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_texture_material_alpha_mask",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_shadow_map_dir_light",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_shadow_map_point_light",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_shadow_map_spot_light",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_sampler_comparison", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_SAMPLER}},
-            {"g_sampler_anisotropic",
-             {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_SAMPLER}}};
-        ps_cd.srv = SRVs;
-        ps_cd.srv_num = (sizeof(SRVs) / sizeof(ShaderResourceCreateDesc));
+        const char *vs_cbs[] = {"cb_renderer", "cb_per_frame", "cb_per_draw"};
+        const char *ps_cbs[] = {"cb_renderer", "cb_per_frame", "cb_per_draw", "cb_material", "cb_light"};
+        const char *ps_srvs_1[] = {"g_material_albedo", "g_material_roughness", "g_material_metallic",
+                                   "g_material_normal", "g_material_occlusion", "g_material_emission",
+                                   "g_material_height", "g_material_alpha_mask"};
+        const char *ps_srvs_2[] = {"g_shadow_map_dir_light", "g_shadow_map_point_light", "g_shadow_map_spot_light"};
+        const char *ps_smps[] = {"g_sampler_comparison", "g_sampler_anisotropic"};
+
+        ShaderResourceRangeCreateDesc range[] = {
+            {{ShaderTypeFlags::SHADER_TYPE_VERTEX, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER, 0u},
+             sizeof(vs_cbs) / sizeof(ShaderResourceDesc),
+             vs_cbs},
+            {{ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_CONSTANT_BUFFER, 0u},
+             sizeof(ps_cbs) / sizeof(ShaderResourceDesc),
+             ps_cbs},
+            {{ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV, 0u},
+             sizeof(ps_srvs_1) / sizeof(ShaderResourceDesc),
+             ps_srvs_1},
+            {{ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV, 13u},
+             sizeof(ps_srvs_2) / sizeof(ShaderResourceDesc),
+             ps_srvs_2},
+            {{ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_SAMPLER, 0u},
+             sizeof(ps_smps) / sizeof(ShaderResourceDesc),
+             ps_smps},
+        };
+
+        ps_cd.sr_create_desc.range = range;
+        ps_cd.sr_create_desc.range_num = (sizeof(range) / sizeof(ShaderResourceRangeCreateDesc));
 
         RendererSystem::Get().GetDevice()->CreatePipelineState(ps_cd, m_ambient_PSO);
 
@@ -188,11 +180,11 @@ ForwardRenderPass::ForwardRenderPass()
     // Create Shader Resource Binding
     m_SRB = m_ambient_PSO->CreateShaderResourceBinding();
 
-    m_SRB->GetVariableByName("cb_PerDraw", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_draw);
+    m_SRB->GetVariableByName("cb_per_draw", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(m_cb_per_draw);
 
-    m_SRB->GetVariableByName("cb_PerDraw", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_per_draw);
-    m_SRB->GetVariableByName("cb_Material", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_material);
-    m_SRB->GetVariableByName("cb_Light", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_light);
+    m_SRB->GetVariableByName("cb_per_draw", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_per_draw);
+    m_SRB->GetVariableByName("cb_material", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_material);
+    m_SRB->GetVariableByName("cb_light", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_cb_light);
 
     m_SRB->GetVariableByName("g_sampler_comparison", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_comparison_sampler);
     m_SRB->GetVariableByName("g_sampler_anisotropic", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_anisotropic_sampler);
@@ -201,14 +193,14 @@ ForwardRenderPass::ForwardRenderPass()
 void ForwardRenderPass::Load(RenderGraph &render_graph)
 {
     auto cb_renderer = render_graph.GetResource<PPGEBuffer>(CbRendererOptionsName);
-    m_SRB->GetVariableByName("cb_Renderer", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(cb_renderer);
-    m_SRB->GetVariableByName("cb_Renderer", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(std::move(cb_renderer));
+    m_SRB->GetVariableByName("cb_renderer", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(cb_renderer);
+    m_SRB->GetVariableByName("cb_renderer", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(std::move(cb_renderer));
 
     auto cb_per_frame = render_graph.GetResource<PPGEBuffer>(CbPerFrameResourceName);
-    m_SRB->GetVariableByName("cb_PerFrame", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(cb_per_frame);
-    m_SRB->GetVariableByName("cb_PerFrame", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(std::move(cb_per_frame));
+    m_SRB->GetVariableByName("cb_per_frame", ShaderTypeFlags::SHADER_TYPE_VERTEX)->Set(cb_per_frame);
+    m_SRB->GetVariableByName("cb_per_frame", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(std::move(cb_per_frame));
 
-    auto color_buffer = render_graph.GetResource<PPGETexture>(RenderPassResourceDescs::Color_Buffer_Resource);
+    auto color_buffer = render_graph.GetResource<PPGETexture>(RenderPassResourceDescs::Present_Buffer_Resource);
     {
         TextureViewDesc desc;
         desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_RENDER_TARGET;

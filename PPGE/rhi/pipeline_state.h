@@ -246,8 +246,7 @@ struct RtxPipelineStateDesc : public PipelineStateDesc
 
 struct PipelineStateCreateDesc
 {
-    ShaderResourceCreateDesc *srv = nullptr;
-    uint32_t srv_num = 0;
+    ShaderResourceCreateDesc sr_create_desc;
 };
 
 struct GfxPipelineStateCreateDesc : public PipelineStateCreateDesc

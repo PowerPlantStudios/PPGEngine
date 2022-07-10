@@ -11,6 +11,7 @@
 #include "lighting_helpers.hlsl"
 #include "pbr_helpers.hlsl"
 #include "renderer_helpers.hlsl"
+#include "transformation_helpers.hlsl"
 
 #define IS_ALBEDO_MAP_BOUND     uint(1U << 0)
 #define IS_SPECULAR_MAP_BOUND   uint(1U << 1)
@@ -42,14 +43,13 @@ struct Fragment
     float3 emissive;
     float3 position;
     float  depth;
-    float3 vertex_normal;
     float3 normal;
     float  fragment_to_eye_distance;
     float3 fragment_to_eye;
 
     float3 SampleNormalMap(float3 in_normal, float3 in_tangent, float2 in_uv)
     {
-        float3 normal_map_value = g_texture_material_normal.Sample(g_sampler_anisotropic, in_uv).rgb;
+        float3 normal_map_value = g_material_normal.Sample(g_sampler_anisotropic, in_uv).rgb;
         normal_map_value = 2.0f * normal_map_value - 1.0f;
 
         float3 N = normalize(in_normal);
@@ -66,13 +66,13 @@ struct Fragment
         alpha = 1.0f;
         [flatten] if (material_is_alpha_mask_map_bound())
         {
-            alpha = g_texture_material_alpha_mask.Sample(g_sampler_anisotropic, in_uv).r;
+            alpha = g_material_alpha_mask.Sample(g_sampler_anisotropic, in_uv).r;
         }
 
         albedo = g_albedo_color.rgb;
         [flatten] if (material_is_albedo_map_bound())
         {
-            float4 albedo_sample = g_texture_material_albedo.Sample(g_sampler_anisotropic, in_uv);
+            float4 albedo_sample = g_material_albedo.Sample(g_sampler_anisotropic, in_uv);
             alpha  = min(alpha, albedo_sample.a);
             albedo *= degamma(albedo_sample.rgb, 1.5f);
         }
@@ -80,17 +80,16 @@ struct Fragment
         roughness = g_roughness_factor;
         [flatten] if (material_is_roughness_map_bound())
         {
-            roughness *= g_texture_material_roughness.Sample(g_sampler_anisotropic, in_uv).g;
+            roughness *= g_material_roughness.Sample(g_sampler_anisotropic, in_uv).g;
         }
 
         metalness = g_metalic_factor;
         [flatten] if (material_is_metalic_map_bound())
         {
-            metalness *= g_texture_material_metalic.Sample(g_sampler_anisotropic, in_uv).b;
+            metalness *= g_material_metalic.Sample(g_sampler_anisotropic, in_uv).b;
         }
 
-        vertex_normal = normalize(in_normal);
-        normal = vertex_normal;
+        normal = normalize(in_normal);
         [flatten] if (material_is_normal_map_bound())
         {
             normal = SampleNormalMap(in_normal, in_tangent, in_uv);
@@ -99,18 +98,43 @@ struct Fragment
         occlusion = 1.0f;
         [flatten] if (material_is_occlusion_map_bound())
         {
-            occlusion = g_texture_material_occlusion.Sample(g_sampler_anisotropic, in_uv).r;
+            occlusion = g_material_occlusion.Sample(g_sampler_anisotropic, in_uv).r;
         }
 
         emissive = g_emissive_color.rgb;
         [flatten] if (material_is_emission_map_bound())
         {
-            emissive *= g_texture_material_emission.Sample(g_sampler_anisotropic, in_uv).rgb;
+            emissive *= g_material_emission.Sample(g_sampler_anisotropic, in_uv).rgb;
         }
 
         depth                    = in_depth;
         position                 = in_position;
-        fragment_to_eye          = g_cameraPosition - in_position;
+        fragment_to_eye          = g_camera_position - in_position;
+        fragment_to_eye_distance = length(fragment_to_eye);
+        fragment_to_eye          = normalize(fragment_to_eye);
+    }
+
+    void DeferredInitialize(float2 ss_coord)
+    {
+        float4 sample_albedo = g_buffer_albedo.Sample(g_sampler_anisotropic, ss_coord);
+        alpha = sample_albedo.a;
+        albedo = sample_albedo.rgb;
+
+        float4 sample_material = g_buffer_material.Sample(g_sampler_anisotropic, ss_coord);
+        roughness = sample_material.r;
+        metalness = sample_material.g;
+        occlusion = sample_material.b;
+
+        float4 sample_normal = g_buffer_normal.Sample(g_sampler_anisotropic, ss_coord);
+        normal = sample_normal.rgb;
+
+        float4 sample_emission = g_buffer_emission.Sample(g_sampler_anisotropic, ss_coord);
+        emissive = sample_emission.rgb;
+
+        float4 sample_position = g_buffer_position.Sample(g_sampler_anisotropic, ss_coord);
+        depth = ViewToNDC(sample_position.rgb).z;
+        position = sample_position.rgb;
+        fragment_to_eye          = g_camera_position - sample_position.rgb;
         fragment_to_eye_distance = length(fragment_to_eye);
         fragment_to_eye          = normalize(fragment_to_eye);
     }
@@ -144,7 +168,7 @@ struct Fragment
 
         color = (diffuse_energy * diffuse_brdf + specular_brdf) * light.radiance * n_dot_l;
 
-        return saturate(color + emissive);
+        return saturate(color /*+ emissive*/);
     }
 };
 

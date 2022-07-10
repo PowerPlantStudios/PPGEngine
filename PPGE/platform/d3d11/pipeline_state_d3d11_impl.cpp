@@ -258,10 +258,13 @@ PipelineStateD3D11Impl::PipelineStateD3D11Impl(std::shared_ptr<DeviceD3D11Impl> 
                                                const GfxPipelineStateCreateDesc &desc)
     : PipelineStateBaseType(std::move(device_sp), desc)
 {
-    for (size_t i = 0; i < desc.srv_num; i++)
+    for (size_t i = 0; i < desc.sr_create_desc.range_num; i++)
     {
-        ShaderResourceCreateDesc cd = desc.srv[i];
-        m_bindable_resource_descs.push_back(std::make_tuple(std::string(cd.name), cd.desc));
+        ShaderResourceRangeCreateDesc range_cd = desc.sr_create_desc.range[i];
+        for (size_t j = 0; j < range_cd.sr_name_num; j++)
+        {
+            m_bindable_resource_descs.push_back(std::make_tuple(std::string(range_cd.sr_name[j]), range_cd.sr_desc));
+        }
     }
 
 #define PUSH_SHADER_BACK(ShaderType, Idx)                                                                              \

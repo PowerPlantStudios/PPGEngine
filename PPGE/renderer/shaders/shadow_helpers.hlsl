@@ -72,8 +72,7 @@ float GetShadowFactor(Light light, Fragment fragment)
         return shadow;
 
     // Add bias in the direction of fragment normal
-    float3 world_pos = fragment.position + get_normal_offset(
-        fragment.vertex_normal, saturate(dot(fragment.vertex_normal, -light.light_to_fragment)));
+    float3 world_pos = fragment.position + get_normal_offset(fragment.normal, light.lambertian_reflectance);
 
     if (light_is_directional())
     {

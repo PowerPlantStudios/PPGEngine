@@ -52,8 +52,7 @@ void LegacyMaterial::Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std:
 #define BindMap(MapName, MapFlag)                                                                                      \
     if (m_##MapName##_map)                                                                                             \
     {                                                                                                                  \
-        SRB->GetVariableByName("g_texture_material_" #MapName, ShaderTypeFlags::SHADER_TYPE_PIXEL)                     \
-            ->Set(m_##MapName##_map);                                                                                  \
+        SRB->GetVariableByName("g_material_" #MapName, ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_##MapName##_map);    \
         material->material_options |= MaterialOptions::##MapFlag##_BOUND;                                              \
     }
 
@@ -93,8 +92,7 @@ void PBRMaterial::Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std::sh
 #define BindMap(MapName, MapFlag)                                                                                      \
     if (m_##MapName##_map)                                                                                             \
     {                                                                                                                  \
-        SRB->GetVariableByName("g_texture_material_" #MapName, ShaderTypeFlags::SHADER_TYPE_PIXEL)                     \
-            ->Set(m_##MapName##_map);                                                                                  \
+        SRB->GetVariableByName("g_material_" #MapName, ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_##MapName##_map);    \
         material->material_options |= MaterialOptions::##MapFlag##_BOUND;                                              \
     }
 

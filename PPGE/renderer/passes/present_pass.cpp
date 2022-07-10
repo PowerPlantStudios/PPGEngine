@@ -50,11 +50,20 @@ PresentPass::PresentPass()
         ps_cd.desc.rasterizer_state_desc.cull_mode = CullModeType::CULL_MODE_NONE;
         ps_cd.desc.primitive_topology = PrimitiveTopologyType::PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-        ShaderResourceCreateDesc SRVs[] = {
-            {"g_color_buffer", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV}},
-            {"g_sampler", {ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_SAMPLER}}};
-        ps_cd.srv = SRVs;
-        ps_cd.srv_num = (sizeof(SRVs) / sizeof(ShaderResourceCreateDesc));
+        const char *ps_srvs[] = {"g_color_buffer"};
+        const char *ps_smps[] = {"g_sampler"};
+
+        ShaderResourceRangeCreateDesc range[] = {
+            {{ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_TEXTURE_SRV, 0u},
+             sizeof(ps_srvs) / sizeof(ShaderResourceDesc),
+             ps_srvs},
+            {{ShaderTypeFlags::SHADER_TYPE_PIXEL, ShaderResourceType::SHADER_RESOURCE_SAMPLER, 0u},
+             sizeof(ps_smps) / sizeof(ShaderResourceDesc),
+             ps_smps},
+        };
+
+        ps_cd.sr_create_desc.range = range;
+        ps_cd.sr_create_desc.range_num = (sizeof(range) / sizeof(ShaderResourceRangeCreateDesc));
 
         RendererSystem::Get().GetDevice()->CreatePipelineState(ps_cd, m_PSO);
     }
@@ -66,7 +75,7 @@ PresentPass::PresentPass()
 
 void PresentPass::Load(RenderGraph &render_graph)
 {
-    auto color_buffer = render_graph.GetResource<PPGETexture>(RenderPassResourceDescs::Color_Buffer_Resource);
+    auto color_buffer = render_graph.GetResource<PPGETexture>(RenderPassResourceDescs::Present_Buffer_Resource);
     {
         TextureViewDesc desc;
         desc.texture_view_type = ResourceViewType::RESOURCE_VIEW_SHADER_RESOURCE;
@@ -77,7 +86,8 @@ void PresentPass::Load(RenderGraph &render_graph)
         desc.array_slices_num = color_buffer->GetDesc().array_size;
         desc.first_array_slice = 0;
         auto color_buffer_srv = color_buffer->CreateView(desc);
-        m_SRB->GetVariableByName("g_color_buffer", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(std::move(color_buffer_srv));
+        m_SRB->GetVariableByName("g_color_buffer", ShaderTypeFlags::SHADER_TYPE_PIXEL)
+            ->Set(std::move(color_buffer_srv));
     }
 }
 
@@ -103,7 +113,6 @@ void PresentPass::Execute()
                           .max_depth = 1.0f};
         RendererSystem::Get().GetImmediateContext()->SetViewports(1, &viewport);
         RendererSystem::Get().GetImmediateContext()->SetRenderTargets(1, RTVs, std::move(DSV));
-
     }
 
     RendererSystem::Get().GetImmediateContext()->CommitShaderResources(m_SRB);

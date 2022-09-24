@@ -3,6 +3,7 @@
 
 #include "core/defines.h"
 #include "core/input.h"
+#include "core/os_helper.h"
 #include "event/application_event.h"
 #include "event/input_event.h"
 #include "system/isystem.h"
@@ -10,13 +11,6 @@
 
 namespace PPGE
 {
-enum class WindowAPI
-{
-    None = 1,
-    GLFW,
-    Win32
-};
-
 namespace WindowProps
 {
 enum class WindowMode
@@ -86,7 +80,7 @@ class PPGE_API DisplaySystem : public ISystem<DisplaySystemProps>
     virtual uint32_t GetWidth() const = 0;
 
   public:
-    static void Initialize(WindowAPI api);
+    static void Initialize(WindowAPIType api);
 
     inline static void Destroy()
     {

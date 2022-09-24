@@ -2,6 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
+#include "core/os_helper.h"
 #include "system/logger_system.h"
 #include "system/renderer_system.h"
 
@@ -28,9 +29,9 @@ class PPGE_API RendererSystemD3D11 final : public RendererSystem
 
     void OnResize() override final;
 
-    RendererAPI GetRendererAPI() override final
+    RendererAPIType GetRendererAPI() override final
     {
-        return RendererAPI::D3D11;
+        return RendererAPIType::D3D11;
     }
 
     PPGEDevice *GetDevice() override final;

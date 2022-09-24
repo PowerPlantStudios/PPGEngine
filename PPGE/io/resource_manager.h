@@ -2,6 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
+#include "io/file_system_observer.h"
 #include "io/resource_loaders.h"
 #include "io/resources.h"
 #include "system/logger_system.h"
@@ -47,6 +48,10 @@ class ResourceManager
 
     void SafeCleanCache();
 
+    void ConnectFileSystemObserver(const FileSystemObserver::Callback& callback);
+
+    void DisconnectFileSystemObserver();
+
     template <typename ResourceType, typename LoaderType,
               typename std::enable_if_t<std::is_base_of_v<Resource, ResourceType>> * = nullptr,
               typename std::enable_if_t<std::is_base_of_v<ResourceLoader, LoaderType>> * = nullptr>
@@ -86,6 +91,8 @@ class ResourceManager
 
   private:
     std::filesystem::path m_resource_root;
+
+    std::unique_ptr<FileSystemObserver> m_file_system_observer;
 
     std::unordered_map<std::string, ResourceLoaderCallback> m_loaders;
 

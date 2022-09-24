@@ -12,27 +12,28 @@ namespace PPGE
 {
 RendererSystem *RendererSystem::s_instance = nullptr;
 
-void RendererSystem::Initialize(RendererAPI api)
+void RendererSystem::Initialize(RendererAPIType api)
 {
+    PPGE_ASSERT(IsRendererAPISupported(api), "Renderer API is not suppoerted on the current platform.");
     switch (api)
     {
-    case PPGE::RendererAPI::OpenGL:
+    case PPGE::RendererAPIType::OpenGL:
         s_instance = new RendererSystemGL();
         break;
-    case PPGE::RendererAPI::Vulkan:
+    case PPGE::RendererAPIType::Vulkan:
         break;
 #if defined(PPGE_PLATFORM_WIN)
-    case PPGE::RendererAPI::D3D11:
+    case PPGE::RendererAPIType::D3D11:
         s_instance = new RendererSystemD3D11();
         break;
-    case PPGE::RendererAPI::D3D12:
+    case PPGE::RendererAPIType::D3D12:
         break;
 #endif
 #if defined(PPGE_PLATFORM_APPLE)
     case PPGE::RendererAPI::Metal:
         break;
 #endif
-    case PPGE::RendererAPI::None:
+    case PPGE::RendererAPIType::None:
         PPGE_ASSERT(false, "RendererAPI::None is not a valid option for RendererSystem initialization.");
         break;
     default:

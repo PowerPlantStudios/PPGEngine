@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include "core/os_helper.h"
 #include "platform/glfw/input_codes_glfw.h"
 #include "system/renderer_system.h"
 
@@ -197,7 +198,7 @@ void DisplaySystemGLFW::StartUp(const DisplaySystemProps &props)
     glfwSetErrorCallback(GLFWErrorCallback);
 #if defined(PPGE_DEBUG)
     // If rendering API is OpenGL set debug context to true //
-    if (RendererSystem::Get().GetRendererAPI() == RendererAPI::OpenGL)
+    if (RendererSystem::Get().GetRendererAPI() == RendererAPIType::OpenGL)
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 

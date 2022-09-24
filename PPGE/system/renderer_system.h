@@ -2,6 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
+#include "core/os_helper.h"
 #include "rhi/device.h"
 #include "rhi/device_context.h"
 #include "rhi/swap_chain.h"
@@ -10,16 +11,6 @@
 
 namespace PPGE
 {
-enum class RendererAPI
-{
-    None = 0,
-    OpenGL,
-    Vulkan,
-    D3D11,
-    D3D12,
-    Metal
-};
-
 enum class MSAAQuality
 {
     MSAA_OFF = 0,
@@ -41,7 +32,7 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
 
     virtual void OnResize() = 0;
 
-    virtual RendererAPI GetRendererAPI() = 0;
+    virtual RendererAPIType GetRendererAPI() = 0;
 
     virtual PPGEDevice *GetDevice() = 0;
 
@@ -50,7 +41,7 @@ class PPGE_API RendererSystem : public ISystem<RendererSystemProps>
     virtual PPGESwapChain *GetSwapChain() = 0;
 
   public:
-    static void Initialize(RendererAPI api);
+    static void Initialize(RendererAPIType api);
 
     inline static void Destroy()
     {

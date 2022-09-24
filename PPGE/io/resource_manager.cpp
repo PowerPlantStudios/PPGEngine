@@ -1,5 +1,7 @@
 #include "resource_manager.h"
 
+#include "system/io_system.h"
+
 namespace PPGE
 {
 std::shared_ptr<Resource> ResourceManager::GetCachedResource(std::string_view name)
@@ -81,5 +83,26 @@ void ResourceManager::SafeCleanCache()
             it++;
         }
     }
+}
+
+void ResourceManager::ConnectFileSystemObserver(const FileSystemObserver::Callback &callback)
+{
+    if (m_file_system_observer)
+    {
+        PPGE_WARN("Resource manager has already been connected to a file system observer");
+        DisconnectFileSystemObserver();
+    }
+    PPGE_ASSERT(!m_file_system_observer, "File system observer is still connected.");
+
+    m_file_system_observer = std::move(IOSystem::Get().GetFileSystemObserver());
+    m_file_system_observer->SetPath(m_resource_root);
+    m_file_system_observer->SetCallback(callback);
+    m_file_system_observer->StartObserving();
+}
+
+void ResourceManager::DisconnectFileSystemObserver()
+{
+    m_file_system_observer->StopObserving();
+    m_file_system_observer.release();
 }
 } // namespace PPGE

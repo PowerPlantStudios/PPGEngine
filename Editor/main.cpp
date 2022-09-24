@@ -5,7 +5,7 @@
 
 namespace PPGE
 {
-class Editor : public Application
+class Editor : public ApplicationBase
 {
   public:
     Editor()
@@ -18,7 +18,7 @@ class Editor : public Application
 
     void StartUp() override
     {
-        Application::StartUp();
+        ApplicationBase::StartUp();
         CreateWidget<EditorWidget>();
         APP_INFO("Application is started up.");
     }
@@ -26,12 +26,12 @@ class Editor : public Application
     void ShutDown() override
     {
         APP_INFO("Application is shut down.");
-        Application::ShutDown();
+        ApplicationBase::ShutDown();
     }
 };
 } // namespace PPGE
 
-PPGE::Application *PPGE::CreateApplication()
+PPGE::ApplicationBase *PPGE::CreateApplication()
 {
     return new Editor();
 }

@@ -8,6 +8,7 @@
 #include "core/application.h"
 #include "core/defines.h"
 #include "core/input.h"
+#include "core/ppge_task.h"
 #include "ecs/components/camera_component.h"
 #include "ecs/components/debug_component.h"
 #include "ecs/components/light_component.h"

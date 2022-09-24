@@ -7,16 +7,17 @@
 #include "event/application_event.h"
 #include "event/input_event.h"
 #include "system/display_system.h"
+#include "system/io_system.h"
 #include "system/renderer_system.h"
 #include "system/widget_system.h"
 
 namespace PPGE
 {
-class PPGE_API Application
+class PPGE_API ApplicationBase
 {
   public:
-    Application();
-    virtual ~Application();
+    ApplicationBase();
+    virtual ~ApplicationBase();
 
     virtual void StartUp();
     virtual void ShutDown();
@@ -41,15 +42,15 @@ class PPGE_API Application
     GameTimer m_game_timer;
 
   public:
-    static Application &Get()
+    static ApplicationBase &Get()
     {
         return *s_instance;
     }
 
   private:
-    static Application *s_instance;
+    static ApplicationBase *s_instance;
 };
 
 // Declaration to be implemented on client code
-Application *CreateApplication();
+ApplicationBase *CreateApplication();
 } // namespace PPGE

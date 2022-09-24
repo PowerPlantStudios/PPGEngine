@@ -1,6 +1,6 @@
 #pragma once
 
-extern PPGE::Application *PPGE::CreateApplication();
+extern PPGE::ApplicationBase *PPGE::CreateApplication();
 
 #if defined(PPGE_PLATFORM_WIN)
 int WINAPI wWinMain(HINSTANCE h_instance, HINSTANCE h_prev_instance, PWSTR p_cmdline, int n_cmd_show)
@@ -12,7 +12,7 @@ int WINAPI wWinMain(HINSTANCE h_instance, HINSTANCE h_prev_instance, PWSTR p_cmd
 int main(int argc, char **argv)
 {
 #endif
-    PPGE::Application *application = PPGE::CreateApplication();
+    PPGE::ApplicationBase *application = PPGE::CreateApplication();
     application->StartUp();
     application->Run();
     application->ShutDown();

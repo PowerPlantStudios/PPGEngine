@@ -9,19 +9,19 @@ namespace PPGE
 {
 DisplaySystem *DisplaySystem::s_instance = nullptr;
 
-void DisplaySystem::Initialize(WindowAPI api)
+void DisplaySystem::Initialize(WindowAPIType api)
 {
     switch (api)
     {
-    case PPGE::WindowAPI::GLFW:
+    case PPGE::WindowAPIType::GLFW:
         s_instance = new DisplaySystemGLFW();
         break;
 #if defined(PPGE_PLATFORM_WIN)
-    case PPGE::WindowAPI::Win32:
+    case PPGE::WindowAPIType::Win32:
         s_instance = new DisplaySystemWin32();
         break;
 #endif
-    case PPGE::WindowAPI::None:
+    case PPGE::WindowAPIType::None:
         PPGE_ASSERT(false, "WindowAPI::None is not a valid option for DisplaySystem initialization.");
         break;
     default:

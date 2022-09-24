@@ -244,7 +244,7 @@ class TestLayer : public Widget
     }
 };
 
-class Game : public Application
+class Game : public ApplicationBase
 {
   public:
     Game()
@@ -257,7 +257,7 @@ class Game : public Application
 
     void StartUp() override
     {
-        Application::StartUp();
+        ApplicationBase::StartUp();
         CreateWidget<TestLayer>();
         APP_INFO("Application is started up.");
     }
@@ -265,12 +265,12 @@ class Game : public Application
     void ShutDown() override
     {
         APP_INFO("Application is shut down.");
-        Application::ShutDown();
+        ApplicationBase::ShutDown();
     }
 };
 } // namespace PPGE
 
-PPGE::Application *PPGE::CreateApplication()
+PPGE::ApplicationBase *PPGE::CreateApplication()
 {
     return new PPGE::Game();
 }

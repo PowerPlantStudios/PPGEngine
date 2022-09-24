@@ -1,37 +1,44 @@
 #include "application.h"
 
+#include "core/os_helper.h"
+
 namespace PPGE
 {
-Application *Application::s_instance = nullptr;
+ApplicationBase *ApplicationBase::s_instance = nullptr;
 
-Application::Application()
+ApplicationBase::ApplicationBase()
 {
     PPGE_ASSERT(!s_instance, "Application already exists!");
     s_instance = this;
 
     LoggerSystem::Initialize();
-    DisplaySystem::Initialize(WindowAPI::Win32);
-    RendererSystem::Initialize(RendererAPI::D3D11);
+    IOSystem::Initialize(GetOSType());
+    DisplaySystem::Initialize(GetPreferredWindowAPIType());
+    RendererSystem::Initialize(GetPreferredRendererAPIType());
     WidgetSystem::Initialize();
 }
 
-Application::~Application()
+ApplicationBase::~ApplicationBase()
 {
-    LoggerSystem::Destroy();
-    DisplaySystem::Destroy();
-    RendererSystem::Destroy();
     WidgetSystem::Destroy();
+    RendererSystem::Destroy();
+    DisplaySystem::Destroy();
+    IOSystem::Destroy();
+    LoggerSystem::Destroy();
 }
 
-void Application::StartUp()
+void ApplicationBase::StartUp()
 {
     LoggerSystemProps logger_sys_props;
     LoggerSystem::Get().StartUp(logger_sys_props);
     PPGE_INFO("PPGE is starting up.");
 
+    IOSystemProps io_sys_props;
+    IOSystem::Get().StartUp(io_sys_props);
+
     DisplaySystemProps ds_props;
-    ds_props.input_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnInputEvent);
-    ds_props.application_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnApplicationEvent);
+    ds_props.input_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(ApplicationBase::OnInputEvent);
+    ds_props.application_event_callback = PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(ApplicationBase::OnApplicationEvent);
     DisplaySystem::Get().StartUp(ds_props);
 
     RendererSystemProps rs_props;
@@ -42,17 +49,18 @@ void Application::StartUp()
     WidgetSystem::Get().StartUp(ws_props);
 }
 
-void Application::ShutDown()
+void ApplicationBase::ShutDown()
 {
-    PPGE_INFO("PPGE is shuting down.");
-
     WidgetSystem::Get().ShutDown();
     RendererSystem::Get().ShutDown();
     DisplaySystem::Get().ShutDown();
+    IOSystem::Get().ShutDown();
+
+    PPGE_INFO("PPGE is shuting down.");
     LoggerSystem::Get().ShutDown();
 }
 
-void Application::Run()
+void ApplicationBase::Run()
 {
     while (b_is_running)
     {
@@ -65,27 +73,27 @@ void Application::Run()
     }
 }
 
-void Application::OnInputEvent(InputEvent &input_event)
+void ApplicationBase::OnInputEvent(InputEvent &input_event)
 {
     WidgetSystem::Get().OnInputEvent(input_event);
 }
 
-void Application::OnApplicationEvent(ApplicationEvent &application_event)
+void ApplicationBase::OnApplicationEvent(ApplicationEvent &application_event)
 {
     DispatchApplicationEvent<WindowCloseEvent>(application_event,
-                                               PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnWindowClose));
+                                               PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(ApplicationBase::OnWindowClose));
     DispatchApplicationEvent<WindowResizeEvent>(application_event,
-                                                PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(Application::OnWindowResize));
+                                                PPGE_BIND_CLASS_METHOD_ARG_COUNT_1(ApplicationBase::OnWindowResize));
 }
 
-bool Application::OnWindowClose(WindowCloseEvent &)
+bool ApplicationBase::OnWindowClose(WindowCloseEvent &)
 {
     b_is_running = false;
 
     return true;
 }
 
-bool Application::OnWindowResize(WindowResizeEvent &)
+bool ApplicationBase::OnWindowResize(WindowResizeEvent &)
 {
     b_is_paused = (DisplaySystem::Get().IsMinimized()) ? true : false;
     if (b_is_paused)

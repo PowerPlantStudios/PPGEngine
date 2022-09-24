@@ -2,6 +2,7 @@
 #include "PPGEpch.h"
 
 #include "core/defines.h"
+#include "core/os_helper.h"
 #include "system/logger_system.h"
 #include "system/renderer_system.h"
 
@@ -25,9 +26,9 @@ class PPGE_API RendererSystemGL : public RendererSystem
 
     void OnResize() override;
 
-    RendererAPI GetRendererAPI() override
+    RendererAPIType GetRendererAPI() override
     {
-        return RendererAPI::OpenGL;
+        return RendererAPIType::OpenGL;
     }
 
     PPGEDevice *GetDevice() override final;

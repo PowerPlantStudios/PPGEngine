@@ -16,7 +16,7 @@ static DWORD s_change_buf_size = sizeof(s_change_buf) / sizeof(uint8_t);
 FileSystemObserverWindows::FileSystemObserverWindows()
     : FileSystemObserver(), m_handle{INVALID_HANDLE_VALUE}, m_overlapped_handle{0}
 {
-    m_overlapped_handle.hEvent = CreateEvent(NULL, FALSE, 0, NULL);
+    m_overlapped_handle.hEvent = CreateEventW(NULL, FALSE, 0, NULL);
     PPGE_ASSERT(m_overlapped_handle.hEvent, "Failed to create event");
 }
 
@@ -33,76 +33,74 @@ void FileSystemObserverWindows::SetPath(const std::filesystem::path &path)
     if (m_handle != INVALID_HANDLE_VALUE)
         CloseHandle(m_handle);
 
-    m_handle = CreateFileW(path.c_str(), FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+    m_handle = CreateFileW(m_path.c_str(), FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
                            NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL);
     PPGE_ASSERT(m_handle != INVALID_HANDLE_VALUE, "Opening a file handle has failed.");
-}
 
-void FileSystemObserverWindows::PollFilesystemEvents()
-{
     BOOL success = ReadDirectoryChangesW(m_handle, s_change_buf, s_change_buf_size, TRUE,
                                          FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_FILE_NAME |
                                              FILE_NOTIFY_CHANGE_DIR_NAME,
                                          NULL, &m_overlapped_handle, NULL);
     PPGE_ASSERT(success, "Call to ReadDirectoryChangesW has failed.");
+}
 
+void FileSystemObserverWindows::PollFilesystemEvents()
+{
     DWORD result = WaitForSingleObject(m_overlapped_handle.hEvent, 100);
     switch (result)
     {
     case WAIT_OBJECT_0: {
         DWORD bytes_transferred;
         GetOverlappedResult(m_handle, &m_overlapped_handle, &bytes_transferred, FALSE);
-        PPGE_INFO("ReadDirectoryChangesW: received signalled message with {0} bytes long.", bytes_transferred);
+        PPGE_ASSERT(bytes_transferred < s_change_buf_size, "Change buffer size is less than transferred data size.")
 
         DWORD offset = 0;
-        FILE_NOTIFY_INFORMATION *file_notify_info;
+        FILE_NOTIFY_INFORMATION *file_notify_info = (FILE_NOTIFY_INFORMATION *)s_change_buf;
         do
         {
-            file_notify_info = (FILE_NOTIFY_INFORMATION *)((uint8_t *)s_change_buf + offset);
+            *((uint8_t **)&file_notify_info) += offset;
 
-            std::filesystem::path file_name(
-                std::wstring(file_notify_info->FileName, file_notify_info->FileNameLength / sizeof(wchar_t)));
+            std::filesystem::path file_name =
+                m_path / std::wstring(file_notify_info->FileName, file_notify_info->FileNameLength / sizeof(wchar_t));
+            file_name = std::filesystem::weakly_canonical(file_name);
 
             switch (file_notify_info->Action)
             {
             case FILE_ACTION_ADDED: {
-                PPGE_INFO("       Added: {0}", file_name.string());
                 m_callback(file_name, FileAction::ADDED);
             }
             break;
-
             case FILE_ACTION_REMOVED: {
-                PPGE_INFO("     Removed: {0}", file_name.string());
                 m_callback(file_name, FileAction::REMOVED);
             }
             break;
-
             case FILE_ACTION_MODIFIED: {
-                PPGE_INFO("    Modified: {0}", file_name.string());
                 m_callback(file_name, FileAction::MODIFIED);
             }
             break;
-
             case FILE_ACTION_RENAMED_OLD_NAME: {
-                PPGE_INFO("Renamed from: {0}", file_name.string());
                 m_callback(file_name, FileAction::RENAMED_FROM);
             }
             break;
-
             case FILE_ACTION_RENAMED_NEW_NAME: {
-                PPGE_INFO("  Renamed to: {0}", file_name.string());
                 m_callback(file_name, FileAction::RENAMED_TO);
             }
             break;
-
             default: {
-                PPGE_INFO("Unknown action!");
+                PPGE_ERROR("FILE_NOTIFY_INFORMATION.Action '{0}' is unknown action!", file_notify_info->Action);
+                PPGE_ASSERT(false, "Unknown file notify information action.");
             }
             break;
             }
 
-            offset += file_notify_info->NextEntryOffset;
+            offset = file_notify_info->NextEntryOffset;
         } while (file_notify_info->NextEntryOffset);
+
+        BOOL success = ReadDirectoryChangesW(m_handle, s_change_buf, s_change_buf_size, TRUE,
+                                             FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_FILE_NAME |
+                                                 FILE_NOTIFY_CHANGE_DIR_NAME,
+                                             NULL, &m_overlapped_handle, NULL);
+        PPGE_ASSERT(success, "Call to ReadDirectoryChangesW has failed.");
     }
     break;
     case WAIT_TIMEOUT: {
@@ -122,6 +120,7 @@ void FileSystemObserverWindows::PollFilesystemEvents()
     }
     break;
     default: {
+        PPGE_ERROR("Call to WaitForSingleObject has returned unknown result.");
         PPGE_ASSERT(false, "Unexpected error happened in FileSystemObserverWindows::PollFilesystemEvents.");
     }
     break;

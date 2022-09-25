@@ -109,6 +109,7 @@ class SceneRenderGraph : public RenderGraph
 
     virtual void Destroy() override
     {
+        m_cb_per_frame.reset();
         m_srp_refs.clear();
         RenderGraph::Destroy();
     }

@@ -7,24 +7,11 @@
 
 namespace PPGE
 {
-class Scene;
-class Renderer;
 class CameraController;
 class PPGEBuffer;
-
-class SceneRenderer
-{
-  public:
-    SceneRenderer(SceneRenderGraph &scene_rgh, const Scene &scene, const CameraController &active_camera);
-
-    ~SceneRenderer();
-
-    void Submit();
-
-  private:
-    SceneRenderGraph &m_scene_rgh;
-    SceneRenderPassData m_data;
-};
+class Renderer;
+class Scene;
+class SceneRenderer;
 
 class Renderer
 {
@@ -37,9 +24,9 @@ class Renderer
 
     SceneRenderer BeginScene(const Scene &scene, const CameraController &active_camera);
 
-    const SceneRenderGraph &GetActiveSRGH() const
+    const SceneRenderGraph &GetActiveSceneRGH() const
     {
-        return m_active_srgh;
+        return m_active_scene_rgh;
     }
 
     void SetRendererOptions(RendererOptions options);
@@ -52,7 +39,11 @@ class Renderer
   private:
     void SubmitRendererOptions();
 
-    SceneRenderGraph m_active_srgh;
+    void ReloadRenderGraph();
+
+    std::mutex m_mutex;
+
+    SceneRenderGraph m_active_scene_rgh;
 
     RendererOptions m_options = RendererOptions::NONE;
 
@@ -61,5 +52,23 @@ class Renderer
     float m_shadowmap_resolution = 2048.0f;
 
     std::shared_ptr<PPGEBuffer> m_cb_renderer_options;
+};
+
+class SceneRenderer
+{
+  public:
+    SceneRenderer(std::mutex &renderer_mutex, SceneRenderGraph &scene_render_graph, const Scene &scene,
+                  const CameraController &active_camera);
+
+    ~SceneRenderer();
+
+    void Submit();
+
+  private:
+    std::mutex &m_renderer_mutex;
+
+    SceneRenderGraph &m_scene_render_graph;
+
+    SceneRenderPassData m_data;
 };
 } // namespace PPGE

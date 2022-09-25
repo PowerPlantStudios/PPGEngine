@@ -7,6 +7,8 @@ namespace PPGE
 std::shared_ptr<Resource> ResourceManager::GetCachedResource(std::string_view name)
 {
     size_t uuid = hasher(name);
+    if (!IsResourceCached(uuid))
+        LoadResource(m_resource_root / name);
     return GetCachedResource(uuid);
 }
 
@@ -23,8 +25,7 @@ void ResourceManager::CacheResource(std::string_view name, std::shared_ptr<Resou
 
 void ResourceManager::CacheResource(size_t uuid, std::shared_ptr<Resource> resource)
 {
-    auto it = m_resource_cache.find(uuid);
-    if (it != m_resource_cache.end())
+    if (IsResourceCached(uuid))
     {
         PPGE_WARN("Resource #{0} has already been cached.", uuid);
         return;
@@ -32,8 +33,30 @@ void ResourceManager::CacheResource(size_t uuid, std::shared_ptr<Resource> resou
     m_resource_cache.emplace(uuid, std::move(resource));
 }
 
+void ResourceManager::FLushResource(std::string_view name)
+{
+    size_t uuid = hasher(name);
+    FLushResource(uuid);
+}
+
+void ResourceManager::FLushResource(size_t uuid)
+{
+    if (!IsResourceCached(uuid))
+    {
+        PPGE_WARN("Resource #{0} not cached.", uuid);
+        return;
+    }
+    m_resource_cache.erase(uuid);
+}
+
 void ResourceManager::LoadResource(const std::filesystem::path &path_to_resource)
 {
+    if (!std::filesystem::exists(path_to_resource))
+    {
+        PPGE_WARN("Resource '{0}' doesn't exist.", path_to_resource.string().c_str());
+        return;
+    }
+
     if (!path_to_resource.has_extension())
     {
         PPGE_WARN("Resource '{0}' has no extension. It will be skipped in resource root directory scan.",

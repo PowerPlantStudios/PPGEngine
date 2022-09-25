@@ -42,6 +42,10 @@ class ResourceManager
 
     void CacheResource(size_t uuid, std::shared_ptr<Resource> resource);
 
+    void FLushResource(std::string_view name);
+
+    void FLushResource(size_t uuid);
+
     void LoadResource(const std::filesystem::path &path_to_resource);
 
     void WalkRoot(const std::filesystem::path &resource_root);

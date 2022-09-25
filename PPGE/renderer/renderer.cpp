@@ -7,25 +7,30 @@
 #include "renderer/passes/lighting_pass.h"
 #include "renderer/passes/present_pass.h"
 #include "renderer/passes/shadow_pass.h"
+#include "renderer/shader_library.h"
 #include "rhi/buffer.h"
 #include "system/renderer_system.h"
 
 namespace PPGE
 {
-SceneRenderer::SceneRenderer(SceneRenderGraph &scene_rgh, const Scene &scene, const CameraController &active_camera)
-    : m_scene_rgh{scene_rgh}, m_data{.scene = scene, .active_camera = active_camera}
+SceneRenderer::SceneRenderer(std::mutex &renderer_mutex, SceneRenderGraph &scene_render_graph, const Scene &scene,
+                             const CameraController &active_camera)
+    : m_renderer_mutex{renderer_mutex}, m_scene_render_graph{scene_render_graph}, m_data{.scene = scene,
+                                                                                         .active_camera = active_camera}
 {
-    m_scene_rgh.BindScene(m_data);
+    m_renderer_mutex.lock();
+    m_scene_render_graph.BindScene(m_data);
 }
 
 SceneRenderer::~SceneRenderer()
 {
-    m_scene_rgh.UnbindScene();
+    m_scene_render_graph.UnbindScene();
+    m_renderer_mutex.unlock();
 }
 
 void SceneRenderer::Submit()
 {
-    m_scene_rgh.Run();
+    m_scene_render_graph.Run();
 }
 
 Renderer::Renderer()
@@ -40,21 +45,14 @@ Renderer::Renderer()
 
     SubmitRendererOptions();
 
-    m_active_srgh.PushResource(CbRendererOptionsName, m_cb_renderer_options);
+    ReloadRenderGraph();
 
-    m_active_srgh.CreateRenderPass<ClearBufferPass>();
-    m_active_srgh.CreateRenderPass<ShadowPass>();
-    m_active_srgh.CreateRenderPass<GeometryPass>();
-    m_active_srgh.CreateRenderPass<LightingPass>();
-    //m_active_srgh.CreateRenderPass<ForwardRenderPass>();
-    m_active_srgh.CreateRenderPass<PresentPass>();
-
-    m_active_srgh.Compile();
+    ShaderLibrary::Get().Subscribe("Renderer", [this](auto &shader_path) { ReloadRenderGraph(); });
 }
 
 SceneRenderer Renderer::BeginScene(const Scene &scene, const CameraController &active_camera)
 {
-    return SceneRenderer(m_active_srgh, scene, active_camera);
+    return SceneRenderer(m_mutex, m_active_scene_rgh, scene, active_camera);
 }
 
 void Renderer::SetRendererOptions(RendererOptions options)
@@ -76,6 +74,21 @@ void Renderer::SubmitRendererOptions()
         map_data->shadowmap_resolution = m_shadowmap_resolution;
 
         PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_renderer_options.get());
+    }
+}
+
+void Renderer::ReloadRenderGraph()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    {
+        m_active_scene_rgh.Destroy();
+        m_active_scene_rgh.PushResource(CbRendererOptionsName, m_cb_renderer_options);
+        m_active_scene_rgh.CreateRenderPass<ClearBufferPass>();
+        m_active_scene_rgh.CreateRenderPass<ShadowPass>();
+        m_active_scene_rgh.CreateRenderPass<GeometryPass>();
+        m_active_scene_rgh.CreateRenderPass<LightingPass>();
+        m_active_scene_rgh.CreateRenderPass<PresentPass>();
+        m_active_scene_rgh.Compile();
     }
 }
 } // namespace PPGE

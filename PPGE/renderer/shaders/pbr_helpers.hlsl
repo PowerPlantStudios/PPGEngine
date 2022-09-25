@@ -89,7 +89,7 @@ float3 OrenNayarDiffuse(float3 color, float roughness, float n_dot_e, float n_do
 
 float3 LambertDiffuse(float3 color)
 {
-    return color ;//* PI_INV;
+    return color * PI_INV;
 }
 
 float3 DiffuseBRDF(float3 color, float roughness, float n_dot_e, float n_dot_l, float h_dot_e)

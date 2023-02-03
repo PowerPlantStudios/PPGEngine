@@ -25,6 +25,8 @@ file(GLOB PPGE_HDRS
     ${PPGE_CORE_DIR}/renderer/passes/*.h
     ${PPGE_CORE_DIR}/rhi/*.h
     ${PPGE_CORE_DIR}/system/*.h
+    ${PPGE_CORE_DIR}/system/animation/*.h
+    ${PPGE_CORE_DIR}/system/animation/*.hpp
     ${PPGE_CORE_DIR}/ui/*.h)
 set(PPGE_HDRS ${PPGE_HDRS} 
     ${PPGE_CORE_DIR}/PPGE.h)
@@ -39,6 +41,7 @@ file(GLOB PPGE_SRCS
     ${PPGE_CORE_DIR}/renderer/passes/*.cpp
     ${PPGE_CORE_DIR}/rhi/*.cpp
     ${PPGE_CORE_DIR}/system/*.cpp
+    ${PPGE_CORE_DIR}/system/animation/*.cpp
     ${PPGE_CORE_DIR}/ui/*.cpp)
 set(PPGE_SRCS ${PPGE_SRCS} 
     ${PPGE_CORE_DIR}/PPGEpch.h)

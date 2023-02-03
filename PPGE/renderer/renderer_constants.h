@@ -12,7 +12,7 @@ template <size_t N, class T> constexpr size_t count_of(T (&)[N])
 }
 
 #define LAYOUT_HELPER(Name, Layout)                                                                                    \
-    constexpr std::pair<const InputElementDesc *, size_t> Get##Name##()                                                \
+    constexpr std::pair<const InputElementDesc *, size_t> Get##Name()                                                \
     {                                                                                                                  \
         return std::make_pair(Layout, count_of(Layout));                                                               \
     }

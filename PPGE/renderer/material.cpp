@@ -47,7 +47,7 @@ void LegacyMaterial::Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std:
 
         material->roughness_factor = std::sqrtf(2.0f / (m_shininess + 2.0f));
         material->alpha_cutoff = m_alpha_cutoff;
-
+#if !defined(PPGE_PLATFORM_APPLE)
 #define BindMap(MapName, MapFlag)                                                                                      \
     if (m_##MapName##_map)                                                                                             \
     {                                                                                                                  \
@@ -59,7 +59,7 @@ void LegacyMaterial::Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std:
         BindMap(normal, NORMAL_MAP);
         BindMap(emission, EMISSION_MAP);
 #undef BindMap
-
+#endif
         if (m_specular_map)
         {
             SRB->GetVariableByName("g_material_roughness", ShaderTypeFlags::SHADER_TYPE_PIXEL)->Set(m_specular_map);
@@ -92,7 +92,7 @@ void PBRMaterial::Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std::sh
         material->roughness_factor = m_roughness_factor;
         material->metalic_factor = m_metalic_factor;
         material->alpha_cutoff = m_alpha_cutoff;
-
+#if !defined(PPGE_PLATFORM_APPLE)
 #define BindMap(MapName, MapFlag)                                                                                      \
     if (m_##MapName##_map)                                                                                             \
     {                                                                                                                  \
@@ -109,7 +109,7 @@ void PBRMaterial::Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std::sh
         BindMap(height, HEIGHT_MAP);
         BindMap(alpha_mask, ALPHA_MASK_MAP);
 #undef BindMap
-
+#endif
         RendererSystem::Get().GetImmediateContext()->Unmap(buffer.get());
     }
 }

@@ -90,7 +90,7 @@ std::optional<Math::Color> GetMaterialProperty(const aiMaterial *ai_material, co
     aiColor4D ai_color;
     aiReturn result = ai_material->Get(p_key, type, index, ai_color);
     if (result == AI_SUCCESS)
-        return Math::Color(ai_color.r, ai_color.g, ai_color.b, ai_color.a);
+        return Math::Color{ai_color.r, ai_color.g, ai_color.b, ai_color.a};
     return {};
 }
 
@@ -225,7 +225,7 @@ class MaterialLoader
                 desc.alpha_cutoff = *opacity;
 
             auto material = MaterialHelper::CreateMaterial<LegacyMaterial>(desc);
-
+#if !defined(PPGE_PLATFORM_APPLE)
             if (auto map = LoadTexture(ai_scene, ai_material, aiTextureType_DIFFUSE, 0))
                 material->SetAlbedoMap(std::move(map));
 
@@ -239,7 +239,7 @@ class MaterialLoader
 
             if (auto map = LoadTexture(ai_scene, ai_material, aiTextureType_EMISSIVE, 0))
                 material->SetEmissionMap(std::move(map));
-
+#endif
             mesh_renderer.material = std::move(material);
         }
     }
@@ -268,7 +268,7 @@ class MaterialLoader
                 desc.alpha_cutoff = *opacity;
 
             auto material = MaterialHelper::CreateMaterial<PBRMaterial>(desc);
-
+#if !defined(PPGE_PLATFORM_APPLE)
             if (auto map = LoadTexture(ai_scene, ai_material, aiTextureType_BASE_COLOR, 0))
                 material->SetAlbedoMap(std::move(map));
             else if (auto map = LoadTexture(ai_scene, ai_material, aiTextureType_DIFFUSE, 0))
@@ -306,7 +306,7 @@ class MaterialLoader
 
             if (auto map = LoadTexture(ai_scene, ai_material, aiTextureType_OPACITY, 0))
                 material->SetAlphaMaskMap(std::move(map));
-
+#endif
             mesh_renderer.material = std::move(material);
         }
     }

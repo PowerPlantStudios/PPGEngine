@@ -245,10 +245,17 @@ void GeometryPass::Execute()
             per_draw_data->entity_id = static_cast<uint32_t>(entity);
 
             auto world = transform.GetWorldMatrix();
+#if !defined(PPGE_PLATFORM_APPLE)
             auto world_inv_trans = world.Invert().Transpose();
 
             per_draw_data->world = world.Transpose();
             per_draw_data->world_inverse_transpose = world_inv_trans.Transpose();
+#else
+            auto world_inv_trans = simd_transpose(simd_inverse(world));
+
+            per_draw_data->world = simd_transpose(world);
+            per_draw_data->world_inverse_transpose = simd_transpose(world_inv_trans);
+#endif
 
             RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_draw.get());
         }

@@ -5,7 +5,7 @@
 #include "platform/d3d11/renderer_system_d3d11.h"
 #endif
 #if defined(PPGE_PLATFORM_APPLE)
-#include "platform/mtl/renderer_system_mtl.h"
+#include "platform/metal/renderer_system_metal.h"
 #endif
 
 namespace PPGE
@@ -30,7 +30,7 @@ void RendererSystem::Initialize(RendererAPIType api)
         break;
 #endif
 #if defined(PPGE_PLATFORM_APPLE)
-    case PPGE::RendererAPI::Metal:
+    case PPGE::RendererAPIType::Metal:
         break;
 #endif
     case PPGE::RendererAPIType::None:

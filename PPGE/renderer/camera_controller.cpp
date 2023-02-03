@@ -31,11 +31,17 @@ Math::Vector3 CameraController::GetPosition() const
 Math::Matrix CameraController::GetView() const
 {
     const auto &transform_component = m_camera_entity.GetComponents<TransformComponent>();
-
+#if !defined(PPGE_PLATFORM_APPLE)
     auto view = Math::Matrix::CreateFromQuaternion(transform_component.rotation);
     view.Translation(transform_component.position);
-
     return view.Invert();
+#else
+    auto view = Math::CreateFromQuaternion(transform_component.rotation);
+    view = view * Math::translate(transform_component.position);
+    return matrix_invert(view);
+#endif
+
+    
 }
 
 Math::Matrix CameraController::GetProj() const
@@ -53,18 +59,25 @@ void CameraController2D::Move(const Math::Vector2 &delta_pos)
 {
     auto &transform_component = m_camera_entity.GetComponents<TransformComponent>();
 
-    transform_component.position += Math::Vector3(delta_pos.x, delta_pos.y, 0.0f);
+    transform_component.position += Math::Vector3{delta_pos.x, delta_pos.y, 0.0f};
 }
 
 void CameraController2D::Rotate(float angle)
 {
     auto &transform_component = m_camera_entity.GetComponents<TransformComponent>();
-
+#if !defined(PPGE_PLATFORM_APPLE)
     auto orientation = Math::Matrix::CreateFromQuaternion(transform_component.rotation);
     auto rotator = Math::Matrix::CreateRotationZ((angle / 180.0f) * pi);
     orientation *= rotator;
 
     transform_component.rotation = Math::Quaternion::CreateFromRotationMatrix(orientation);
+#else
+    auto orientation = Math::CreateFromQuaternion(transform_component.rotation);
+    auto rotator = Math::rotateZ((angle / 180.0f) * pi);
+    orientation *= rotator;
+
+    transform_component.rotation = Math::CreateFromRotationMatrix(orientation);
+#endif
 }
 
 void CameraController3D::Move(const Math::Vector3 &delta_pos)
@@ -77,8 +90,8 @@ void CameraController3D::Move(const Math::Vector3 &delta_pos)
 void CameraController3D::LookAt(const Math::Vector3 &target, const Math::Vector3 &world_up)
 {
     auto &transform_component = m_camera_entity.GetComponents<TransformComponent>();
-
     auto F = target - transform_component.position;
+#if !defined(PPGE_PLATFORM_APPLE)
     F.Normalize();
     auto L = F.Cross(world_up);
     L.Normalize();
@@ -90,6 +103,17 @@ void CameraController3D::LookAt(const Math::Vector3 &target, const Math::Vector3
     orientation.Up(U);
 
     transform_component.rotation = Math::Quaternion::CreateFromRotationMatrix(orientation);
+#else
+    F = simd_normalize(F);
+    auto L = simd_normalize(simd_cross(F, world_up));
+    auto U = simd_cross(L, F);
+    Math::Matrix orientation;
+    Math::Forward(orientation, F);
+    Math::Right(orientation, L);
+    Math::Up(orientation, U);
+    
+    transform_component.rotation = Math::CreateFromRotationMatrix(orientation);
+#endif
 }
 
 void FreeLookCamera::Update(float delta_time)
@@ -103,9 +127,10 @@ void FreeLookCamera::Update(float delta_time)
     m_mouse_pos.y = y;
 
     Math::Vector3 delta_pos;
+    
     {
         auto &transform_component = m_camera_entity.GetComponents<TransformComponent>();
-
+#if !defined(PPGE_PLATFORM_APPLE)
         auto orientation = Math::Matrix::CreateFromQuaternion(transform_component.rotation);
 
         if (Input::IsKeyPressed(PPGE_KEY_W))
@@ -134,6 +159,36 @@ void FreeLookCamera::Update(float delta_time)
         {
             delta_pos -= orientation.Up() * m_walk_speed * delta_time;
         }
+#else
+        auto orientation = Math::CreateFromQuaternion(transform_component.rotation);
+
+        if (Input::IsKeyPressed(PPGE_KEY_W))
+        {
+            delta_pos += Math::Forward(orientation) * m_walk_speed * delta_time;
+        }
+        else if (Input::IsKeyPressed(PPGE_KEY_S))
+        {
+            delta_pos -= Math::Forward(orientation) * m_walk_speed * delta_time;
+        }
+
+        if (Input::IsKeyPressed(PPGE_KEY_A))
+        {
+            delta_pos += Math::Left(orientation) * m_walk_speed * delta_time;
+        }
+        else if (Input::IsKeyPressed(PPGE_KEY_D))
+        {
+            delta_pos -= Math::Left(orientation) * m_walk_speed * delta_time;
+        }
+
+        if (Input::IsKeyPressed(PPGE_KEY_E))
+        {
+            delta_pos += Math::Up(orientation) * m_walk_speed * delta_time;
+        }
+        else if (Input::IsKeyPressed(PPGE_KEY_Q))
+        {
+            delta_pos -= Math::Up(orientation) * m_walk_speed * delta_time;
+        }
+#endif
     }
     Move(delta_pos);
 
@@ -142,7 +197,7 @@ void FreeLookCamera::Update(float delta_time)
         Math::Vector3 look_at_dir;
         {
             auto &transform_component = m_camera_entity.GetComponents<TransformComponent>();
-
+#if !defined(PPGE_PLATFORM_APPLE)
             auto orientation = Math::Matrix::CreateFromQuaternion(transform_component.rotation);
             Math::Matrix rotator;
             {
@@ -155,6 +210,18 @@ void FreeLookCamera::Update(float delta_time)
             look_at_dir = transform_component.position + orientation.Forward();
         }
         LookAt(look_at_dir, Math::Vector3::Up);
+#else
+        auto orientation = Math::CreateFromQuaternion(transform_component.rotation);
+        Math::Matrix rotator;
+        {
+            rotator = simd::quatf(m_rotation_speed * ((delta_y * delta_time) / 180.0f * pi)), Math::Left(orientation);
+            rotator *= simd::quatf(m_rotation_speed * ((delta_x * delta_time) / 180.0f * pi)), Math::Up(orientation);
+        }
+        orientation *= rotator;
+        look_at_dir = transform_component.position + Math::Forward(orientation);
+    }
+    LookAt(look_at_dir, simd::float3{0.f, 1.f, 0.f});
+#endif
     }
 }
 } // namespace PPGE

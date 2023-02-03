@@ -116,13 +116,21 @@ void ShadowPass::Execute()
                 auto view = light.GetLightView(i);
                 auto proj = light.GetLightProj();
                 auto view_proj = view * proj;
-
+#if !defined(PPGE_PLATFORM_APPLE)
                 map_data->view = view.Transpose();
                 map_data->view_inverse = view.Invert().Transpose();
                 map_data->proj = proj.Transpose();
                 map_data->proj_inverse = proj.Invert().Transpose();
                 map_data->view_proj = view_proj.Transpose();
                 map_data->view_proj_inverse = view_proj.Invert().Transpose();
+#else
+                map_data->view = simd_transpose(view);
+                map_data->view_inverse = simd_transpose(simd_inverse(view));
+                map_data->proj = simd_transpose(proj);
+                map_data->proj_inverse = simd_transpose(simd_inverse(proj));
+                map_data->view_proj = simd_transpose(view_proj);
+                map_data->view_proj_inverse = simd_transpose(simd_inverse(view_proj));
+#endif
 
                 PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_frame.get());
             }
@@ -143,11 +151,17 @@ void ShadowPass::Execute()
                                                                      reinterpret_cast<void **>(&per_draw_data));
 
                     auto world = obj_transform_data.GetWorldMatrix();
+#if !defined(PPGE_PLATFORM_APPLE)
                     auto world_inv_trans = world.Invert().Transpose();
 
                     per_draw_data->world = world.Transpose();
                     per_draw_data->world_inverse_transpose = world_inv_trans.Transpose();
+#else
+                    auto world_inv_trans = simd_transpose(simd_inverse(world));
 
+                    per_draw_data->world = simd_transpose(world);
+                    per_draw_data->world_inverse_transpose = simd_transpose(world_inv_trans);
+#endif
                     RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_draw.get());
                 }
 

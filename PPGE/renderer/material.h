@@ -21,8 +21,8 @@ class LegacyMaterial : public Material
   public:
     struct MaterialDesc
     {
-        Math::Color albedo_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
-        Math::Color emissive_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
+        Math::Color albedo_color = Math::Color{1.0f, 1.0f, 1.0f, 1.0f};
+        Math::Color emissive_color = Math::Color{1.0f, 1.0f, 1.0f, 1.0f};
         float shininess = 0.0f;
         float alpha_cutoff = 1.0f;
     };
@@ -33,7 +33,7 @@ class LegacyMaterial : public Material
     LegacyMaterial(const MaterialDesc &desc);
 
     void Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std::shared_ptr<PPGEBuffer> &buffer) override;
-
+#if !defined(PPGE_PLATFORM_APPLE)
 #define SetMap(ID, MAP)                                                                                                \
     inline void Set##ID##Map(std::shared_ptr<PPGETextureView> MAP##_map)                                               \
     {                                                                                                                  \
@@ -41,6 +41,7 @@ class LegacyMaterial : public Material
     }
     SetMap(Albedo, albedo) SetMap(Specular, specular) SetMap(Normal, normal) SetMap(Emission, emission);
 #undef SetMap
+#endif
 
   private:
     std::shared_ptr<PPGETextureView> m_albedo_map;
@@ -59,8 +60,8 @@ class PBRMaterial : public Material
   public:
     struct MaterialDesc
     {
-        Math::Color albedo_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
-        Math::Color emissive_color = Math::Color(1.0f, 1.0f, 1.0f, 1.0f);
+        Math::Color albedo_color = Math::Color{1.0f, 1.0f, 1.0f, 1.0f};
+        Math::Color emissive_color = Math::Color{1.0f, 1.0f, 1.0f, 1.0f};
         float roughness_factor = 1.0f;
         float metalic_factor = 0.0f;
         float alpha_cutoff = 1.0f;
@@ -72,7 +73,7 @@ class PBRMaterial : public Material
     PBRMaterial(const MaterialDesc &desc);
 
     void Build(std::shared_ptr<PPGEShaderResourceBinding> &SRB, std::shared_ptr<PPGEBuffer> &buffer) override;
-
+#if !defined(PPGE_PLATFORM_APPLE)
 #define SetMap(ID, MAP)                                                                                                \
     inline void Set##ID##Map(std::shared_ptr<PPGETextureView> MAP##_map)                                               \
     {                                                                                                                  \
@@ -82,7 +83,7 @@ class PBRMaterial : public Material
     SetMap(Albedo, albedo) SetMap(Roughness, roughness) SetMap(Metallic, metallic) SetMap(Normal, normal);
     SetMap(Occlusion, occlusion) SetMap(Emission, emission) SetMap(Height, height) SetMap(AlphaMask, alpha_mask);
 #undef SetMap
-
+#endif
   private:
     std::shared_ptr<PPGETextureView> m_albedo_map;
     std::shared_ptr<PPGETextureView> m_roughness_map;

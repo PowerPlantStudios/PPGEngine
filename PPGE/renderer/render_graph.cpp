@@ -92,7 +92,7 @@ void SceneRenderGraph::BindScene(const SceneRenderPassData &data)
                                                                PPGE::MapFlags::MAP_DISCARD,
                                                                reinterpret_cast<void **>(&map_data));
         Math::Vector3 camera_position = data.active_camera.GetPosition();
-
+#if !defined(PPGE_PLATFORM_APPLE)
         *map_data =
             CbPerFrame{.view = data.active_camera.GetView().Transpose(),
                        .view_inverse = data.active_camera.GetView().Invert().Transpose(),
@@ -102,6 +102,17 @@ void SceneRenderGraph::BindScene(const SceneRenderPassData &data)
                        .view_proj_inverse = data.active_camera.GetViewProj().Invert().Transpose(),
                        .camera_position = Math::Vector4(camera_position.x, camera_position.y, camera_position.z, 1.0f),
                        .camera_direction = Math::Vector4()};
+#else
+        *map_data =
+            CbPerFrame{.view = simd_transpose(data.active_camera.GetView()),
+                       .view_inverse = simd_transpose(simd_inverse(data.active_camera.GetView())),
+                       .proj = simd_transpose(data.active_camera.GetProj()),
+                       .proj_inverse = simd_transpose(simd_inverse(data.active_camera.GetProj())),
+                       .view_proj = simd_transpose(data.active_camera.GetViewProj()),
+                       .view_proj_inverse = simd_transpose(simd_inverse(data.active_camera.GetViewProj())),
+                       .camera_position = Math::Vector4{camera_position.x, camera_position.y, camera_position.z, 1.0f},
+                       .camera_direction = Math::Vector4()};
+#endif
         PPGE::RendererSystem::Get().GetImmediateContext()->Unmap(m_cb_per_frame.get());
     }
     // Bind reference to scene data

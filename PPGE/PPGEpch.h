@@ -32,11 +32,28 @@
 #include <atlbase.h>
 #include <d3d11_4.h>
 #include <d3d11sdklayers.h>
+// Math includes
+#include <simple_math.h>
+namespace PPGE
+{
+namespace Math = ::DirectX::SimpleMath;
+}
 #elif defined(PPGE_PLATFORM_UNIX)
 // Linux libraries
 #include <signal.h>
+// Math includes
+#include <simple_math.h>
+namespace PPGE
+{
+namespace Math = ::DirectX::SimpleMath;
+}
 #elif defined(PPGE_PLATFORM_APPLE)
 // Mac libraries
+#include "platform/metal/base_math.h"
+namespace PPGE
+{
+namespace Math = ::Metal::SimpleMath;
+} // namespace PPGE
 #endif
 
 // Commonly used (mostly unchanged) PPGE third party libraries
@@ -53,12 +70,6 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <spdlog/sinks/basic_file_sink.h>
-// Math includes
-#include <simple_math.h>
-namespace PPGE
-{
-namespace Math = ::DirectX::SimpleMath;
-}
 
 #include <assimp/cimport.h>
 #include <assimp/postprocess.h>

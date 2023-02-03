@@ -34,7 +34,7 @@ struct LightComponent
     }
 
     // Color of the light (Only RGB components are taken into account)
-    Math::Color color = PPGE::Math::Color(1.0, 1.0, 1.0, 1.0f);
+    Math::Color color = PPGE::Math::Color{1.0f, 1.0f, 1.0f, 1.0f};
     // Intensity of the light
     float intensity = 1.0f;
     // Attenuation of light with increasing distance of the frament from the light source.
@@ -100,7 +100,11 @@ struct LightComponent
     {
         if (CanCastShadow())
             return proj;
+#if !defined(PPGE_PLATFORM_APPLE)
         return Math::Matrix::Identity;
+#else
+        return Math::Identity();
+#endif
     }
 
     ShadowMapDSV GetShadowMapDSViewAt(size_t index) const
@@ -133,7 +137,11 @@ struct LightComponent
 
             if (type == LightType::DIRECTIONAL)
             {
+#if !defined(PPGE_PLATFORM_APPLE)
                 proj = Math::Matrix::CreateOrthographic(16.0f, 16.0f, -16.0f, 16.0f);
+#else
+                proj = Math::CreateOrthographic(16.0f, 16.0f, -16.0f, 16.0f);
+#endif
             }
             else
             {
@@ -146,8 +154,11 @@ struct LightComponent
 
                 constexpr float near_plane = 0.1f;
                 const float far_plane = range > 0.1f ? range : 0.1f;
-
+#if !defined(PPGE_PLATFORM_APPLE)
                 proj = Math::Matrix::CreatePerspectiveFieldOfView(fov, aspect_ratio, near_plane, far_plane);
+#else
+                proj = Math::CreatePerspectiveFieldOfView(fov, aspect_ratio, near_plane, far_plane);
+#endif
             }
         }
     }
